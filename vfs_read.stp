@@ -1,0 +1,31 @@
+
+/*
+probe vfs.write, vfs.read {
+	if (execname() != "gnome-terminal" && execname() != "stapio" && execname() != "Xorg" && execname() != "vmware-user" && !strpos(execname(), "gnome-")){
+		mountpoint = @cast(file,"file")->f_path->mnt->mnt_mountpoint;
+		parent = @cast(file,"file")->f_path->dentry->d_parent;
+		nom = @cast(file,"file")->f_path->dentry;
+		printf("Execname: %s\t PID: %i\t File: %s\n", execname(), pid(), reverse_path_walk(mountpoint).reverse_path_walk(parent).d_name(nom));
+	}
+}
+*/
+%{
+#include <string.h>
+%}
+
+function test:string (execname:string, pid:long, probefunc:string, path:string) %{
+	if (!strstr(THIS->execname, "syslog-ng") && strcmp(THIS->execname, "stapio")
+		&& strcmp(THIS->execname, "gnome-terminal") && strcmp(THIS->execname, "Xorg")
+		&& !strstr(THIS->execname,"vmware-") && strcmp(THIS->execname, "konsole")) {
+		sprintf(THIS->__retvalue, "%d\t%s\t%s\t%s",(int)THIS->pid, THIS->execname, THIS->probefunc, THIS->path);
+		printk(KERN_INFO "%s", THIS->__retvalue);
+	}
+%}
+
+probe vfs.read.return, vfs.write.return {
+	result =  test(execname(),pid(),probefunc(),reverse_path_walk($file->f_path->dentry));
+	if (result != "") {
+		result = result;
+		/* printf("%s\n", result); */
+	}
+}
