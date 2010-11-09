@@ -1,0 +1,6 @@
+Pour lancer les scripts systemtap, il ne faut pas oublier les options suivantes :
+-g : mode guru pour accepter l'utilisation de code C à l'intérieur d'un script
+-v : pour verbose
+
+$ stap -g -v script.stp
+

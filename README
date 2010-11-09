@@ -1,10 +1,4 @@
+Porjet 2A STI
+
 Auteurs : Dimitri Gressin, Timothée Ravier
-
-Projet 2A STI
-
-Pour lancer les scripts systemtap, il ne faut pas oublier les options suivantes :
--g : mode guru pour accepter l'utilisation de code C à l'intérieur d'un script
--v : pour verbose
-
-$ stap -g -v script.stp
 

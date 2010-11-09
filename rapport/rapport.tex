@@ -1,0 +1,218 @@
+\documentclass[pdftex,a4paper,titlepage,11pt,openright]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,francais]{babel}
+\usepackage{listings}
+\usepackage{setspace}
+
+\usepackage{avant}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\itshape\thepage}
+% \fancyhead[LO]{\itshape\rightmark}
+% \fancyhead[RE]{\itshape\leftmark}
+\renewcommand{\headrulewidth}{0.5pt}
+\addtolength{\headheight}{0.5pt}
+\renewcommand\footrulewidth{0pt}
+\fancypagestyle{plain}{
+    \fancyhead{}
+    \renewcommand{\headrulewidth}{0pt}}
+\usepackage{textcomp}
+\usepackage{relsize}
+\usepackage{amssymb}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black,filecolor=black]{hyperref}
+\usepackage{framed}
+\usepackage{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{makeidx}
+\addtolength{\textwidth}{1cm}
+\setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
+
+
+% nouvelle commande pour un joli nom
+\newcommand{\nom}[1]{\textsc{#1}}
+
+% commande pour une zolie ligne
+\newcommand{\ligne}[1][1pt]{
+  \par\noindent
+  \rule[.5ex]{\linewidth}{#1}\par}
+
+% nettoyer une page blanche avant une page de chapitre en mode openright
+\newcommand{\clearemptydoublepage}{
+	\newpage{\pagestyle{empty}\cleardoublepage}}
+
+
+\makeindex
+
+\begin{document}
+
+% augmenter l'espacement entre plusieurs paragraphes plutôt que de passer des lignes quand il faut pas
+\setlength{\parskip}{2.4ex}
+
+\title{\ligne{\Large}\textbf{Project de Période 4}\\
+\Large Simplification de graphes de politique PIGA}
+\author{\nom{Nicolas Cornu} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Pascal Berthomé}}
+\date{27 Mai 2010}
+
+
+% titre
+\maketitle
+
+% page blanche
+\clearemptydoublepage
+
+% table des matières
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents
+\addtocounter{page}{-1}
+
+\newpage
+
+\section*{Introduction} \addcontentsline{toc}{section}{Introduction}
+Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de quatrième période.
+
+~
+
+Le but de ce projet était d'implémenter un ou plusieurs algorithmes permettant de simplifier un graphe possédant un grand nombre de noeuds avec de fortes similarités. Les graphes obtenus après traitement regroupent les noeuds ayant des propriétés similaires en ``clusters''. Ces regroupements permettraient de généraliser les parcours dans le graphe, car les noeuds d'un même ``clusters'' se comportent tous de la même façon.
+
+~
+
+Ce projet vise aussi à être appliqué concrétement sur des graphes issus du projet de recherche PIGA, pour déterminer si le développement d'une telle solution permettrait de faire gagner en efficacité le parcours de graphes de politiques.
+
+\newpage
+
+\section{Principes de la décomposition modulaire}
+Pour simplifier les graphes et regrouper les noeuds présentant des propriétés similaires nous avons utilisé l'algorithme de l'HDR de Christophe Paul \cite{HDR}, dont voici une représentation graphique :
+
+\includegraphics[scale=0.4]{diag.png}
+
+Nous avons donc travaillé sur des algorithmes pour récupérer les composantes connexes maximales et les modules maximaux.
+
+
+\newpage
+
+
+\section{Fonctionnalités}
+
+Nous avons implémenté l'algorithme de décomposition modulaire et les fonctions annexes pour travailler sur les graphes en C++.
+
+Le programme realisé permet\footnote{Les paramètres sont détaillés dans l'aide accessible en ajoutant l'argument -h lors de l'exécution.} :
+\begin{itemize}
+	\item L'importation et l'exportation de graphes sous forme de fichiers .pol, proposant le choix entre une version orientée et non-orientée (dans ce dernier cas, les graphes orientés sont alors ``complétés'' pour obtenir un graphe non-orienté).
+	\item L'exportation au format dot avec Graphviz.
+	\item L'exportation au format PostScript pour visualiser les graphes plus facilement.
+	\item L'exportation au format PostScript de l'arbre de décomposition modulaire et du graphe quotient.
+	\item L'exportation au format PostScript du graphe simplifié permettant d'obtenir le chemin entre deux noeuds.
+	\item La limitation à un nombre défini de noeuds avant l'exécution de l'algorithme de simplification modulaire.
+	\item Le choix de l'exécution ou non de l'algorithme de décomposition sur le graphe passé en entré.
+\end{itemize}
+
+
+\newpage
+
+
+\section{Résultats obtenus}
+
+\subsection{Graphes simples}
+Les graphes ne contenant que peu de noeuds (moins de 80) sont traités rapidement et donnent des résultats probants, même si le faible nombre de noeud ne permet pas une simplification poussée. Voici donc les résultats que l'on peut obtenir :
+
+Après chargement du graphe depuis un fichier .pol, export sous forme d'image avec Graphviz :
+\begin{figure}[!h]
+	\begin{center}
+	\includegraphics[scale=0.7]{test-1.png}
+	\caption{Le graphe d'origine}
+	\end{center}
+\end{figure}
+
+\newpage
+
+Résultat du calcul de l'arbre modulaire :
+\begin{figure}[!h]
+	\begin{center}
+	\includegraphics[scale=0.55]{test-0.png}
+	\caption{L'arbre modulaire}
+	\end{center}
+\end{figure}
+
+Obtention du graphe quotient, permettant de distinguer clairement les noeuds possédants les mêmes propriétés :
+\begin{figure}[!h]
+	\begin{center}
+	\includegraphics[scale=0.65]{test-2.png}
+	\caption{Le graphe quotient}
+	\end{center}
+\end{figure}
+
+\newpage
+
+Finalement, calcul du graphe simplifié présentant les chemins entre les noeuds z et u, sans développer les autres modules.
+\begin{figure}[!h]
+	\begin{center}
+	\includegraphics[scale=0.65]{test-links.png}
+	\caption{Le graphe simplifié (noeuds z et u choisis)}
+	\end{center}
+\end{figure}
+
+
+\subsection{Graphe réel}
+Nous présentons dans cette section les résultats obtenus lors des tests sur un graphe réel de politique PIGA. Il faut noter que pour limiter la durée des traitements nous n'avons pas tenu compte ni des noms des arrêtes ni de l'orientation de celles-ci. Nous importons alors un graphe de 27Mo en 8 secondes environ.
+
+Ce tableau présente les différents tests que nous avons effectués :
+\begin{center}
+\begin{tabular}{|r|c|c|c|c|c|c|c|c|c|c|}
+	\hline
+	Nombre de noeuds & 10 & 20 & 30 & 40 & 50 & 70 & 80 & 100 & 120 & 150\\
+	\hline
+	Temps (sec.) & 0,03 & 0.3 & 1 & 2 & 4 & 34 & 180 & 630 & 1290 & 3960 \\
+	\hline
+\end{tabular}
+\end{center}
+Il est difficile d'obtenir une estimation plausible du temps que prendra le traitement du graphe complet car le nombre de noeuds dans ces tests reste trop faible pour faire une regression linéaire. De plus, il est probable que le temps de calcul ne varie pas directement en fonction du nombre de noeuds dans le graphe même si plus le graphe est grand, plus les calculs sont longs.
+
+\begin{figure}[!h]
+	\begin{center}
+	\includegraphics[scale=0.8]{temps.png}
+	\caption{Temps / Nombre de noeud}
+	\end{center}
+\end{figure}
+
+\newpage
+
+D'autre part, alors que les premiers essais (de 10 à 40 noeuds) ne présentent que peu d'intérêt car les graphes peuvent encore être considérés comme lisibles, les tests suivants permettent d'obtenir des simplifications très significatives dès le graphe quotient. Dans nos exemples, le choix d'un noeud quelconque réduit un graphe de 100 noeud à une dizaine, permettant ainsi de visualiser facilement les chemins possibles à partir de ce noeud. Il faut noter que les nouveaux noeuds ``clusters'' ne sont pas ici représentés de manière détaillé pour garder un maximum de lisibilité. Il sera nécessaire de lier ces ``clusters'' aux noeuds qui leur correspondent lors de leur parcours.
+
+\clearemptydoublepage
+
+\section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
+
+Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{TBB}.
+
+De plus, bien que vérifiée, notre implémentation de l'algorithme de décomposition modulaire peut contenir des bugs. Il faut donc prévoir un outils permettant la vérification des résultats obtenus par cette méthode avec ceux obtenus par le parcours simple de graphes. Il sera donc toujours nécessaire de produire l'intégralité des chemins entre deux noeuds à partir du graphe d'origine pour s'assurer que les graphes réduits sont bien justes.
+
+Il faut noter, au vu des résultats, que la décomposition modulaire de graphes permettra fort probablement non seulement d'accélerer le parcours de graphes une fois l'intégralité des chemins générés mais aussi de réduire la taille finale de l'ensemble formé par tous les chemins.
+
+Enfin, notre programme se limite à la décomposition de graphes orientés. Les algorithmes diffèrent de ceux applicables aux graphes non-orientés et leur mise en oeuvre nécessiterai la réécriture d'une grande partie du code pour assurer la rapidité et l'efficacité de notre implémentation.
+
+
+\newpage
+\addcontentsline{toc}{section}{Annexes}
+\addcontentsline{toc}{subsection}{Remarques}
+\addcontentsline{toc}{subsection}{Liens et références}
+\subsection*{Remarques}
+
+Sous Mac OS X, les sauts de lignes (\textbackslash n) sont parfois accompagnés ou remplacés par des ``carriage return'' (\textbackslash r). Notre programme ne permet pas de gérer ce cas particulier; il faut donc s'assurer que seuls les ``line feed'' (\textbackslash n) sont présents.
+
+\subsection*{Liens et références}
+\begin{thebibliography}{40}
+\bibitem{TBB} \textit{Intel Threading Building Blocks}, \url{http://www.threadingbuildingblocks.org/}
+
+\bibitem{HDR} \textit{Aspects Algorithmiques de la décomposition modulaire, par Christophe Paul}, \url{http://www.lirmm.fr/~paul/HdR/hdr.pdf}
+
+\bibitem{SOURCE} Code source disponible sur le serveur de projet STI, \url{http://projetsti.ensi-bourges.fr/projects/2012-p4-smg}.
+\end{thebibliography}
+
+%\printindex
+
+\end{document}

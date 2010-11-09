@@ -1,0 +1,174 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Soutenance de projet - Fichier modèle pour présentations Beamer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{relsize}
+\usepackage{amssymb}
+\usepackage{framed}
+
+
+%%% THÈME TORINO AVEC MINIFRAMES MODIFIÉES - NÉCESSITE FICHIERS SPÉCIAUX
+\usetheme[pageofpages=sur,% String used between the current page and the
+                         % total page count.
+          alternativetitlepage=true,% Use the fancy title page.
+          titlepagelogo=logo,% Logo for the first page.
+          titleline=true,
+          watermark=watermark,% Watermark used in every page.
+          watermarkheight=100px,% Height of the watermark.
+          watermarkheightmult=4,% The watermark image is 4 times bigger
+                                % than watermarkheight.
+          ]{Torino}
+\useoutertheme[subsection=true]{miniframes2}
+\usecolortheme{freewilly}
+%%% FIN DU SECOND THÈME
+
+% nouvelle commande pour un joli nom
+\newcommand{\nom}[1]{\textsc{#1}}
+
+% commande pour une zolie ligne
+\newcommand{\ligne}[1][1pt]{
+  \par\noindent
+  \rule[.5ex]{\linewidth}{#1}\par}
+
+% \0
+\newcommand{\slz}{$\backslash0$}
+
+% commande pour un message réseau
+\newcommand{\netmessage}[5]{\small \begin{framed}
+\texttt{Message} \emph{#1} \texttt{- #2 - #3 $\rightarrow$ #4}\\\noindent
+\rule{\linewidth}{0.4pt}
+
+\footnotesize\noindent\texttt{#5}
+
+\end{framed}}
+
+%%% TITRE DE PAGE
+\title{Simplification modulaire de graphe}
+\author{Nicolas~Cornu \and Timothée~Ravier}
+\institute{ENSI de Bourges}
+\date{\today}
+
+%%% POUR AVOIR UN PLAN QUI S'AFFICHE QUAND ON CHANGE DE SOUS-SECTION
+\AtBeginSection[ ]
+{
+ \begin{frame}<beamer>
+   \frametitle{Plan}
+   \tableofcontents[currentsection]
+  \end{frame}
+}
+\NoAutoSpaceBeforeFDP
+
+\begin{document}
+
+%%% LA PAGE DE TITRE, ON PEUT Y APPLIQUER DES OPTIONS COMME INSTITUTE CI-DESSOUS
+{
+	\framenumberoff
+	\watermarkoff
+	\institute{} % Vire le champ institut sur cette page
+	\begin{frame}
+	\titlepage
+	\end{frame}
+}
+
+
+\section{Principe}
+\subsection{Introduction}
+\begin{frame}
+\frametitle{Introduction}
+\textbf{Simplification modulaire} : Regrouper ensemble les noeuds ayant des propriétés similaires.\\
+\textbf{But} : Simplifier les graphes pour travailler dessus.\\
+\textbf{Application} : Calculer l'ensemble des chemins entre deux noeuds.\\
+\end{frame}
+
+\subsection{Fonctionnalités}
+\begin{frame}
+\frametitle{Fonctionnalités}
+\begin{itemize}
+\item Importation de graphes depuis un fichier ``PIGA'' (.pol)
+\item Calcul de l'arbre modulaire
+\item Calcul du graphe groupé
+\item Calcul du graphe simplifié en précisant les noeuds
+\item Exportation en fichier PIGA (.pol) ou Graphviz
+\end{itemize}
+\end{frame}
+
+\subsection{Algorithme}
+\begin{frame}
+\frametitle{Algorithme}
+\begin{center}
+	\includegraphics[scale=0.2]{diag.png}
+\end{center}
+\end{frame}
+
+\section{Résultats}
+\subsection{Graphes simples}
+\begin{frame}
+\frametitle{Graphes simples}
+Fonctionne très bien avec de petits graphes.\\
+\includegraphics[scale=0.3]{test-1.png}\hfill{}
+\includegraphics[scale=0.45]{test-links.png}
+
+\end{frame}
+\subsection{Graphe réel}
+\begin{frame}
+\frametitle{Graphe réel}
+\begin{itemize}
+	\item Impossible de faire le graphe entier en un temps raisonnable\\
+	\item \textbf{Causes}
+		\begin{itemize}
+		\item Trop de noeud (1704)
+		\item Algorithmes pas assez optimisés
+		\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+Nous avons donc travaillé sur moins de noeuds.
+\begin{center}
+\begin{tabular}{|c|c|}
+	\hline
+	Nombre de noeuds & Temps (sec.) \\
+	\hline
+	10 & 0,03 \\
+	\hline
+	20 & 0,3\\
+	\hline
+	30 & 1\\
+	\hline
+	40 & 2\\
+	\hline
+	50 & 4\\
+	\hline
+	70 & 34\\
+	\hline
+	80 & 180\\
+	\hline
+	100 & 630\\
+	\hline
+	120 & 1290 \\
+	\hline
+	150 & 3960\\
+	\hline
+\end{tabular}
+\end{center}
+\textbf{Et pour 1704 noeuds ?}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}
+\frametitle{Conclusion}
+\textbf{Limitations}
+\begin{itemize}
+\item Ne gêre que les graphes non-orientés.
+\item Vitesse (multi-thread).
+\end{itemize}
+
+\end{frame}
+
+
+\end{document}
