@@ -134,8 +134,8 @@ config SECURITY_SELINUX_POLICYDB_VERSION_MAX_VALUE
 
 config SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
 	bool "NSA SELinux userspace audit support"
-	default n
 	depends on SECURITY_SELINUX
+	default n
 	help 
 		Bonjour
 
