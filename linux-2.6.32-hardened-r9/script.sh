@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cp arch/x86/boot/bzImage /boot/kernel
+cp -v arch/x86/boot/bzImage /boot/kernel
