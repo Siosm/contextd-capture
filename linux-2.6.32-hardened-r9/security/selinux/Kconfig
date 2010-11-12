@@ -125,9 +125,17 @@ config SECURITY_SELINUX_POLICYDB_VERSION_MAX_VALUE
 	  For Fedora Core 3, use 18.
 	  For Fedora Core 4, use 19.
 
+
 	  If you are unsure how to answer this question, look for the
 	  policy format version supported by your policy toolchain, by
 	  running 'checkpolicy -V'. Or look at what policy you have
 	  installed under /etc/selinux/$SELINUXTYPE/policy, where
 	  SELINUXTYPE is defined in your /etc/selinux/config.
+
+config SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	bool "NSA SELinux userspace audit support"
+	default n
+	depends on SECURITY_SELINUX
+	help 
+		Bonjour
 
