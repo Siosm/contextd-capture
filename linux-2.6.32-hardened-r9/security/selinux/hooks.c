@@ -5657,7 +5657,7 @@ static __init int selinux_init(void)
 		return 0;
 	}
 
-#ifdef SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
 		printk(KERN_INFO "Module:  Actif au demarrage.\n");
 #else
 		printk(KERN_INFO "Module:  Desactive au demarrage.\n");
