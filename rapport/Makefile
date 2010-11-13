@@ -4,7 +4,7 @@ C_SOUTENANCE = soutenance.tex
 all : clean rapport soutenance
 
 clean :
-	rm *~
+	rm *~ *.dvi
 
 rapport :
 	pdflatex $(C_RAPPORT) && pdflatex $(C_RAPPORT) && pdflatex $(C_RAPPORT)

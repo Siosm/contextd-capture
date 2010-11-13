@@ -2,9 +2,4 @@ BUILD/
 build/
 *~
 doc/
-*.ps
-*.dot
-*.png
-*.pgm
-*.out.*
 

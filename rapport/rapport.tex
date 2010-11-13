@@ -51,11 +51,13 @@
 % augmenter l'espacement entre plusieurs paragraphes plutôt que de passer des lignes quand il faut pas
 \setlength{\parskip}{2.4ex}
 
-\title{\ligne{\Large}\textbf{Project de deuxième année}\\
-\Large LSM ? PGST ?} %TODO
+\title{
+\ligne{\Large}\textbf{Project de deuxième année}\\
+\Large Linux Security Modules \& Intégration Piga Systrans ?
+\ligne{\Large}
+} %TODO
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
 \date{xx xxx 201x} %TODO
-
 
 % titre
 \maketitle
@@ -85,14 +87,29 @@ Le but de ce projet est %TODO
 
 \newpage
 
-\section{Systemtap}
-Nous avons débuter avec Systemtap qui est %TODO
+\section{Objectifs}
 
-Il fallait obtenir :
+Il faut obtenir :
 \begin{itemize}
 	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes selinux associés
 	\item la liste des connexions ouvertes par le systeme (socket) et faire correspondre l'adresse ip avec le nom de domaine pour obtenir une url
 \end{itemize}
+
+
+\section{Systemtap}
+
+\subsection{Principe de fonctionnement}
+Nous avons débuter avec Systemtap qui est %TODO
+
+Utilise les KProbes, et les Kretprobes\cite{IBMRBST}.
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics[scale=0.65]{kretprob.png}
+	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
+\end{figure}
+
+\subsection{Résultats obtenus}
 
 Nous avons partiellement atteint ces critères mais nous nous sommes rendu compte d'une particularité de l'implémentation de Systemtap qui ne corespondait pas avec notre besoin final. Nous nous sommes heurté à la simplicité de Systemtap qui vise un apprentissage rapide pour un usage ciblé.
 
@@ -110,28 +127,17 @@ Cela ne correspond donc pas au besoin de sécurité énoncé précédement.
 
 Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers les ``Linux Security Modules''.
 
-\newpage
+\subsection{Principe de fonctionnement}
 
-
-\section{Résultats obtenus}
-
-\subsection{Graphes simples}
-Les graphes ne contenant que peu de noeuds (moins de 80) sont traités rapidement et donnent des résultats probants, même si le faible nombre de noeud ne permet pas une simplification poussée. Voici donc les résultats que l'on peut obtenir :
-
-
-
-\subsection{Graphe réel}
-Nous présentons dans cette section les résultats obtenus lors des tests sur un graphe réel de politique PIGA. Il faut noter que pour limiter la durée des traitements nous n'avons pas tenu compte ni des noms des arrêtes ni de l'orientation de celles-ci. Nous importons alors un graphe de 27Mo en 8 secondes environ.
-
+\subsection{Résultats obtenus}
 
 \newpage
-
 
 \clearemptydoublepage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
-Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{TBB}.
+Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{IBMRBST}.
 
 De plus, bien que vérifiée, notre implémentation de l'algorithme de décomposition modulaire peut contenir des bugs. Il faut donc prévoir un outils permettant la vérification des résultats obtenus par cette méthode avec ceux obtenus par le parcours simple de graphes. Il sera donc toujours nécessaire de produire l'intégralité des chemins entre deux noeuds à partir du graphe d'origine pour s'assurer que les graphes réduits sont bien justes.
 
@@ -146,15 +152,15 @@ Enfin, notre programme se limite à la décomposition de graphes orientés. Les 
 \addcontentsline{toc}{subsection}{Liens et références}
 \subsection*{Remarques}
 
-Sous Mac OS X, les sauts de lignes (\textbackslash n) sont parfois accompagnés ou remplacés par des ``carriage return'' (\textbackslash r). Notre programme ne permet pas de gérer ce cas particulier; il faut donc s'assurer que seuls les ``line feed'' (\textbackslash n) sont présents.
+Un fichier de configuration est présent avec les sources du kernel 2.6.32-hardened. Il correspond aux options nécessaire à la compilation dans une machine virtuelle Virtualbox. L'option autorisant nos modifications y est aussi activée. Elle est situé dans Security -> SELinux userspace audit.
 
 \subsection*{Liens et références}
 \begin{thebibliography}{40}
-\bibitem{TBB} \textit{Intel Threading Building Blocks}, \url{http://www.threadingbuildingblocks.org/}
+\bibitem{IBMRBST} \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
 
-\bibitem{HDR} \textit{Aspects Algorithmiques de la décomposition modulaire, par Christophe Paul}, \url{http://www.lirmm.fr/~paul/HdR/hdr.pdf}
+\bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
 
-\bibitem{SOURCE} Code source disponible sur le serveur de projet STI, \url{http://projetsti.ensi-bourges.fr/projects/2012-p4-smg}.
+\bibitem{SOURCE} Code source (kernel 2.6.32 hardened et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
 \end{thebibliography}
 
 %\printindex
