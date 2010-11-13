@@ -5657,12 +5657,6 @@ static __init int selinux_init(void)
 		return 0;
 	}
 
-#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-		printk(KERN_INFO "Module:  Actif au demarrage.\n");
-#else
-		printk(KERN_INFO "Module:  Desactive au demarrage.\n");
-#endif
-
 	printk(KERN_INFO "SELinux:  Initializing.\n");
 
 	/* Set the security state for the initial task. */
@@ -5683,6 +5677,12 @@ static __init int selinux_init(void)
 		printk(KERN_DEBUG "SELinux:  Starting in enforcing mode\n");
 	else
 		printk(KERN_DEBUG "SELinux:  Starting in permissive mode\n");
+
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	printk(KERN_INFO "Userspace audit:  Available\n");
+	#else
+	printk(KERN_INFO "Userspace audit:  Non-available\n");
+	#endif
 
 	return 0;
 }
