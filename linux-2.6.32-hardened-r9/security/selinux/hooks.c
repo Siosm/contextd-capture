@@ -2648,7 +2648,15 @@ static int selinux_inode_init_security(struct inode *inode, struct inode *dir,
 
 static int selinux_inode_create(struct inode *dir, struct dentry *dentry, int mask)
 {
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	int ret = may_create(dir, dentry, SECCLASS_FILE)
+	if(ret == 0){
+		printk(KERN_INFO "inode_create:  %p, %s", dir, dentry->d_name->name);
+	}
+	return ret;
+	#else
 	return may_create(dir, dentry, SECCLASS_FILE);
+	#endif
 }
 
 static int selinux_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
