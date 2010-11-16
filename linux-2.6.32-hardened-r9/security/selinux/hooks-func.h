@@ -54,4 +54,6 @@
 #include <linux/mutex.h>
 #include <linux/posix-timers.h>
 
+char * dentry_path_ (struct dentry *);
+
 #endif

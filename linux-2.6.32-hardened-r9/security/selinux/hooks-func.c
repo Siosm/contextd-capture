@@ -8,13 +8,22 @@ char * dentry_path_ (struct dentry *dentry) {
 
 	while (!IS_ROOT(parent)) {
 		nb = strlen(parent->d_name.name);
-		path_tmp = path
-		path = vmalloc(n+nb);
-		memcpy(path, path_tmp, n);
+		path_tmp = path;
+		path = vmalloc(n+nb+1);
+		memcpy(path+nb+1, path_tmp, n);
 		vfree(path_tmp);
-		memcpy(path+n, parent->d_name.name, nb);
+		path[nb] = '/';
+		memcpy(path, parent->d_name.name, nb);
 		n += nb;
+		nb = 0;
 		parent = parent->d_parent;
 	}
+
+	path_tmp = path;
+	path = vmalloc(n+1);
+	memcpy(path+1, path_tmp, n);
+	vfree(path_tmp);
+	*path = '/';
+
 	return path;
 }
