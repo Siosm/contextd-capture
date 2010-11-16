@@ -2650,8 +2650,15 @@ static int selinux_inode_create(struct inode *dir, struct dentry *dentry, int ma
 {
 	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
 	int ret = may_create(dir, dentry, SECCLASS_FILE);
-	if(ret == 0){
-		printk(KERN_INFO " USA: inode_create:  %p, %s", dir, dentry->d_name.name);
+	char * path_buf = vmalloc(sizeof(char) * 1024);
+	if(path_buf == NULL){
+		printk(KERN_INFO "USA: inode_create: %s (kmalloc failed), mask: %d", dentry->d_name.name, mask);
+	}else{
+		dentry_path(dentry, path_buf, 1024);
+		if(ret == 0){
+			printk(KERN_INFO "USA: inode_create: %s/%s, mask: %d", path_buf, dentry->d_name.name, mask);
+		}
+		vfree(path_buf);
 	}
 	return ret;
 	#else
