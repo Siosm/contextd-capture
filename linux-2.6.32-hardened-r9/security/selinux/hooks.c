@@ -86,6 +86,8 @@
 #include "netlabel.h"
 #include "audit.h"
 
+#include "hooks-func.h"
+
 #define XATTR_SELINUX_SUFFIX "selinux"
 #define XATTR_NAME_SELINUX XATTR_SECURITY_PREFIX XATTR_SELINUX_SUFFIX
 
