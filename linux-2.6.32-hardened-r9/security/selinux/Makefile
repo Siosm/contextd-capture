@@ -12,7 +12,8 @@ selinux-y := avc.o \
 	     netif.o \
 	     netnode.o \
 	     netport.o \
-	     exports.o
+	     exports.o \
+		 hooks-func.o
 
 selinux-$(CONFIG_SECURITY_NETWORK_XFRM) += xfrm.o
 
