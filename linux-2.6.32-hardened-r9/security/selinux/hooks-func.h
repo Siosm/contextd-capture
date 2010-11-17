@@ -52,7 +52,10 @@
 #include <linux/selinux.h>
 #include <linux/mutex.h>
 #include <linux/posix-timers.h>
+#include <linux/limits.h>
 
 char * dentry_path_(struct dentry *);
+
+int print_info_audit_file(struct inode *, struct dentry *, int , char *);
 
 #endif
