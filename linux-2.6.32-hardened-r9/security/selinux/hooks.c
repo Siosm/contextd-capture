@@ -3003,6 +3003,13 @@ static int selinux_file_permission(struct file *file, int mask)
 	struct inode_security_struct *isec = inode->i_security;
 	u32 sid = current_sid();
 
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	int ret = selinux_revalidate_file_permission(file, mask);
+	if(ret == 0){
+		print_info_audit_file(NULL, file->f_path.dentry, 0, "file_permission");
+	}
+	#endif
+
 	if (!mask)
 		/* No permission to check.  Existence test. */
 		return 0;
@@ -3012,7 +3019,8 @@ static int selinux_file_permission(struct file *file, int mask)
 		/* No change since dentry_open check. */
 		return 0;
 
-	return selinux_revalidate_file_permission(file, mask);
+	//return selinux_revalidate_file_permission(file, mask);
+	return ret;
 }
 
 static int selinux_file_alloc_security(struct file *file)
