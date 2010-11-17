@@ -53,10 +53,6 @@
 #include <linux/mutex.h>
 #include <linux/posix-timers.h>
 
-<<<<<<< HEAD
-char * dentry_path_ (struct dentry *);
-=======
 char * dentry_path_(struct dentry *);
->>>>>>> b6c9a489cc98b3150227e69f24cfcede2053a40a
 
 #endif
