@@ -32,13 +32,14 @@ char * dentry_path_(struct dentry *dentry)
 
 int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
 {
-	char * path_buf = vmalloc(sizeof(char) * PATH_MAX);
-	if(path_buf == NULL){
+	//char * path_buf = vmalloc(sizeof(char) * PATH_MAX);
+	char * path_buf = NULL;
+	/*if(path_buf == NULL){
 		printk(KERN_INFO "USA: %s: %s (vmalloc failed)", hook_name, dentry->d_name.name);
 		return 1;
-	}
-	//path_buf = dentry_path_(dentry);
-	dentry_path(dentry, path_buf, PATH_MAX);
+	}*/
+	path_buf = dentry_path_(dentry);
+	//dentry_path(dentry, path_buf, PATH_MAX);
 	printk(KERN_INFO "USA: %s: %s", hook_name, path_buf);
 	vfree(path_buf);
 

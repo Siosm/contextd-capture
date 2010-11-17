@@ -2675,17 +2675,41 @@ static int selinux_inode_unlink(struct inode *dir, struct dentry *dentry)
 
 static int selinux_inode_symlink(struct inode *dir, struct dentry *dentry, const char *name)
 {
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	int ret = may_create(dir, dentry, SECCLASS_LNK_FILE);
+	if(ret == 0){
+		print_info_audit_file(dir, dentry, mask, "inode_symlink");
+	}
+	return ret;
+	#else
 	return may_create(dir, dentry, SECCLASS_LNK_FILE);
+	#endif
 }
 
 static int selinux_inode_mkdir(struct inode *dir, struct dentry *dentry, int mask)
 {
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	int ret = may_create(dir, dentry, SECCLASS_DIR);
+	if(ret == 0){
+		print_info_audit_file(dir, dentry, mask, "inode_mkdir");
+	}
+	return ret;
+	#else
 	return may_create(dir, dentry, SECCLASS_DIR);
+	#endif
 }
 
 static int selinux_inode_rmdir(struct inode *dir, struct dentry *dentry)
 {
+	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
+	int ret = may_link(dir, dentry, MAY_RMDIR);
+	if(ret == 0){
+		print_info_audit_file(dir, dentry, mask, "inode_rmdir");
+	}
+	return ret;
+	#else
 	return may_link(dir, dentry, MAY_RMDIR);
+	#endif
 }
 
 static int selinux_inode_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
