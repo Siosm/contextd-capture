@@ -40,7 +40,7 @@ int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, ch
 	}*/
 	path_buf = dentry_path_(dentry);
 	//dentry_path(dentry, path_buf, PATH_MAX);
-	printk(KERN_INFO "USA: %s: %s", hook_name, path_buf);
+	printk(KERN_INFO "USA: %s: %s, mask: %d", hook_name, path_buf, mask);
 	vfree(path_buf);
 
 	return 0;

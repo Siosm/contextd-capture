@@ -2678,7 +2678,7 @@ static int selinux_inode_symlink(struct inode *dir, struct dentry *dentry, const
 	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
 	int ret = may_create(dir, dentry, SECCLASS_LNK_FILE);
 	if(ret == 0){
-		print_info_audit_file(dir, dentry, mask, "inode_symlink");
+		print_info_audit_file(dir, dentry, 0, "inode_symlink");
 	}
 	return ret;
 	#else
@@ -2704,7 +2704,7 @@ static int selinux_inode_rmdir(struct inode *dir, struct dentry *dentry)
 	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
 	int ret = may_link(dir, dentry, MAY_RMDIR);
 	if(ret == 0){
-		print_info_audit_file(dir, dentry, mask, "inode_rmdir");
+		print_info_audit_file(dir, dentry, 0, "inode_rmdir");
 	}
 	return ret;
 	#else
