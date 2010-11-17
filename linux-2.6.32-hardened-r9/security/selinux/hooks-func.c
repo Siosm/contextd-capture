@@ -21,10 +21,11 @@ char * dentry_path_(struct dentry *dentry)
 	}
 
 	path_tmp = path;
-	path = vmalloc(n+1);
+	path = vmalloc(n+2);
 	memcpy(path+1, path_tmp, n);
 	vfree(path_tmp);
-	*path = '/';
+	path[0] = '/';
+	path[n+1] = '\0';
 
 	return path;
 }
