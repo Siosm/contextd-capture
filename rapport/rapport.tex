@@ -53,7 +53,8 @@
 
 \title{
 \ligne{\Large}\textbf{Project de deuxième année}\\
-\Large Linux Security Modules \& Intégration Piga Systrans ?
+\Large Intégration des plugins contextd grâce aux ``Linux Security Modules''
+% \& Intégration Piga Systrans ?
 \ligne{\Large}
 } %TODO
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
@@ -75,24 +76,31 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus après x mois dans le cadre de notre projet d'application de deuxième année. %TODO
+Ce rapport présente le travail et les résultats obtenus après x mois dans le cadre de notre projet d'application de deuxième année.
+%TODO
 
 ~
 
-Le but de ce projet est %TODO
+Le but de ce projet est de remplacer l'écriture de plugins pour contextd par application par un ``plugin'' général. L'idée de départ était d'utiliser Systemtap, un outils développé par ... pour ...
+%TODO
 
 ~
 
- %TODO
+Ici, ce sera donc plus qu'un plugin puisque les fonctionnalités telles les demandes d'ouverture de fichier, de connexion réseau, seront ``détectées'' par le ``sous-module'' LSM, puis transmisent à contextd.
+%TODO
+
+~
+
+%TODO
 
 \newpage
 
 \section{Objectifs}
 
-Il faut obtenir :
+Il fallait obtenir :
 \begin{itemize}
 	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes selinux associés
-	\item la liste des connexions ouvertes par le systeme (socket) et faire correspondre l'adresse ip avec le nom de domaine pour obtenir une url
+	\item la liste des connexions ouvertes par le systeme et faire correspondre l'adresse ip avec le nom de domaine
 \end{itemize}
 
 
@@ -105,7 +113,7 @@ Utilise les KProbes, et les Kretprobes\cite{IBMRBST}.
 
 \begin{figure}[hb]
 	\centering
-	\includegraphics[scale=0.65]{kretprob.png}
+	\includegraphics[scale=0.4]{kretprob.png}
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
 \end{figure}
 
@@ -128,6 +136,20 @@ Cela ne correspond donc pas au besoin de sécurité énoncé précédement.
 Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers les ``Linux Security Modules''.
 
 \subsection{Principe de fonctionnement}
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics[scale=0.45]{lsm1.png}
+	\caption{LSM Hook Architecture \cite{LSMINTRO}}
+\end{figure}
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics[scale=0.45]{lsm2.png}
+	\caption{Permissive LSM hook. This hook allows the security policy to override a DAC restriction \cite{LSMINTRO}}
+\end{figure}
+
+\newpage
 
 \subsection{Résultats obtenus}
 
