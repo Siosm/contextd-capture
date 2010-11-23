@@ -48,6 +48,7 @@ int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, ch
 // 1285 : ligne context selinux
 char * get_context(void)
 {
+	int rc = 0;
 	int len = INITCONTEXTLEN;
 	char * context = kmalloc(len+1, GFP_NOFS);
 	if (!context) {

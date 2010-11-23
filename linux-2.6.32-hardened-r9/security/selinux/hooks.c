@@ -3002,9 +3002,9 @@ static int selinux_file_permission(struct file *file, int mask)
 	struct file_security_struct *fsec = file->f_security;
 	struct inode_security_struct *isec = inode->i_security;
 	u32 sid = current_sid();
+	int ret = selinux_revalidate_file_permission(file, mask);
 
 	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	int ret = selinux_revalidate_file_permission(file, mask);
 	if(ret == 0){
 		print_info_audit_file(NULL, file->f_path.dentry, 0, "file_permission");
 	}
