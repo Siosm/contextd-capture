@@ -655,7 +655,7 @@ config LSM_MMAP_MIN_ADDR
 source security/selinux/Kconfig
 source security/smack/Kconfig
 source security/tomoyo/Kconfig
-
+source security/audit/Kconfig
 source security/integrity/ima/Kconfig
 
 endmenu

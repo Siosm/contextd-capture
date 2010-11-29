@@ -131,11 +131,3 @@ config SECURITY_SELINUX_POLICYDB_VERSION_MAX_VALUE
 	  running 'checkpolicy -V'. Or look at what policy you have
 	  installed under /etc/selinux/$SELINUXTYPE/policy, where
 	  SELINUXTYPE is defined in your /etc/selinux/config.
-
-config SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	bool "NSA SELinux userspace audit support"
-	depends on SECURITY_SELINUX
-	default n
-	help 
-		Bonjour
-

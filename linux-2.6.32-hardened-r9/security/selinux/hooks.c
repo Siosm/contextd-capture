@@ -86,10 +86,6 @@
 #include "netlabel.h"
 #include "audit.h"
 
-#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-#include "hooks-func.h"
-#endif
-
 #define XATTR_SELINUX_SUFFIX "selinux"
 #define XATTR_NAME_SELINUX XATTR_SECURITY_PREFIX XATTR_SELINUX_SUFFIX
 
@@ -2652,15 +2648,7 @@ static int selinux_inode_init_security(struct inode *inode, struct inode *dir,
 
 static int selinux_inode_create(struct inode *dir, struct dentry *dentry, int mask)
 {
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	int ret = may_create(dir, dentry, SECCLASS_FILE);
-	if(ret == 0){
-		print_info_audit_file(dir, dentry, mask, "inode_create");
-	}
-	return ret;
-	#else
 	return may_create(dir, dentry, SECCLASS_FILE);
-	#endif
 }
 
 static int selinux_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
@@ -2675,41 +2663,17 @@ static int selinux_inode_unlink(struct inode *dir, struct dentry *dentry)
 
 static int selinux_inode_symlink(struct inode *dir, struct dentry *dentry, const char *name)
 {
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	int ret = may_create(dir, dentry, SECCLASS_LNK_FILE);
-	if(ret == 0){
-		print_info_audit_file(dir, dentry, 0, "inode_symlink");
-	}
-	return ret;
-	#else
 	return may_create(dir, dentry, SECCLASS_LNK_FILE);
-	#endif
 }
 
 static int selinux_inode_mkdir(struct inode *dir, struct dentry *dentry, int mask)
 {
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	int ret = may_create(dir, dentry, SECCLASS_DIR);
-	if(ret == 0){
-		print_info_audit_file(dir, dentry, mask, "inode_mkdir");
-	}
-	return ret;
-	#else
 	return may_create(dir, dentry, SECCLASS_DIR);
-	#endif
 }
 
 static int selinux_inode_rmdir(struct inode *dir, struct dentry *dentry)
 {
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	int ret = may_link(dir, dentry, MAY_RMDIR);
-	if(ret == 0){
-		print_info_audit_file(dir, dentry, 0, "inode_rmdir");
-	}
-	return ret;
-	#else
 	return may_link(dir, dentry, MAY_RMDIR);
-	#endif
 }
 
 static int selinux_inode_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
@@ -3003,12 +2967,6 @@ static int selinux_file_permission(struct file *file, int mask)
 	struct inode_security_struct *isec = inode->i_security;
 	u32 sid = current_sid();
 	int ret = selinux_revalidate_file_permission(file, mask);
-
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	if(ret == 0){
-		print_info_audit_file(NULL, file->f_path.dentry, 0, "file_permission");
-	}
-	#endif
 
 	if (!mask)
 		/* No permission to check.  Existence test. */
@@ -5721,13 +5679,6 @@ static __init int selinux_init(void)
 		printk(KERN_DEBUG "SELinux:  Starting in enforcing mode\n");
 	else
 		printk(KERN_DEBUG "SELinux:  Starting in permissive mode\n");
-
-	#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-	printk(KERN_INFO "Userspace audit:  Available\n");
-	#else
-	printk(KERN_INFO "Userspace audit:  Non-available\n");
-	#endif
-
 	return 0;
 }
 
