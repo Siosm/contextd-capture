@@ -1,0 +1,8 @@
+config SECURITY_USERSPACE_AUDIT_SECURITY
+	bool "Userspace audit securty"
+	depends on SECURITY_NETWORK && AUDIT && NET && INET
+	select NETWORK_SECMARK
+	default y
+	help
+		Bonjour
+
