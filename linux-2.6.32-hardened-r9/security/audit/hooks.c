@@ -249,9 +249,9 @@ static struct security_operations audit_ops = {
 
 static __init int audit_security_init(void)
 {
-//	if (!security_module_enable(&audit_ops)) {
-//		return 0;
-//	}
+	if (!security_module_enable(&audit_ops)) {
+		return 0;
+	}
 
 	printk(KERN_INFO "Audit Security:  Initializing.\n");
 
@@ -264,8 +264,8 @@ static __init int audit_security_init(void)
 //	secondary_ops = security_ops;
 //	if (!secondary_ops)
 //		panic("Audit Security: No initial security operations\n");
-//	if (register_security(&audit_ops))
-//		panic("Audit Security: Unable to register with kernel.\n");
+	if (register_security(&audit_ops))
+		panic("Audit Security: Unable to register with kernel.\n");
 
 	return 0;
 }
