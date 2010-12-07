@@ -1,5 +1,3 @@
-#ifdef CONFIG_SECURITY_SELINUX_USERSPACE_AUDIT_SECURITY
-
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/tracehook.h>
@@ -58,4 +56,3 @@ char * dentry_path_(struct dentry *);
 
 int print_info_audit_file(struct inode *, struct dentry *, int , char *);
 
-#endif

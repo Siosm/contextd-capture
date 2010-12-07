@@ -52,6 +52,8 @@
 #include <linux/mutex.h>
 #include <linux/posix-timers.h>
 
+#include "hooks-func.h"
+
 int audit_security_ptrace_access_check(struct task_struct *child, unsigned int mode)
 {
 	return 0;//cap_ptrace_access_check(child, mode);
@@ -223,7 +225,9 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	printk(KERN_INFO "Dossier cree");
+	char * path = dentry_path_(dentry);
+	printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
+	vfree(path);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(audit_security_inode_mkdir);
@@ -303,6 +307,9 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int audit_security_file_permission(struct file *file, int mask)
 {
+	char * path = dentry_path_(file->f_path.dentry);
+	printk(KERN_INFO "Audit Security: Acces au fichier : %s", path);
+	vfree(path);
 	return 0;
 }
 
@@ -986,7 +993,7 @@ static struct security_operations audit_ops = {
 //	.inode_listsecurity =			audit_security_inode_listsecurity,
 //	.inode_getsecid =				audit_security_inode_getsecid,
 
-//	.file_permission =				audit_security_file_permission,
+	.file_permission =				audit_security_file_permission,
 //	.file_alloc_security =			audit_security_file_alloc,
 //	.file_free_security =			audit_security_file_free,
 //	.file_ioctl =					audit_security_file_ioctl,

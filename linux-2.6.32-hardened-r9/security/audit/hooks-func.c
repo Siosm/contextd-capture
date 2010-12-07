@@ -46,6 +46,7 @@ int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, ch
 }
 
 // 1285 : ligne context selinux
+/*
 char * get_context(void)
 {
 	int rc = 0;
@@ -61,7 +62,7 @@ char * get_context(void)
 	if (rc == -ERANGE) {
 		kfree(context);
 
-		/* Need a larger buffer.  Query for the right size. */
+		// Need a larger buffer.  Query for the right size. 
 		rc = inode->i_op->getxattr(dentry, XATTR_NAME_SELINUX,
 					   NULL, 0);
 		if (rc < 0) {
@@ -80,4 +81,4 @@ char * get_context(void)
 	}
 	return context;
 }
-
+*/

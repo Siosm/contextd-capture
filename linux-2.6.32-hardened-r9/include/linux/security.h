@@ -468,7 +468,7 @@ static inline void security_free_mnt_opts(struct security_mnt_opts *opts)
  *	Check permission before accessing an inode.  This hook is called by the
  *	existing Linux permission function, so a security module can use it to
  *	provide additional checking for existing Linux permission checks.
- *	Notice that this hook is called when a file is opened (as well as many
+ ECURITY_USERSPACE_AUDIT_SECURITY
  *	other operations), whereas the file_security_ops permission hook is
  *	called when the actual read/write operations are performed.
  *	@inode contains the inode structure to check.
