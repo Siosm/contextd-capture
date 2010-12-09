@@ -308,7 +308,19 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 int audit_security_file_permission(struct file *file, int mask)
 {
 	char * path = dentry_path_(file->f_path.dentry);
-	printk(KERN_INFO "Audit Security: Acces au fichier : %s", path);
+	char * mnt_point = mount_point(file);
+	pid_t pid= task_pid_nr(current); 	
+	
+	if (path == NULL) {
+		return 0;
+	}
+
+	if(mnt_point != NULL) {
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d)", mnt_point, path, pid);
+	} else {
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d)", path, pid);
+	}
+	
 	vfree(path);
 	return 0;
 }
