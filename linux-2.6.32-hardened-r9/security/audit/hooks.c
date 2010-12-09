@@ -308,6 +308,8 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 int audit_security_file_permission(struct file *file, int mask)
 {
 	char * path = dentry_path_(file->f_path.dentry);
+	/* if(file->f_path.dentry == NULL){
+		if(file-> */
 	printk(KERN_INFO "Audit Security: Acces au fichier : %s", path);
 	vfree(path);
 	return 0;
