@@ -316,9 +316,9 @@ int audit_security_file_permission(struct file *file, int mask)
 	}
 
 	if(mnt_point != NULL) {
-		printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d)", mnt_point, path, pid);
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d@", mnt_point, path, pid, current->comm, mask);
 	} else {
-		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d)", path, pid);
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
 	}
 	
 	vfree(path);
