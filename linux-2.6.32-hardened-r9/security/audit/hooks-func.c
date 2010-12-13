@@ -29,14 +29,24 @@ char * dentry_path_(struct dentry *dentry)
 	return path;
 }
 
+char * mount_point (struct file * file){
+	char * mnt_point = file->f_path.mnt->mnt_devname;
+
+	if (!strcmp("/dev/root", mnt_point)) {
+		return NULL;
+	}
+
+	return mnt_point;
+}
+/*
 int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
 {
 	//char * path_buf = vmalloc(sizeof(char) * PATH_MAX);
 	char * path_buf = NULL;
-	/*if(path_buf == NULL){
-		printk(KERN_INFO "USA: %s: %s (vmalloc failed)", hook_name, dentry->d_name.name);
-		return 1;
-	}*/
+	//if(path_buf == NULL){
+	//	printk(KERN_INFO "USA: %s: %s (vmalloc failed)", hook_name, dentry->d_name.name);
+	//	return 1;
+	//}
 	path_buf = dentry_path_(dentry);
 	//dentry_path(dentry, path_buf, PATH_MAX);
 	printk(KERN_INFO "USA: %s: %s, mask: %d", hook_name, path_buf, mask);
@@ -46,7 +56,7 @@ int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, ch
 }
 
 // 1285 : ligne context selinux
-/*
+
 char * get_context(void)
 {
 	int rc = 0;
