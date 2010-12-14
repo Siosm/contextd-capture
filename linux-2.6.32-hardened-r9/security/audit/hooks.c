@@ -320,7 +320,6 @@ int audit_security_file_permission(struct file *file, int mask)
 	} else {
 		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
 	}
-	
 	vfree(path);
 	return 0;
 }
