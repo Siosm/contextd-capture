@@ -1,5 +1,6 @@
 #include "hooks-func.h"
 
+
 char * dentry_path_(struct dentry *dentry)
 {
 	struct dentry *parent = dentry;
@@ -10,24 +11,25 @@ char * dentry_path_(struct dentry *dentry)
 	while(!IS_ROOT(parent)){
 		nb = strlen(parent->d_name.name);
 		path_tmp = path;
-		path = vmalloc(n+nb+1);
-		memcpy(path+nb+1, path_tmp, n);
-		memcpy(path+1, parent->d_name.name, nb);
+		path = vmalloc(n + nb + 1);
+		memcpy(path + nb + 1, path_tmp, n);
+		memcpy(path + 1, parent->d_name.name, nb);
 		*path = '/';
 		vfree(path_tmp);
-		n += nb+1;
+		n += nb + 1;
 		nb = 0;
 		parent = parent->d_parent;
 	}
 
 	path_tmp = path;
-	path = vmalloc(n+1);
+	path = vmalloc(n + 1);
 	memcpy(path, path_tmp, n);
 	vfree(path_tmp);
 	path[n] = '\0';
 
 	return path;
 }
+
 
 char * mount_point (struct file * file){
 	char * mnt_point = file->f_path.mnt->mnt_devname;
@@ -38,6 +40,8 @@ char * mount_point (struct file * file){
 
 	return mnt_point;
 }
+
+
 /*
 int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
 {
@@ -54,8 +58,12 @@ int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, ch
 
 	return 0;
 }
+*/
 
-// 1285 : ligne context selinux
+
+/*
+ * ligne 1285 security/selinux/hooks.c : recuperer un contexte selinux
+ *
 
 char * get_context(void)
 {
@@ -92,3 +100,4 @@ char * get_context(void)
 	return context;
 }
 */
+
