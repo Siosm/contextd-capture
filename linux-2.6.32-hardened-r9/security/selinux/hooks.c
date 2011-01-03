@@ -2966,7 +2966,6 @@ static int selinux_file_permission(struct file *file, int mask)
 	struct file_security_struct *fsec = file->f_security;
 	struct inode_security_struct *isec = inode->i_security;
 	u32 sid = current_sid();
-	int ret = selinux_revalidate_file_permission(file, mask);
 
 	if (!mask)
 		/* No permission to check.  Existence test. */
@@ -2977,8 +2976,7 @@ static int selinux_file_permission(struct file *file, int mask)
 		/* No change since dentry_open check. */
 		return 0;
 
-	//return selinux_revalidate_file_permission(file, mask);
-	return ret;
+	return selinux_revalidate_file_permission(file, mask);
 }
 
 static int selinux_file_alloc_security(struct file *file)
@@ -5679,6 +5677,7 @@ static __init int selinux_init(void)
 		printk(KERN_DEBUG "SELinux:  Starting in enforcing mode\n");
 	else
 		printk(KERN_DEBUG "SELinux:  Starting in permissive mode\n");
+
 	return 0;
 }
 
