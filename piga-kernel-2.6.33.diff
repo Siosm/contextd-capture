@@ -1,0 +1,1299 @@
+diff -urN ./linux-2.6.33-hardened-r1/include/linux/lsm_audit.h linux-2.6.33-hardened-piga/include/linux/lsm_audit.h
+--- ./linux-2.6.33-hardened-r1/include/linux/lsm_audit.h	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33-hardened-piga/include/linux/lsm_audit.h	2010-04-08 10:33:51.000000000 +0200
+@@ -35,6 +35,8 @@
+ #define LSM_AUDIT_DATA_KEY	6
+ #define LSM_AUDIT_NO_AUDIT	7
+ #define LSM_AUDIT_DATA_KMOD	8
++#define LSM_AUDIT_DATA_2P       9
++
+ 	struct task_struct *tsk;
+ 	union 	{
+ 		struct {
+@@ -61,6 +63,7 @@
+ 		int cap;
+ 		int ipc_id;
+ 		struct task_struct *tsk;
++		struct task_struct *tskd;
+ #ifdef CONFIG_KEYS
+ 		struct {
+ 			key_serial_t key;
+diff -urN ./linux-2.6.33-hardened-r1/include/linux/piga.h linux-2.6.33-hardened-piga/include/linux/piga.h
+--- ./linux-2.6.33-hardened-r1/include/linux/piga.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33-hardened-piga/include/linux/piga.h	2010-04-08 10:29:47.000000000 +0200
+@@ -0,0 +1,26 @@
++#ifndef _SECURITY_PIGA_H
++#define _SECURITY_PIGA_H
++
++#include <linux/capability.h>
++#include <linux/spinlock.h>
++#include <linux/lsm_audit.h>
++#include "../../security/selinux/include/avc.h"
++
++#if defined(CONFIG_SECURITY_ROOTPLUG_MODULE)
++#define MY_NAME THIS_MODULE->name
++#else
++#define MY_NAME "piga"
++#endif
++
++
++void piga_handle_mem_write(void);
++
++int piga_control(u32 ssid, u32 tsid, u16 tclass, u32 requested, struct common_audit_data *auditdata, int rc, struct av_decision * avd);
++
++void addTrace(char *tt, int actualsize);
++
++static spinlock_t xgr_learn_lock = SPIN_LOCK_UNLOCKED;
++
++
++
++#endif  /* _SECURITY_PIGA_H */
+diff -urN ./linux-2.6.33-hardened-r1/include/linux/sched.h linux-2.6.33-hardened-piga/include/linux/sched.h
+--- ./linux-2.6.33-hardened-r1/include/linux/sched.h	2010-04-27 11:38:35.000000000 +0200
++++ linux-2.6.33-hardened-piga/include/linux/sched.h	2010-04-08 10:29:47.000000000 +0200
+@@ -358,6 +358,7 @@
+ extern signed long schedule_timeout_killable(signed long timeout);
+ extern signed long schedule_timeout_uninterruptible(signed long timeout);
+ asmlinkage void schedule(void);
++asmlinkage extern int can_schedule(void);
+ extern int mutex_spin_on_owner(struct mutex *lock, struct thread_info *owner);
+ 
+ struct nsproxy;
+ }
+ 
+ static inline int sd_balance_for_package_power(void)
+diff -urN ./linux-2.6.33-hardened-r1/kernel/exit.c linux-2.6.33-hardened-piga/kernel/exit.c
+--- ./linux-2.6.33-hardened-r1/kernel/exit.c	2010-04-27 11:38:35.000000000 +0200
++++ linux-2.6.33-hardened-piga/kernel/exit.c	2010-04-08 10:29:47.000000000 +0200
+@@ -57,6 +57,10 @@
+ #include <asm/mmu_context.h>
+ #include "cred-internals.h"
+ 
++#ifdef CONFIG_SECURITY_PIGA_EXIT_HOOK
++#include <linux/piga.h>
++#endif
++
+ #ifdef CONFIG_GRKERNSEC
+ extern rwlock_t grsec_exec_file_lock;
+ #endif
+@@ -922,6 +926,31 @@
+ 	struct task_struct *tsk = current;
+ 	int group_dead;
+ 
++
++	#ifdef CONFIG_SECURITY_PIGA_EXIT_HOOK
++	int pid = 0;
++	int cp = 0;
++	int strsize = 0;
++	char *strpid, *str;
++	struct timespec tsm;
++
++	if (tsk && tsk->pid) {
++			pid=tsk->pid;
++			strpid=kzalloc(48,GFP_ATOMIC);
++			tsm = current_kernel_time();
++
++			strsize=sprintf(strpid,"TS=%ld.%ld PID=%dEND",tsm.tv_sec,tsm.tv_nsec,pid);
++
++			printk(KERN_INFO "(%d / %d) : %s", strlen(strpid), strsize, strpid);
++
++			spin_lock(&xgr_learn_lock);
++			addTrace(strpid,strsize);
++			spin_unlock(&xgr_learn_lock);
++
++			kfree(strpid);
++	}
++	#endif
++
+ 	profile_task_exit(tsk);
+ 
+ 	WARN_ON(atomic_read(&tsk->fs_excl));
+diff -urN ./linux-2.6.33-hardened-r1/kernel/sched.c linux-2.6.33-hardened-piga/kernel/sched.c
+--- ./linux-2.6.33-hardened-r1/kernel/sched.c	2010-04-27 11:38:35.000000000 +0200
++++ linux-2.6.33-hardened-piga/kernel/sched.c	2010-04-08 10:29:47.000000000 +0200
+@@ -5417,6 +5396,13 @@
+ 	else
+ 		dump_stack();
+ }
++asmlinkage int can_schedule(void)
++{
++	if (likely(in_atomic()))
++		return 1;
++	return 0;
++
++}
+ 
+ /*
+  * Various schedule()-time debugging checks and statistics:
+diff -urN ./linux-2.6.33-hardened-r1/security/Kconfig linux-2.6.33-hardened-piga/security/Kconfig
+--- ./linux-2.6.33-hardened-r1/security/Kconfig	2010-04-27 11:38:35.000000000 +0200
++++ linux-2.6.33-hardened-piga/security/Kconfig	2010-04-08 10:29:47.000000000 +0200
+@@ -630,6 +619,21 @@
+ 	  this low address space will need the permission specific to the
+ 	  systems running LSM.
+ 
++config SECURITY_PIGA
++	tristate "PIGA Support"
++	depends on SECURITY_SELINUX && SECURITY
++	help
++	  This is a sample LSM module that should only be used as such.
++	  
++	  If you are unsure how to answer this question, answer N.
++
++config SECURITY_PIGA_EXIT_HOOK
++	tristate "PIGA Exit Hook support"
++	help
++	  This is a special hook for PIGA.
++
++	  If you are unsure how to answer this question, answer N.
++
+ source security/selinux/Kconfig
+ source security/smack/Kconfig
+ source security/tomoyo/Kconfig
+diff -urN ./linux-2.6.33-hardened-r1/security/lsm_audit.c linux-2.6.33-hardened-piga/security/lsm_audit.c
+--- ./linux-2.6.33-hardened-r1/security/lsm_audit.c	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/lsm_audit.c	2010-04-09 12:02:49.000000000 +0200
+@@ -211,6 +211,7 @@
+ {
+ 	struct inode *inode = NULL;
+ 	struct task_struct *tsk = current;
++	struct task_struct *tskd;
+ 
+ 	if (a->tsk)
+ 		tsk = a->tsk;
+@@ -218,7 +219,10 @@
+ 		audit_log_format(ab, " pid=%d comm=", tsk->pid);
+ 		audit_log_untrustedstring(ab, tsk->comm);
+ 	}
+-
++	if (tsk && tsk->parent && tsk->parent->pid) {
++ 		audit_log_format(ab, " ppid=%d", tsk->parent->pid);
++ 	}
++ 
+ 	switch (a->type) {
+ 	case LSM_AUDIT_NO_AUDIT:
+ 		return;
+@@ -262,6 +266,13 @@
+ 			audit_log_untrustedstring(ab, tsk->comm);
+ 		}
+ 		break;
++ 	case LSM_AUDIT_DATA_2P:
++		tskd = a->u.tskd;
++ 		if (tskd && tskd->pid)
++  			audit_log_format(ab, " dpid=%d", tskd->pid);
++		if (tskd && tskd->parent && tskd->parent->pid)
++			audit_log_format(ab, " dppid=%d", tskd->parent->pid);
++ 		break;
+ 	case LSM_AUDIT_DATA_NET:
+ 		if (a->u.net.sk) {
+ 			struct sock *sk = a->u.net.sk;
+diff -urN ./linux-2.6.33-hardened-r1/security/Makefile linux-2.6.33-hardened-piga/security/Makefile
+--- ./linux-2.6.33-hardened-r1/security/Makefile	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/Makefile	2010-04-08 10:29:47.000000000 +0200
+@@ -4,6 +4,7 @@
+ 
+ obj-$(CONFIG_KEYS)			+= keys/
+ subdir-$(CONFIG_SECURITY_SELINUX)	+= selinux
++subdir-$(CONFIG_SECURITY_PIGA)          += piga
+ subdir-$(CONFIG_SECURITY_SMACK)		+= smack
+ subdir-$(CONFIG_SECURITY_TOMOYO)        += tomoyo
+ 
+@@ -16,6 +17,7 @@
+ obj-$(CONFIG_SECURITYFS)		+= inode.o
+ # Must precede capability.o in order to stack properly.
+ obj-$(CONFIG_SECURITY_SELINUX)		+= selinux/built-in.o
++obj-$(CONFIG_SECURITY_PIGA)             += piga/built-in.o
+ obj-$(CONFIG_SECURITY_SMACK)		+= smack/built-in.o
+ obj-$(CONFIG_AUDIT)			+= lsm_audit.o
+ obj-$(CONFIG_SECURITY_TOMOYO)		+= tomoyo/built-in.o
+diff -urN ./linux-2.6.33-hardened-r1/security/piga/Kconfig linux-2.6.33-hardened-piga/security/piga/Kconfig
+--- ./linux-2.6.33-hardened-r1/security/piga/Kconfig	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/piga/Kconfig	2010-04-08 10:29:47.000000000 +0200
+@@ -0,0 +1,19 @@
++config SECURITY_PIGA
++	bool "Simplified Mandatory Access Control Kernel Support"
++	depends on NETLABEL && SECURITY_NETWORK
++	default n
++	help
++	  This selects the Simplified Mandatory Access Control Kernel.
++	  Smack is useful for sensitivity, integrity, and a variety
++	  of other mandatory security schemes.
++	  If you are unsure how to answer this question, answer N.
++
++config SECURITY_PIGA_EXIT_HOOK
++	bool "Simplified Mandatory Access Control Kernel Support"
++	depends on NETLABEL && SECURITY_NETWORK
++	default n
++	help
++	  This selects the Simplified Mandatory Access Control Kernel.
++	  Smack is useful for sensitivity, integrity, and a variety
++	  of other mandatory security schemes.
++	  If you are unsure how to answer this question, answer N.
+diff -urN ./linux-2.6.33-hardened-r1/security/piga/Makefile linux-2.6.33-hardened-piga/security/piga/Makefile
+--- ./linux-2.6.33-hardened-r1/security/piga/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/piga/Makefile	2010-04-09 11:51:51.000000000 +0200
+@@ -0,0 +1,18 @@
++#
++# Makefile for the PIGA LSM
++#
++
++obj-$(CONFIG_SECURITY_PIGA) := piga_lsm.o
++
++piga-y := piga_lsm.o
++
++obj-flask := security/selinux/include
++
++$(obj)/piga_lsm.o: $(obj-flask)/flask.h
++
++quiet_cmd_flask = GEN     $(obj-flask)/flask.h $(obj-flask)/av_permissions.h
++      cmd_flask = scripts/selinux/genheaders/genheaders $(obj-flask)/flask.h $(obj-flask)/av_permissions.h
++
++targets += flask.h
++$(obj-flask)/flask.h: $(obj-flask)/classmap.h FORCE
++	$(call if_changed,flask)
+diff -urN ./linux-2.6.33-hardened-r1/security/piga/piga_lsm.c linux-2.6.33-hardened-piga/security/piga/piga_lsm.c
+--- ./linux-2.6.33-hardened-r1/security/piga/piga_lsm.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/piga/piga_lsm.c	2010-04-09 15:57:06.000000000 +0200
+@@ -0,0 +1,700 @@
++/*
++ *  Simplified MAC Kernel (piga) security module
++ *
++ *  This file contains the piga hook function implementations.
++ *
++ *  Author:
++ *     Jeremy Briffaut (jeremy DOT briffaut AT ensi - bourges DOT fr)
++ *     Jonathan Rouzaud-Cornabas (jonathan DOT rouzaud - cornabas AT ensi - bourges DOT fr)
++ *
++ *
++ */
++
++#include "piga_lsm.h"
++
++/*
++ * Call at start.
++ *
++ */
++static int __init init (void)
++{
++
++	struct proc_dir_entry *entry;
++	struct proc_dir_entry *piga_rep_proc;
++	int i;
++
++	printk(KERN_INFO "Init PIGA\n");
++	/*
++	 * Create /proc/sys/piga/ to activate/desactivate but also fix variable in piga module.
++	 *
++	 */
++	if (!(my_table_header = register_sysctl_table(my_ctl_dir))) {
++		printk(KERN_INFO "PIGA-Kernel: failed /proc/sys/piga\n");
++		return EPERM;
++	}
++
++	/*
++	 * Initialize the list of traces.
++	 */
++	debut = NULL;
++	fin = NULL;
++
++	printk(KERN_INFO "PIGA-Kernel: <1>piga: /dev created.\n");
++
++	printk (KERN_INFO "PIGA-Kernel: PIGA module initialized");
++
++	/*
++	 * Create and register the seq_file.
++	 */
++	entry = create_proc_entry("pigaseq", 0400, NULL);
++	if (entry == NULL) {
++		remove_proc_entry("pigaseq", NULL);
++		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n",
++				"pigaseq");
++		return -ENOMEM;
++	}
++	entry->proc_fops = &proc_pigaseq_operations;
++	printk(KERN_INFO "/proc/%s created\n", "pigaseq");
++
++	/*
++	 * Clean the table for piga_rep
++	 */
++	for(i=0;i<MAX_REP_SIZE;i++) {
++		piga_rep[i][0]=0;
++		piga_rep[i][1]=0;
++	}
++	/*
++	 * Create and register the piga_rep.
++	 */
++	piga_rep_proc = create_proc_entry("piga_rep", 0600, NULL);
++	if (piga_rep_proc == NULL) {
++		remove_proc_entry("piga_rep", NULL);
++		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n",
++				"piga_rep");
++		return -ENOMEM;
++	}
++	piga_rep_proc->read_proc = read_proc;
++	piga_rep_proc->write_proc = write_proc;
++	//piga_rep_proc->mode = S_IFREG | S_IRUGO;
++	piga_rep_proc->uid = 0;
++	piga_rep_proc->gid = 0;
++	//piga_rep_proc->size 	  = 37;
++	printk(KERN_INFO "/proc/%s created\n", "piga_rep");
++
++	return 0;
++}
++
++/*
++ * Procedure call when unloading the module.
++ *
++ */
++static void __exit exit (void)
++{
++	/*
++	 * Destroy /proc/sys/piga/
++	 */
++	if (my_table_header)
++		unregister_sysctl_table(my_table_header);
++
++	/*
++	 * Destroy the seq_file.
++	 */
++	remove_proc_entry("pigaseq", NULL);
++	remove_proc_entry( "piga_rep", NULL);
++
++	printk (KERN_INFO "PIGA-Kernel: PIGA module removed\n");
++}
++
++security_initcall ( init);
++module_exit ( exit);
++
++MODULE_DESCRIPTION("PIGA sample LSM module, written for SEC&SI");
++MODULE_LICENSE("GPL");
++
++/*
++ * Function use to add a trace at the end of the list.
++ */
++void addTrace(char *tt, int actualsize) {
++
++	struct trace *cur;
++	cur = kmalloc(sizeof(struct trace), GFP_ATOMIC);
++	cur->str = kzalloc(actualsize, GFP_ATOMIC);
++	memcpy(cur->str, tt, actualsize);if (actualsize < 40) printk(KERN_INFO "addTrace: %s\n", cur->str);
++
++	if (debut == NULL) {
++		cur->next = NULL;
++		debut = cur;
++		fin = cur;
++	} else {
++		cur->next = NULL;
++		fin->next = cur;
++		fin = cur;
++	}
++
++	eventToSend = 1;
++}
++
++/*
++ * Parse a security permissions buffer to create the string buffer that fit it.
++ *
++ */
++static char *avc_dump_av2(char *ptr, u16 tclass, u32 av, int *pactualsize) //, int *prc)
++{
++	const char **perms;
++
++	int i, perm;
++	int cp;
++	int actualsize = *pactualsize;
++
++	if (av == 0) {
++		mem_cp_avc(ptr, " null", actualsize, rc);
++		return ptr;
++	}
++
++	perms = secclass_map[tclass-1].perms;
++
++	mem_cp_avc(ptr, "{", actualsize, rc);
++	i = 0;
++	perm = 1;
++	while (i < (sizeof(av) * 8)) {
++		if ((perm & av) && perms[i]) {
++			char tmp[AVC_BUFFER_SIZE];
++			cp = scnprintf(tmp, AVC_BUFFER_SIZE, " %s", perms[i]);
++			mem_scp_avc(ptr, tmp, cp, actualsize, rc);
++			av &= ~perm;
++		}
++		i++;
++		perm <<= 1;
++	}
++
++	if (av) {
++		char tmp[AVC_BUFFER_SIZE];
++		cp = scnprintf(tmp, AVC_BUFFER_SIZE, " 0x%x", av);
++		mem_scp_avc(ptr, tmp, cp, actualsize, rc);
++	}
++
++	mem_cp_avc(ptr, " }", actualsize, rc);
++
++	*pactualsize = actualsize;
++
++	return ptr;
++}
++
++
++/*
++ * Function that generate from multi data the string buffer that contains the corresponding event.
++ */
++int piga_control(u32 ssid, u32 tsid, u16 tclass, u32 requested, struct common_audit_data *auditdata, int rc, struct av_decision * avd) {
++
++	int res;
++	char *scontext;
++	u32 scontext_len;
++	int pid = -1, ppid = -1;
++	struct task_struct *tsk = current;
++	int rep_cpt;
++	int id;
++	int rep = PIGA_REP_MAX_WAIT;
++	int id_rep;
++	u16 ltclass = tclass;
++
++	/*
++	 * Result and ptr are the string buffer that will contain the event at the end of the function.
++	 */
++	char *result, *ptr;
++	char *tmp;
++	char buf[LOCAL_BUFFER_SIZE];
++
++	int cp;
++	u32 denied = 0, audited;
++	int actualsize = 0;
++
++	struct timespec tsm;
++	//
++	if(piga_deletegranting == 0){
++		avc_audit(ssid, tsid, tclass, requested, avd, rc, auditdata);
++	}
++
++	/*
++	 * If piga is activated (=1) in /proc/sys/piga/piga_on
++	 */
++	if (piga_on == 1) {
++		/*
++		 * Resolve if SELinux decided to allow or denied or log the syscall.
++		 */
++		if (avd) {
++			denied = requested & ~avd->allowed;
++
++			if (piga_mode == 0) {
++				if (denied) {
++					audited = denied;
++					if (!(audited & avd->auditdeny))
++						return rc;
++				} else {
++					audited = requested;
++					if (!(audited & avd->auditallow))
++						return rc;
++				}
++			}
++		}
++
++		/*
++		 * Recover from the input data, the structure of the process who do the syscall.
++		 * And then, recover its PID and PPID.
++		 */
++		if (auditdata && auditdata->tsk)
++			tsk = auditdata->tsk;
++
++		if (tsk && tsk->pid) {
++			pid = tsk->pid;
++		}
++
++		if (tsk && tsk->parent && tsk->parent->pid) {
++			ppid = tsk->parent->pid;
++		}
++
++		/*
++		 * Initialize the local buffer that will contain the event.
++		 */
++		result = kmalloc(LOCAL_BUFFER_SIZE, GFP_ATOMIC);
++		if (result == NULL) {
++			printk(KERN_INFO "PIGA-Kernel: Error vmalloc result trace buffer\n");
++			return rc;
++		}
++		ptr = result;
++
++		/*
++		 * Generate and add the unique identifier of the event.
++		 */
++		mem_cp(ptr, "ID=", actualsize, rc);
++
++		// Increment trace number
++		id = ID++;
++
++		cp = scnprintf(buf, LOCAL_BUFFER_SIZE, "%d", id);
++		mem_scp(ptr, buf, cp, actualsize, rc);
++
++		/*
++		 * Generate and add the timestamp of the event.
++		 */
++		mem_cp(ptr, " TS=", actualsize, rc);
++
++		tsm = current_kernel_time();
++		cp = scnprintf(buf, LOCAL_BUFFER_SIZE, "%ld.%ld", tsm.tv_sec, tsm.tv_nsec);
++		mem_scp(ptr, buf, cp, actualsize, rc);
++		/*
++		 * Add in the event if it has been allowed or denied.
++		 */
++		if (denied) {
++			mem_cp(ptr, " denied", actualsize, rc);
++		} else {
++			mem_cp(ptr, " granted", actualsize, rc);
++		}
++		/*
++		 * Convert to string input data to recover the source security context.
++		 */
++		mem_cp(ptr, " scontext=", actualsize, rc);
++
++		res = security_sid_to_context(ssid, &scontext, &scontext_len);
++		if (res) {
++			scnprintf(buf, LOCAL_BUFFER_SIZE, "%d", ssid);
++			mem_cp(ptr, buf, actualsize, rc);
++		} else {
++			// -1 without the '\0'
++			mem_scp(ptr, scontext, (sizeof(char) * (scontext_len - 1)), actualsize, rc);
++			kfree(scontext);
++		}
++
++		/*
++		 * Convert to string input data to recover the destination security context.
++		 */
++		mem_cp(ptr, " dcontext=", actualsize, rc);
++		res = security_sid_to_context(tsid, &scontext, &scontext_len);
++		if (res) {
++			scnprintf(buf, LOCAL_BUFFER_SIZE, "%d", tsid);
++			mem_cp(ptr, buf, actualsize, rc);
++		} else {
++			// -1 without the '\0'
++			mem_scp(ptr, scontext, (sizeof(char) * (scontext_len - 1)), actualsize, rc);
++			kfree(scontext);
++		}
++
++		/*
++		 * Add the PID number to the event trace.
++		 */
++		mem_cp(ptr, " pid=", actualsize, rc);
++
++		cp = scnprintf(buf, LOCAL_BUFFER_SIZE, "%d", pid);
++		mem_scp(ptr, buf, cp, actualsize, rc);
++
++		/*
++		 * Add the PPID number to the event trace.
++		 */
++		mem_cp(ptr, " ppid=", actualsize, rc);
++
++		cp = scnprintf(buf, LOCAL_BUFFER_SIZE, "%d", ppid);
++		mem_scp(ptr, buf, cp, actualsize, rc);
++
++		/*
++		 * Recover and convert to string the class security and add it to the trace.
++		 */
++		mem_cp(ptr, " tclass=", actualsize, rc);
++
++		cp = strlen(secclass_map[ltclass-1].name);
++		mem_scp(ptr, secclass_map[ltclass-1].name, cp, actualsize, rc);
++
++		/*
++		 * Call the function that convert security perms to string.
++		 * And add this string to the event trace.
++		 */
++		mem_cp(ptr, " tperm=", actualsize, rc);
++
++		tmp = avc_dump_av2(ptr, ltclass, requested, &actualsize);
++
++		if (tmp == NULL)
++			return rc;
++
++		ptr = tmp;
++
++		/*
++		 * Add end of the string character at the end of the string.
++		 */
++		ptr = '\0';
++
++		/*
++		 * Add the trace to the list.
++		 * Use spinlock_bh to avoid concurrency on the list.
++		 */
++		spin_lock_bh(&xgr_learn_lock);
++		addTrace(result, actualsize);
++		spin_unlock_bh(&xgr_learn_lock);
++
++		/*
++		 * Wake up read syscall on seq_file (if need).
++		 *
++		 */
++		wake_up(&piqueue);
++
++		/*
++		 * Freeing the buffer.
++		 */
++		if (result != NULL)
++			kfree(result);
++
++		/*
++		 * Update piga_rep table
++		 */
++
++		/*
++		 * Using a spinlock_bh to avoid concurrency on the table.
++		 */
++		// lock_bh write on the table
++		spin_lock_bh(&piga_rep_write_lock);
++		id_rep = piga_rep_cpt;
++		piga_rep_cpt = ((piga_rep_cpt + 1) % MAX_REP_SIZE);
++		// write the query
++		piga_rep[id_rep][0] = id;
++		piga_rep[id_rep][1] = PIGA_WAIT;
++		// unlock_bh write on the table
++		spin_unlock_bh(&piga_rep_write_lock);
++
++		/** delete granting */
++		/*if (piga_deletegranting == 1) {
++			avd->auditallow = 0;
++		}*/
++
++		/*
++		 * IPS mode
++		 */
++		if (piga_ips == 1) {
++			while ((rep--) > 0) {
++				//add_wait_queue(&q, &wait);
++				if (can_schedule() == 0) {
++
++					set_current_state(TASK_INTERRUPTIBLE);
++					schedule_timeout(PIGA_SLEEP);
++					set_current_state(TASK_RUNNING);
++				} else {
++					printk(KERN_INFO "can not schedule atomic\n");
++					/*	set_current_state(TASK_INTERRUPTIBLE);
++						schedule_timeout_atomic(PIGA_SLEEP);
++						set_current_state(TASK_RUNNING); */
++					if (piga_ips_enforcing == 0) {
++						return PIGA_ALLOW;
++					} else {
++						avd->allowed = 0;
++						return PIGA_DENY;
++					}
++
++				}
++				for (rep_cpt = 0; rep_cpt < MAX_REP_SIZE; rep_cpt++) {
++					if (piga_rep[rep_cpt][0] == id && piga_rep[rep_cpt][1] != PIGA_WAIT) {
++						rep = 0;
++						//printk(KERN_INFO "Reponse for ID : %d, REP : %d\n",piga_rep[rep_cpt][0],piga_rep[rep_cpt][1]);
++						// return selinux & piga decision
++						if(piga_rep[rep_cpt][1]) {
++							avd->allowed = 0;
++							return PIGA_DENY;
++						} else {
++							return PIGA_ALLOW;
++						}
++					}
++				}
++			}
++			printk(KERN_INFO "No Response : %d \n",id);
++			if (piga_ips_enforcing == 0) {
++				return PIGA_ALLOW;
++			} else {
++				avd->allowed = 0;
++				return PIGA_DENY;
++			}
++		}
++	}
++	//return the decision
++	return rc;
++}
++
++/*
++ * Function call when seq_file is open by a userland application.
++ */
++static int piga_open(struct inode *inode, struct file *file) {
++	return seq_open(file, &piga_seq_ops);
++}
++
++/*
++ * Function call when a userland application start to read on seq_file.
++ */
++static void *piga_seq_start(struct seq_file *seq, loff_t *pos) {
++	/*
++	 * First, to allow the syscall to be block_bhing in case of no data to read
++	 * i.e. the syscall will wait data, we declare a waiting queue.
++	 */
++	DEFINE_WAIT(qwait);
++
++	/*
++	 * Pointer to the currently compute/send trace.
++	 */
++	struct trace *cur;
++
++	/*
++	 * While no trace to send to seq_file
++	 * the syscall will sleep.
++	 * It will be awake by piga_control after adding a new trace to the list.
++	 */
++	while (!(eventToSend == 1)) {
++
++		prepare_to_wait(&piqueue, &qwait, TASK_INTERRUPTIBLE);
++		if (!(eventToSend == 1))
++			schedule();
++		finish_wait(&piqueue, &qwait);
++	}
++
++	/*
++	 * Using a spinlock_bh to avoid concurrency on the list.
++	 */
++	spin_lock_bh(&xgr_learn_lock);
++
++	/*
++	 * If nothing in the list, return NULL.
++	 */
++	if (debut == NULL) {
++		olddebut = NULL;
++		return NULL;
++	}
++	/*
++	 * If only one trace on the list, return a pointer to the trace
++	 * and set to NULL debut and fin.
++	 * olddebut will point to the trace.
++	 */
++	else if (debut == fin) {
++		debut = NULL;
++		cur = fin;
++		olddebut = fin;
++		fin = NULL;
++		return cur;
++		/*
++		 * If more than one trace in the list.
++		 * olddebut take the value of debut.
++		 * cur will point to the first element on the list
++		 * debut will point to the next element in the list i.e. the second one.
++		 */
++	} else {
++		olddebut = debut;
++		cur = debut;
++		debut = debut->next;
++		return cur;
++	}
++	/*
++	 * else we return NULL
++	 */
++	return NULL;
++}
++
++/*
++ * Function call after piga_seq_start if piga_seq_start did not return NULL.
++ * It will be call until no more element in the list.
++ * It return a pointer to the element or NULL if no more elemnt.
++ */
++static void *piga_seq_next(struct seq_file *s, void *v, loff_t *pos) {
++	struct trace *cur;
++
++	/*
++	 * If nothing more in the list, return NULL
++	 */
++	if (debut == NULL)
++		return NULL;
++	/*
++	 * If only one element on the list, return this element.
++	 */
++	else if (debut == fin) {
++		debut = NULL;
++		cur = fin;
++		fin = NULL;
++		return cur;
++		/*
++		 * Else return the current element
++		 * and go to the next event in the list.
++		 */
++	} else {
++		cur = debut;
++		debut = debut->next;
++
++		return cur;
++	}
++	return NULL;
++}
++
++/*
++ * Function call when piga_seq_start and piga_seq_next have finish
++ * i.e. when nothing more in the list.
++ */
++static void piga_seq_stop(struct seq_file *seq, void *v) {
++
++	struct trace *ttmp;
++
++	/*
++	 * If olddebut is initialized.
++	 */
++	if (olddebut != NULL) {
++		/*
++		 * We clean up each element of the list, that has been send
++		 * to the seq_file.
++		 */
++		do {
++			ttmp = olddebut;
++			olddebut = olddebut->next;
++			ttmp->next = NULL;
++			kfree(ttmp->str);
++			kfree(ttmp);
++		} while ((olddebut != debut) && (olddebut != NULL));
++	}
++
++	/*
++	 * If the list is empty, we setup eventToSend to 0 to help futur
++	 * read to sleep until new trace are available in the list.
++	 */
++	if (debut == NULL)
++		eventToSend = 0;
++
++	/*
++	 * We release the spinlock_bh.
++	 */
++	spin_unlock_bh(&xgr_learn_lock);
++}
++
++/*
++ * Function used to print/send the event to the seq_file.
++ * When a new trace is send by piga_seq_start or piga_seq_next
++ * this function describe how the trace is write on the seq_file.
++ */
++static int piga_seq_show(struct seq_file *seq, void *v) {
++
++	struct trace *tr;
++	int ret = 0;
++
++	if (v != NULL) {
++		tr = v;
++		if (strlen(tr->str) < 40) printk(KERN_INFO "seq_show: %s\n", tr->str);
++		ret = seq_printf(seq, "%s\n", tr->str);
++	}
++
++	return ret;
++}
++
++/*
++ *  Proc file reading
++ *  print the table piga_rep in human format :
++ *  ID1:REP
++ *  ID2:REP
++ *  ...
++ *
++ *  REP=0 -> deny, 1-> allow, 2-> wait for a response
++ *
++ */
++static int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data) {
++	int len = 0;
++	int i;
++	/* print each line of the table ID:REP */
++	for (i = 0; i < MAX_REP_SIZE; i++) {
++		//FIXME scnprintf
++		len += sprintf(buf + len, "%d:%d\n", piga_rep[i][0], piga_rep[i][1]);
++	}
++	return len;
++}
++
++/**
++ * This function is called with the /proc file is written
++ * update the table of current responce : piga_rep
++ */
++static int write_proc(struct file *file, const char *buffer, unsigned long count, void *data) {
++	static char procfs_buffer[PROCFS_MAX_SIZE];
++	char *res;
++	int rep_cpt;
++	int id;
++	int doit=0;
++
++	/* get buffer size */
++	size_t procfs_buffer_size = count;
++	if (procfs_buffer_size >= PROCFS_MAX_SIZE) {
++		procfs_buffer_size = PROCFS_MAX_SIZE-1;
++	}
++
++	/* write data to the buffer */
++	if (copy_from_user(procfs_buffer, buffer, procfs_buffer_size)!=0) {
++		return -EFAULT;
++	}
++	/* find separator : */
++	//printk(KERN_INFO "PROCFS_BUFFER: %s\n", procfs_buffer);
++	res = strrchr(procfs_buffer, ':');
++	if (res != NULL) {
++		/* cut in two part */
++		res[0] = '\0';
++		res++;
++		/*
++		 * Using a spinlock_bh to avoid concurrency on the table.
++		 */
++		spin_lock_bh(&piga_rep_write_lock);
++		// convert id to int
++		id = atoi(procfs_buffer);
++		// serach the response id in the table
++		for (rep_cpt = 0; rep_cpt < MAX_REP_SIZE; rep_cpt++) {
++			if (piga_rep[rep_cpt][0] == id ) {
++				//fix the response
++				piga_rep[rep_cpt][1] = atoi(res);
++				doit=1;
++			}
++		}
++		if(doit==0){
++			piga_rep[piga_rep_cpt][0] = id;
++			piga_rep[piga_rep_cpt][1] = atoi(res);
++			piga_rep_cpt = ((piga_rep_cpt + 1) % MAX_REP_SIZE);
++
++		}
++		// unlock_bh write on the table
++		spin_unlock_bh(&piga_rep_write_lock);
++	} else {
++		printk(KERN_ERR "write_proc->piga_rep : bad value : %s\n",procfs_buffer);
++		return -EFAULT;
++	}
++	return procfs_buffer_size;
++}
++
+diff -urN ./linux-2.6.33-hardened-r1/security/piga/piga_lsm.h linux-2.6.33-hardened-piga/security/piga/piga_lsm.h
+--- ./linux-2.6.33-hardened-r1/security/piga/piga_lsm.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/piga/piga_lsm.h	2010-04-09 15:57:35.000000000 +0200
+@@ -0,0 +1,293 @@
++/*
++ *  Simplified MAC Kernel (piga) security module
++ *
++ *  This file contains the piga hook function implementations.
++ *
++ *  Author:
++ *     Jeremy Briffaut (jeremy DOT briffaut AT ensi - bourges DOT fr)
++ *     Jonathan Rouzaud-Cornabas (jonathan DOT rouzaud - cornabas AT ensi - bourges DOT fr)
++ *
++ *
++ */
++
++#include <linux/types.h>
++#include <linux/xattr.h>
++#include <linux/security.h>
++#include <linux/lsm_audit.h>
++#include <linux/pagemap.h>
++#include <linux/mount.h>
++#include <linux/stat.h>
++#include <linux/ext2_fs.h>
++#include <linux/kd.h>
++#include <asm/ioctls.h>
++#include <linux/tcp.h>
++#include <linux/udp.h>
++#include <linux/mutex.h>
++#include <linux/pipe_fs_i.h>
++#include <net/netlabel.h>
++#include <net/cipso_ipv4.h>
++#include <linux/seq_file.h>
++#include <linux/proc_fs.h>
++#include <linux/sched.h>
++
++#include <linux/sysctl.h>
++#include <linux/errno.h>
++/*
++ * Include everything we need to manipulate SELinux data.
++ */
++#include <linux/piga.h>
++#include "../selinux/include/avc.h"
++#include "../selinux/include/avc_ss.h"
++#include "../selinux/include/security.h"
++
++/*
++ * The function available in PIGA-Kernel
++ */
++
++// set 1 to DEBUG PIGA_KERNEL
++static int DEBUG_PIGA = 0;
++
++/*
++ * Prototype of the function used to interact with seq_file.
++ */
++static void *piga_seq_start(struct seq_file *seq, loff_t *pos);
++static void *piga_seq_next(struct seq_file *s, void *v, loff_t *pos);
++static void piga_seq_stop(struct seq_file *seq, void *v);
++static int piga_seq_show(struct seq_file *seq, void *v);
++static int piga_open(struct inode *inode, struct file *file);
++void addTrace(char *tt, int actualsize);
++
++/*
++ * Enum use to activate or not PIGA.
++ */
++
++enum {
++	CTL_PIGA = 1
++};
++enum {
++	CTL_PIGA_MODE = 0
++};
++enum {
++	CTL_PIGA_IPS = 0
++};
++enum {
++	CTL_PIGA_ENFORCING = 0
++};
++enum {
++	CTL_PIGA_DELETEGRANTING = 1
++};
++
++/*
++ * The variables that are link with /proc/sys/piga/
++ */
++// PIGA on by default
++static int piga_on = 1;
++//PIGA no full mode by default
++static int piga_mode = 0;
++//PIGA permissive mode by default
++static int piga_ips = 0;
++//
++static int piga_ips_enforcing = 0;
++static int piga_deletegranting = 1;
++
++/**
++ * Variable for /proc/piga_rep
++ */
++#define PROCFS_MAX_SIZE		1024
++#define MAX_REP_SIZE		1024
++static int piga_rep[MAX_REP_SIZE][2];
++static int piga_rep_cpt = 0;
++static int PIGA_ALLOW = 0;
++static int PIGA_DENY = -EACCES;
++static int PIGA_WAIT = 2;
++static int PIGA_SLEEP = HZ / 200;
++static int PIGA_REP_MAX_WAIT=10000;
++
++/**
++ * prototype for piga_rep
++ */
++static int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data);
++static int write_proc(struct file *file, const char *buffer, unsigned long count, void *data);
++
++/**
++ *
++ */
++
++static spinlock_t piga_rep_write_lock = SPIN_LOCK_UNLOCKED;
++
++
++static ctl_table my_ctl_table[] = {
++	/*
++	 * The variable that activate PIGA-Kernel.
++	 */
++	{
++		.procname = "piga_on",
++		.data = &piga_on,
++		.maxlen = sizeof(int),
++		.mode = 0600,
++		.proc_handler = &proc_dointvec,
++	},
++	/*
++	 * The variable that allow to choose between log everything and only the one that are audited.
++	 */
++	{
++		.procname = "piga_mode",
++		.data = &piga_mode,
++		.maxlen = sizeof(int),
++		.mode = 0600,
++		.proc_handler = &proc_dointvec,
++	},
++	/*
++	 * The variable that allow to choose between ids and ips mode (prevent interaction).
++	 */
++	{
++		.procname = "piga_ips",
++		.data = &piga_ips,
++		.maxlen = sizeof(int),
++		.mode = 0600,
++		.proc_handler = &proc_dointvec,
++	},
++	/*
++	 * The variable that allow to choose between ips mode permissive (if no reponse return allow) and ips mode enforcing (deny).
++	 */
++	{
++		.procname = "piga_ips_enforcing",
++		.data = &piga_ips_enforcing,
++		.maxlen = sizeof(int),
++		.mode = 0600,
++		.proc_handler = &proc_dointvec,
++	},
++	/*
++	 * The variable that allow to choose betweendeisplaying selinux granting log and not
++	 */
++	{
++		.procname = "piga_deletegranting",
++		.data = &piga_deletegranting,
++		.maxlen = sizeof(int),
++		.mode = 0600,
++		.proc_handler = &proc_dointvec,
++	},
++	{0}
++};
++/*
++ * Declare the directory in /proc where the PIGA variable are.
++ */
++static struct ctl_table my_ctl_dir[] = {
++	{
++		.procname = "piga",
++		.maxlen = 0,
++		.mode = 0555,
++		.child = my_ctl_table,
++	},
++	{0}
++};
++
++static struct ctl_table_header *my_table_header;
++
++/*
++ * Internal identifier for each trace build by the module.
++ */
++static unsigned int ID = 0;
++
++/*
++ * Define the seq_file in proc and which function can be used.
++ */
++static struct file_operations proc_pigaseq_operations = { .open = piga_open, .read = seq_read, .llseek = seq_lseek, .release = seq_release, };
++
++/*
++ * Define the functions that will be used when reading on seq_file.
++ */
++static struct seq_operations piga_seq_ops = { .start = piga_seq_start, .next = piga_seq_next, .stop = piga_seq_stop, .show = piga_seq_show };
++
++/*
++ * Define the list of trace/events.
++ * Each member of the list contains a trace (character) and a pointer on the next trace.
++ */
++struct trace {
++	char *str;
++	struct trace *next;
++};
++
++/*
++ * - debut point to the beginning of the list.
++ * - olddebut point to an old beginning (i.e. the beginning before it start reading and
++ *   move in the list).
++ * - fin point the ending of the list.
++ */
++struct trace *debut;
++struct trace *olddebut;
++struct trace *fin;
++
++/*
++ * eventToSend is set to 1 when new traces are add in the list.
++ * And it is set to 0 when all the traces in the list are read.
++ */
++static int eventToSend = 0;
++
++/*
++ * Create and initialize waiting queue.
++ */
++static DECLARE_WAIT_QUEUE_HEAD( piqueue);
++
++/* Define the maximum size of a single trace */
++#define LOCAL_BUFFER_SIZE 512
++
++/* Define the maximum size of a single AVC vector */
++#define AVC_BUFFER_SIZE 64
++
++/*
++ * Spinlock used to avoid concurrency and dead lock between
++ * reading, adding, deleting in the list of traces.
++ */
++//static spinlock_t xgr_learn_lock = SPIN_LOCK_UNLOCKED;
++
++
++/*
++ * Macro used in piga_control to build the trace
++ */
++
++/* Macro used to check if the size is ok against the max size of a trace */
++#define test_size(actualsize,chaine,rc)	actualsize+=strlen((char *)chaine); if (actualsize >= LOCAL_BUFFER_SIZE) { printk(KERN_INFO "Oops: temporary result buffer full actualsize : %d, LOCAL_BUFFER_SIZE : %d\n",actualsize,LOCAL_BUFFER_SIZE); return rc; }
++
++/*
++ * Copy sizechaine characters of the string chaine to ptr
++ * The result of the memcpy will be return in rc.
++ * actualsize is the size of the whole string point by ptr
++ * actualsize is increase by the number of characters add to ptr i.e. sizechaine
++ */
++#define mem_scp(ptr,chaine, sizechaine, actualsize,rc) if (DEBUG_PIGA) printk(KERN_INFO "PIGA : %s , %d\n", chaine, actualsize); if (chaine == NULL) return rc; else {test_size(actualsize,chaine,rc); memcpy(ptr, chaine, sizechaine*sizeof(char)); ptr+=sizechaine*sizeof(char);}
++
++/*
++ * copy the string chaine to the string ptr.
++ * actualsize is the size of the whole ptr string and will be increase by
++ * the number of character contains in chain.
++ */
++#define mem_cp(ptr,chaine, actualsize,rc) if (chaine == NULL) return rc; else mem_scp(ptr,chaine,strlen((char *)chaine),actualsize,rc)
++
++/*
++ * same function that test_size but to be used in the avc part of the trace building.
++ */
++#define test_size_avc(actualsize,chaine,rc) actualsize+=strlen((char *)chaine); if (actualsize >= LOCAL_BUFFER_SIZE) { printk(KERN_INFO "Oops AVC: temporary result buffer full\n"); return NULL; }
++
++/*
++ * same function that mem_scp but to be used in the avc part of the trace building.
++ */
++#define mem_scp_avc(ptr,chaine, sizechaine, actualsize,rc) if (DEBUG_PIGA) printk(KERN_INFO "PIGA : %s , %d\n", chaine, actualsize); if (chaine == NULL) return NULL; else {test_size_avc(actualsize,chaine,rc); memcpy(ptr, chaine, sizechaine*sizeof(char)); ptr+=sizechaine*sizeof(char);}
++
++/*
++ * same function that mem_cp but to be used in the avc part of the trace building.
++ */
++#define mem_cp_avc(ptr,chaine, actualsize,rc) if (chaine == NULL) return NULL; else mem_scp_avc(ptr,chaine,strlen((char *)chaine),actualsize,rc)
++
++/*
++ * Macro used to add a return at a point loc in the string ptr.
++ */
++#define add_end_of_line(ptr, loc) memcpy((ptr+loc),"\n",sizeof(char)); loc+=sizeof(char);
++
++/*
++ * Convert a string to a int
++ */
++int atoi(const char *ptr) {
++	return (int) simple_strtol(ptr, (char **) NULL, 10);
++}
++
+diff -urN ./linux-2.6.33-hardened-r1/security/selinux/avc.c linux-2.6.33-hardened-piga/security/selinux/avc.c
+--- ./linux-2.6.33-hardened-r1/security/selinux/avc.c	2010-04-27 11:38:36.000000000 +0200
++++ linux-2.6.33-hardened-piga/security/selinux/avc.c	2010-04-09 11:59:49.000000000 +0200
+@@ -33,6 +33,10 @@
+ #include "avc_ss.h"
+ #include "classmap.h"
+ 
++#ifdef CONFIG_SECURITY_PIGA
++#include <linux/piga.h>
++#endif
++
+ #define AVC_CACHE_SLOTS			512
+ #define AVC_DEF_CACHE_THRESHOLD		512
+ #define AVC_CACHE_RECLAIM		16
+@@ -800,9 +804,16 @@
+ {
+ 	struct av_decision avd;
+ 	int rc;
+-
+ 	rc = avc_has_perm_noaudit(ssid, tsid, tclass, requested, 0, &avd);
+-	avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata);
++	#ifdef CONFIG_SECURITY_PIGA
++		if(rc!=-EACCES){
++			rc=piga_control(ssid, tsid, tclass, requested, auditdata,rc,&avd);
++		}else{
++			avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata);
++		}
++	#else
++		avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata);
++	#endif
+ 	return rc;
+ }
+ 
+diff -urN ./linux-2.6.33-hardened-r1/security/selinux/Makefile linux-2.6.33-hardened-piga/security/selinux/Makefile
+--- ./linux-2.6.33-hardened-r1/security/selinux/Makefile	2010-02-24 19:52:17.000000000 +0100
++++ linux-2.6.33-hardened-piga/security/selinux/Makefile	2010-04-08 10:31:11.000000000 +0200
+@@ -18,7 +18,7 @@
+ 
+ selinux-$(CONFIG_NETLABEL) += netlabel.o
+ 
+-EXTRA_CFLAGS += -Isecurity/selinux -Isecurity/selinux/include
++EXTRA_CFLAGS += -Isecurity/selinux -Isecurity/selinux/include -Isecurity/piga
+ 
+ $(obj)/avc.o: $(obj)/flask.h
+ 
