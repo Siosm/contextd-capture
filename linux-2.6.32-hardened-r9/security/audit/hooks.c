@@ -1160,9 +1160,6 @@ static __init int audit_security_init(void)
 	if (register_security(&audit_ops))
 		panic("Audit Security: Unable to register with kernel.\n");
 	
-	if (sys_mknod("/dev/auditsecurity", 700, S_IFIFO))
-		panic("Audit Security: Unable to create fifo.\n");
-
 	return 0;
 }
 
