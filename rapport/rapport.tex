@@ -14,8 +14,9 @@
 % \fancyhead[LO]{\itshape\rightmark}
 % \fancyhead[RE]{\itshape\leftmark}
 \renewcommand{\headrulewidth}{0.5pt}
-\addtolength{\headheight}{0.5pt}
-\renewcommand\footrulewidth{0pt}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3.0cm, right=3.0cm, a4paper]{geometry}
+% \addtolength{\headheight}{0.5pt}
+% \renewcommand\footrulewidth{0pt}
 \fancypagestyle{plain}{
     \fancyhead{}
     \renewcommand{\headrulewidth}{0pt}}
@@ -24,11 +25,10 @@
 \usepackage{amssymb}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black,filecolor=black]{hyperref}
 \usepackage{framed}
-\usepackage{geometry}
 \usepackage[pdftex]{graphicx}
 \usepackage{makeidx}
-\addtolength{\textwidth}{1cm}
-\setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
+% \addtolength{\textwidth}{1cm}
+% \setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
 
 
 % nouvelle commande pour un joli nom
@@ -82,13 +82,11 @@ Ce rapport présente le travail et les résultats obtenus à la fin de la premi�
 
 ~
 
-Le but de ce projet est de remplacer les plugins charger de la communication avec le daemon contextd. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à
-% par application par un ``plugin'' général. L'idée de départ était d'utiliser Systemtap, un outils développé par ... pour ...
+Le but de ce projet est de remplacer les plugins charger de la communication avec le daemon contextd. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels systèmes a connaissance des actions entreprises par les programmes.
 %TODO
 
 ~
 
-Ici, ce sera donc plus qu'un plugin puisque les fonctionnalités telles les demandes d'ouverture de fichier, de connexion réseau, seront ``détectées'' par le ``sous-module'' LSM, puis transmisent à contextd.
 %TODO
 
 ~
@@ -99,19 +97,19 @@ Ici, ce sera donc plus qu'un plugin puisque les fonctionnalités telles les dema
 
 \section{Objectifs}
 
-Il fallait obtenir :
+Pour pouvoir se séparer des plugins/modifications par applications, il est nécessaire de communiquer à contextd certaines informations sur le comportement des programmes. Il faut notamment obtenir :
 \begin{itemize}
-	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes selinux associés
-	\item la liste des connexions ouvertes par le systeme et faire correspondre l'adresse ip avec le nom de domaine
+	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes SELinux associés, si le module SELinux est activé.
+	\item la liste des connexions ouvertes par le systeme, et plus particulièrement les adresses IP de destination, et donc finalement le nom de domaine de destination.\\
 \end{itemize}
 
+De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre sont exécution.
 
 \section{Systemtap}
 
 \subsection{Principe de fonctionnement}
-Nous avons débuter avec Systemtap qui est %TODO
 
-Utilise les KProbes, et les Kretprobes\cite{IBMRBST}.
+Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessite pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables, controler... %TODO.
 
 \begin{figure}[hb]
 	\centering
@@ -127,7 +125,7 @@ De plus, les instructions décrites dans un script écrit pour Systemtap sont ex
 
 %\includegraphics[scale=0.4]{stap_internals.png} TODO
 
-Cela ne correspond donc pas au besoin de sécurité énoncé précédement.
+Cela ne correspond donc pas au besoin énoncé précédement.
 
 
 \newpage
@@ -161,13 +159,13 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
-Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{IBMRBST}.
+%Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{IBMRBST}.
 
-De plus, bien que vérifiée, notre implémentation de l'algorithme de décomposition modulaire peut contenir des bugs. Il faut donc prévoir un outils permettant la vérification des résultats obtenus par cette méthode avec ceux obtenus par le parcours simple de graphes. Il sera donc toujours nécessaire de produire l'intégralité des chemins entre deux noeuds à partir du graphe d'origine pour s'assurer que les graphes réduits sont bien justes.
+%De plus, bien que vérifiée, notre implémentation de l'algorithme de décomposition modulaire peut contenir des bugs. Il faut donc prévoir un outils permettant la vérification des résultats obtenus par cette méthode avec ceux obtenus par le parcours simple de graphes. Il sera donc toujours nécessaire de produire l'intégralité des chemins entre deux noeuds à partir du graphe d'origine pour s'assurer que les graphes réduits sont bien justes.
 
-Il faut noter, au vu des résultats, que la décomposition modulaire de graphes permettra fort probablement non seulement d'accélerer le parcours de graphes une fois l'intégralité des chemins générés mais aussi de réduire la taille finale de l'ensemble formé par tous les chemins.
+%Il faut noter, au vu des résultats, que la décomposition modulaire de graphes permettra fort probablement non seulement d'accélerer le parcours de graphes une fois l'intégralité des chemins générés mais aussi de réduire la taille finale de l'ensemble formé par tous les chemins.
 
-Enfin, notre programme se limite à la décomposition de graphes orientés. Les algorithmes diffèrent de ceux applicables aux graphes non-orientés et leur mise en oeuvre nécessiterai la réécriture d'une grande partie du code pour assurer la rapidité et l'efficacité de notre implémentation.
+%Enfin, notre programme se limite à la décomposition de graphes orientés. Les algorithmes diffèrent de ceux applicables aux graphes non-orientés et leur mise en oeuvre nécessiterai la réécriture d'une grande partie du code pour assurer la rapidité et l'efficacité de notre implémentation.
 
 
 \newpage
@@ -176,7 +174,7 @@ Enfin, notre programme se limite à la décomposition de graphes orientés. Les 
 \addcontentsline{toc}{subsection}{Liens et références}
 \subsection*{Remarques}
 
-Un fichier de configuration est présent avec les sources du kernel 2.6.32-hardened. Il correspond aux options nécessaire à la compilation dans une machine virtuelle Virtualbox. L'option autorisant nos modifications y est aussi activée. Elle est situé dans Security -> SELinux userspace audit.
+%Un fichier de configuration est présent avec les sources du kernel 2.6.32-hardened. Il correspond aux options nécessaire à la compilation dans une machine virtuelle Virtualbox. L'option autorisant nos modifications y est aussi activée. Elle est situé dans Security -> SELinux userspace audit.
 
 \subsection*{Liens et références}
 \begin{thebibliography}{40}
@@ -184,7 +182,7 @@ Un fichier de configuration est présent avec les sources du kernel 2.6.32-harde
 
 \bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
 
-\bibitem{SOURCE} Code source (kernel 2.6.32 hardened et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+\bibitem{SOURCE} Code source (kernel 2.6.32 hardened r9 et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
 \end{thebibliography}
 
 %\printindex
