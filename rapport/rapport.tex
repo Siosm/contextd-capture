@@ -52,13 +52,14 @@
 \setlength{\parskip}{2.4ex}
 
 \title{
-\ligne{\Large}\textbf{Project de deuxième année}\\
-\Large Intégration des plugins contextd grâce aux ``Linux Security Modules''
-% \& Intégration Piga Systrans ?
 \ligne{\Large}
-} %TODO
+\textbf{Audit Security}\\
+\textbf{Project de deuxième année}\\
+\Large Remplacement et généralisation des plugins contextd
+\ligne{\Large}
+}
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
-\date{xx xxx 201x} %TODO
+\date{xx xxx 2011} %TODO
 
 % titre
 \maketitle
@@ -76,12 +77,13 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus après x mois dans le cadre de notre projet d'application de deuxième année.
+Ce rapport présente le travail et les résultats obtenus à la fin de la première période, dans le cadre de notre projet d'application de deuxième année.
 %TODO
 
 ~
 
-Le but de ce projet est de remplacer l'écriture de plugins pour contextd par application par un ``plugin'' général. L'idée de départ était d'utiliser Systemtap, un outils développé par ... pour ...
+Le but de ce projet est de remplacer les plugins charger de la communication avec le daemon contextd. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à
+% par application par un ``plugin'' général. L'idée de départ était d'utiliser Systemtap, un outils développé par ... pour ...
 %TODO
 
 ~
