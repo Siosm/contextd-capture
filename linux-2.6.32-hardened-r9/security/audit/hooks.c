@@ -226,20 +226,20 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	if(likely(auth_started)){
+	//if(likely(auth_started)){
 		pid_t pid= task_pid_nr(current);
-		if(likely(pid != daemon_pid)){
+		//if(likely(pid != daemon_pid)){
 			char * path = dentry_path_(dentry);
 			printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
 			vfree(path);
-		}else{
+	//	}else{
 			return 0;
-		}
-	}else{
+	//	}
+	/*else{
 		char * path = dentry_path_(dentry);
 		printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
 		vfree(path);
-	}
+	}*/
 	return 0;
 }
 EXPORT_SYMBOL_GPL(audit_security_inode_mkdir);
@@ -322,16 +322,15 @@ int audit_security_file_permission(struct file *file, int mask)
 	int answer = -1;
 
 	spin_lock(&ausec_hook_lock);
-	if(likely(auth_started)){
+	if(likely(daemon_pid != 0)){
 		pid_t pid= task_pid_nr(current);
 
 		if(likely(pid != daemon_pid)){
-			struct ausec_info;
 			char * path = dentry_path_(file->f_path.dentry);
 			char * mnt_point = mount_point(file);
 
-			ausec_info.ausec_type = AUSEC_FILE;
-			ausec_info.ausec_file.pid = pid;
+			kernel_ausec_info.ausec_type = AUSEC_FILE;
+			kernel_ausec_info.ausec_file.pid = pid;
 			// TODO Remplir la struct correctement
 			if (path == NULL){
 				return 0;
