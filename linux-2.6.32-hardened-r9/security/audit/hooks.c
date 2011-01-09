@@ -319,41 +319,62 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int audit_security_file_permission(struct file *file, int mask)
 {
+	int answer = -1;
+
+	spin_lock(&ausec_hook_lock);
 	if(likely(auth_started)){
 		pid_t pid= task_pid_nr(current);
+
 		if(likely(pid != daemon_pid)){
+			struct ausec_info;
 			char * path = dentry_path_(file->f_path.dentry);
 			char * mnt_point = mount_point(file);
 
+			ausec_info.ausec_type = AUSEC_FILE;
+			ausec_info.ausec_file.pid = pid;
+			// TODO Remplir la struct correctement
 			if (path == NULL){
 				return 0;
 			}
+			//ausec_info.ausec_file.full_path ... a remplir
 			if(mnt_point != NULL) {
 			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
 			} else {
 			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
 			}
+
+			spin_lock(&ausec_answer_lock);
+			spin_unlock(&ausec_io_lock);
+			spin_lock(&ausec_answer_lock);
+			answer = ausec_answer;
+			spin_unlock(&ausec_answer_lock);
 			vfree(path);
+			spin_lock(&ausec_io_lock);
+			spin_unlock(&ausec_hook_lock);
+			return answer;
+		}/* else {
+			spin_unlock(&ausec_hook_lock);
 			return 0;
-		} else {
-			return 0;
-		}
+		}*/
 	} else {
 		char * path = dentry_path_(file->f_path.dentry);
 		char * mnt_point = mount_point(file);
 		pid_t pid= task_pid_nr(current);
 
 		if (path == NULL){
+			spin_unlock(&ausec_hook_lock);
 			return 0;
 		}
 		if(mnt_point != NULL) {
-			printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
+			printk(KERN_INFO "AuSecu: file access: %s%s, pid: %d, execname: %s, mask: %d", mnt_point, path, pid, current->comm, mask);
 		} else {
-			printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
+			printk(KERN_INFO "AuSecu: file access: %s,pid: %d, execname: %s, mask: %d", path, pid, current->comm, mask);
 		}
 		vfree(path);
-		return 0;
+		/*spin_unlock(&ausec_hook_lock);
+		return 0;*/
 	}
+	spin_unlock(&ausec_hook_lock);
 	return 0;
 }
 
