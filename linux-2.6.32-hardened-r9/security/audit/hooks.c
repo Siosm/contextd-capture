@@ -329,13 +329,13 @@ int audit_security_file_permission(struct file *file, int mask)
 			char * path = dentry_path_(file->f_path.dentry);
 			char * mnt_point = mount_point(file);
 
-			kernel_ausec_info.ausec_type = AUSEC_FILE;
-			kernel_ausec_info.ausec_file.pid = pid;
+			kernel_ausec_info.type = AUSEC_FILE;
+			kernel_ausec_info.ausec_struct.file.pid = pid;
 			// TODO Remplir la struct correctement
 			if (path == NULL){
 				return 0;
 			}
-			//ausec_info.ausec_file.full_path ... a remplir
+			//ausec_info.file.full_path ... a remplir
 			if(mnt_point != NULL) {
 			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
 			} else {
