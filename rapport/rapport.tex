@@ -55,11 +55,11 @@
 \ligne{\Large}
 \textbf{Audit Security}\\
 \textbf{Project de deuxième année}\\
-\Large Remplacement et généralisation des plugins contextd
+\Large Généralisation des plugins de communication avec contextd
 \ligne{\Large}
 }
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
-\date{xx xxx 2011} %TODO
+\date{17,18,19,20,21 \textsc{janvier} 2011} %TODO
 
 % titre
 \maketitle
@@ -155,9 +155,30 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 
 \newpage
 
+\subsection{Prochain développements}
+
+Création de 3 nouvels appels systèmes pour répondre au besoins de communications entre le noyau et contextd.
+
+%TODO Schéma de principe de communication avec le noyau, le daemon, les appels systèmes, contextd.
+
+Pour s'assurer que les communications ne vont pas se mélanger mais bien se dérouler dans l'ordre, nous avons utilisés des verrous au niveau du noyau. Il a donc était nécessaire de vérifier que la mise en place de ces verrous n'entrainait pas d'état bloquant indéfiniement.
+
+% \begin{figure}[hb]
+% 	\centering
+% 	\includegraphics[scale=0.45]{graphe_verrous.png}
+% 	\caption{Graphe des états des verrous au niveau du noyau}
+% \end{figure}
+%TODO Graphe d'états permettant d'assurer que les verrous dans les appels systèmes n'entrainent pas d'état bloquant sans sortie au niveau du noyau.
+
+\newpage
+
 \clearemptydoublepage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
+
+
+
+Le retard sur la partie implémentation noyau est principalement dûe à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant et d'implémenter les appels systèmes, ...
 
 %Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{IBMRBST}.
 
@@ -170,9 +191,9 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 
 \newpage
 \addcontentsline{toc}{section}{Annexes}
-\addcontentsline{toc}{subsection}{Remarques}
+% \addcontentsline{toc}{subsection}{Remarques}
 \addcontentsline{toc}{subsection}{Liens et références}
-\subsection*{Remarques}
+% \subsection*{Remarques}
 
 %Un fichier de configuration est présent avec les sources du kernel 2.6.32-hardened. Il correspond aux options nécessaire à la compilation dans une machine virtuelle Virtualbox. L'option autorisant nos modifications y est aussi activée. Elle est situé dans Security -> SELinux userspace audit.
 
