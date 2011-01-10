@@ -2,8 +2,6 @@
  * Defines structs and static values for system calls
  **/
 
-#ifndef __AUDIT_SECURITY_HOOKS_H__
-#define __AUDIT_SECURITY_HOOKS_H__
 
 #include <linux/pid.h>
 #include <linux/limits.h>
@@ -14,14 +12,14 @@ enum ausec_type {AUSEC_FILE, AUSEC_SOCKET};
 
 struct ausec_file {
 	pid_t		pid;
-	char *		full_path;
-	char *		execname;
-	char *		sc;
+	char[full_path_len] full_path;
+	char[1024]	execname;
+	char[1024]	sc;
 };
 
 struct ausec_socket {
 	pid_t		pid;
-	char * 		ip_dest;
+	char[1024]	ip_dest;
 	int			port;
 };
 
@@ -29,8 +27,8 @@ struct ausec_info {
 	enum		ausec_type type;
 	union
 	{
-		struct ausec_file file;
-		struct ausec_socket socket;
+		struct	ausec_file;
+		struct	ausec_socket;
 	} ausec_struct;
 };
 
@@ -44,6 +42,4 @@ static spinlock_t	ausec_answer_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_hook_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_io_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_auth_lock = SPIN_LOCK_UNLOCKED;
-
-#endif
 
