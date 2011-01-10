@@ -52,8 +52,6 @@
 #include <linux/posix-timers.h>
 
 #include "hooks-func.h"
-#include "hooks.h"
-
 
 int audit_security_ptrace_access_check(struct task_struct *child, unsigned int mode)
 {
@@ -226,20 +224,9 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	if(likely(auth_started)){
-		pid_t pid= task_pid_nr(current);
-		if(likely(pid != daemon_pid)){
-			char * path = dentry_path_(dentry);
-			printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
-			vfree(path);
-		}else{
-			return 0;
-		}
-	}else{
-		char * path = dentry_path_(dentry);
-		printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
-		vfree(path);
-	}
+	char * path = dentry_path_(dentry);
+	printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
+	vfree(path);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(audit_security_inode_mkdir);
@@ -319,41 +306,20 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int audit_security_file_permission(struct file *file, int mask)
 {
-	if(likely(auth_started)){
-		pid_t pid= task_pid_nr(current);
-		if(likely(pid != daemon_pid)){
-			char * path = dentry_path_(file->f_path.dentry);
-			char * mnt_point = mount_point(file);
-
-			if (path == NULL){
-				return 0;
-			}
-			if(mnt_point != NULL) {
-			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
-			} else {
-			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
-			}
-			vfree(path);
-			return 0;
-		} else {
-			return 0;
-		}
-	} else {
-		char * path = dentry_path_(file->f_path.dentry);
-		char * mnt_point = mount_point(file);
-		pid_t pid= task_pid_nr(current);
-
-		if (path == NULL){
-			return 0;
-		}
-		if(mnt_point != NULL) {
-			printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
-		} else {
-			printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
-		}
-		vfree(path);
+	char * path = dentry_path_(file->f_path.dentry);
+	char * mnt_point = mount_point(file);
+	pid_t pid= task_pid_nr(current); 	
+	
+	if (path == NULL) {
 		return 0;
 	}
+
+	if(mnt_point != NULL) {
+	//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
+	} else {
+	//	printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
+	}
+	vfree(path);
 	return 0;
 }
 
@@ -1191,11 +1157,8 @@ static __init int audit_security_init(void)
 
 	printk(KERN_INFO "Audit Security:  Initializing.\n");
 
-	if (register_security(&audit_ops)){
+	if (register_security(&audit_ops))
 		panic("Audit Security: Unable to register with kernel.\n");
-	}
-
-	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
 	
 	return 0;
 }
