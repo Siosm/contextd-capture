@@ -330,8 +330,9 @@ int audit_security_file_permission(struct file *file, int mask)
 			char * path = dentry_path_(file->f_path.dentry);
 			char * mnt_point = mount_point(file);
 
-			kernel_ausec_info.type = AUSEC_FILE;
-			kernel_ausec_info.pid = pid;
+			k_ausec_info.type = AUSEC_FILE;
+			k_ausec_info.pid = pid;
+			dentry_path_(file->f_path.dentry, k_ausec_info.ausec_struct.file.fullpath_filename);
 			//kernel_ausec_info.execname
 			// TODO Remplir la struct correctement
 			if (path == NULL){

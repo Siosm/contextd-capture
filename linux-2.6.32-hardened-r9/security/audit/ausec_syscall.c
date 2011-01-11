@@ -49,7 +49,7 @@ asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 	// copier les donnees dans le pointeur passe en arg
 	// TODO : faire les tests sur le pointeur donne par le processus ?
 	if(likely(user_as_i != NULL)){
-		if(likely(copy_to_user(user_as_i, &kernel_ausec_info, ausec_info_len) == 0)){
+		if(likely(copy_to_user(user_as_i, &k_ausec_info, ausec_info_len) == 0)){
 			return 0;
 		}
 	}

@@ -14,7 +14,7 @@ enum ausec_type {AUSEC_FILE, AUSEC_SOCKET};
 
 struct ausec_file {
 	char 		filename[NAME_MAX + 1];
-	char		fullpath_filename[PATH_MAX + 1];
+	char		fullpath_filename[PATH_MAX + 1]; // Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
 };
 
 struct ausec_socket {
@@ -40,7 +40,7 @@ struct ausec_info {
 
 
 static pid_t		daemon_pid = -1;
-static struct ausec_info	kernel_ausec_info;
+static struct ausec_info	k_ausec_info;
 static const int	ausec_info_len = sizeof(struct ausec_info);
 static int			ausec_answer;
 

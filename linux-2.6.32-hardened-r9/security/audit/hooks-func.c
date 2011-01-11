@@ -54,7 +54,7 @@
 #include "hooks-func.h"
 
 
-char * dentry_path_(struct dentry *dentry)
+int dentry_path_(struct dentry *dentry, char * fullpath)
 {
 	struct dentry *parent = dentry;
 	char *path = NULL;
@@ -80,7 +80,7 @@ char * dentry_path_(struct dentry *dentry)
 	vfree(path_tmp);
 	path[n] = '\0';
 
-	return path;
+	return 0;
 }
 
 
