@@ -157,7 +157,7 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 
 \subsection{Prochain développements}
 
-Création de 3 nouvels appels systèmes pour répondre au besoins de communications entre le noyau et contextd.
+Création de 3 nouvels appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Pourquoi un appel système plutôt qu'un device ou une fifo? il permet de remplir une structure où nous stockons toutes les informations nécessaires à contextd. Cela nous évite ansi de parser des informations et donc de gagner du temps, resource essentielle vu que chaque appel système ralonge la durée entre la demande d'une application et la réponse finale du noyau.
 
 %TODO Schéma de principe de communication avec le noyau, le daemon, les appels systèmes, contextd.
 
