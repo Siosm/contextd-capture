@@ -39,14 +39,14 @@ struct ausec_info {
 };
 
 
-static pid_t		daemon_pid = 0;
+static pid_t		daemon_pid = -1;
 static struct ausec_info	kernel_ausec_info;
 static const int	ausec_info_len = sizeof(struct ausec_info);
 static int			ausec_answer;
 
 static spinlock_t	ausec_answer_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_hook_lock = SPIN_LOCK_UNLOCKED;
-static spinlock_t	ausec_io_lock = SPIN_LOCK_UNLOCKED;
+static spinlock_t	ausec_io_lock = SPIN_LOCK_LOCKED;
 static spinlock_t	ausec_auth_lock = SPIN_LOCK_UNLOCKED;
 
 #endif
