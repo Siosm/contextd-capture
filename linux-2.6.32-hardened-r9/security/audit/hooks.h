@@ -39,7 +39,7 @@ struct ausec_info {
 };
 
 
-static pid_t		daemon_pid = 0;
+static pid_t		daemon_pid = -1;
 static struct ausec_info	kernel_ausec_info;
 static const int	ausec_info_len = sizeof(struct ausec_info);
 static int			ausec_answer;

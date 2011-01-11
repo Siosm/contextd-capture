@@ -321,8 +321,8 @@ int audit_security_file_permission(struct file *file, int mask)
 {
 	int answer = -1;
 
-	spin_lock(&ausec_hook_lock);
-	if(likely(daemon_pid != 0)){
+	if(likely(daemon_pid != -1)){
+		spin_lock(&ausec_hook_lock);
 		pid_t pid= task_pid_nr(current);
 
 		if(likely(pid != daemon_pid)){
@@ -349,20 +349,16 @@ int audit_security_file_permission(struct file *file, int mask)
 			answer = ausec_answer;
 			spin_unlock(&ausec_answer_lock);
 			vfree(path);
-			spin_lock(&ausec_io_lock);
 			spin_unlock(&ausec_hook_lock);
 			return answer;
-		}/* else {
-			spin_unlock(&ausec_hook_lock);
-			return 0;
-		}*/
+		}
+		spin_unlock(&ausec_hook_lock);
 	} else {
 		char * path = dentry_path_(file->f_path.dentry);
 		char * mnt_point = mount_point(file);
 		pid_t pid= task_pid_nr(current);
 
 		if (path == NULL){
-			spin_unlock(&ausec_hook_lock);
 			return 0;
 		}
 		if(mnt_point != NULL) {
@@ -371,10 +367,8 @@ int audit_security_file_permission(struct file *file, int mask)
 			printk(KERN_INFO "AuSecu: file access: %s,pid: %d, execname: %s, mask: %d", path, pid, current->comm, mask);
 		}
 		vfree(path);
-		/*spin_unlock(&ausec_hook_lock);
-		return 0;*/
 	}
-	spin_unlock(&ausec_hook_lock);
+	
 	return 0;
 }
 
@@ -1216,6 +1210,12 @@ static __init int audit_security_init(void)
 		panic("Audit Security: Unable to register with kernel.\n");
 	}
 
+	// Vérifie que l'on peut locker l'IO_lock
+	if(!spin_trylock(&ausec_io_lock)){
+		panic("Audit Security: Unable to lock ausec_io_lock.\n");
+	}
+	spin_lock(&ausec_io_lock);
+	
 	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
 	
 	return 0;
