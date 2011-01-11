@@ -320,10 +320,11 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 int audit_security_file_permission(struct file *file, int mask)
 {
 	int answer = -1;
+	pid_t pid = 0;
 
 	if(likely(daemon_pid != -1)){
 		spin_lock(&ausec_hook_lock);
-		pid_t pid= task_pid_nr(current);
+		pid= task_pid_nr(current);
 
 		if(likely(pid != daemon_pid)){
 			char * path = dentry_path_(file->f_path.dentry);
