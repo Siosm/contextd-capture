@@ -9,4 +9,6 @@
 *.tex.backup
 *.toc
 *.dvi
+*.nav
+*.snm
 
