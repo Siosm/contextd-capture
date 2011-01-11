@@ -1210,8 +1210,8 @@ static __init int audit_security_init(void)
 		panic("Audit Security: Unable to register with kernel.\n");
 	}
 
-	// Vérifie que l'on peut locker l'IO_lock
-	if(!spin_trylock(&ausec_io_lock)){
+	// Vérifie que l'on peut locker l'io_lock
+	if(unlikely(!spin_trylock(&ausec_io_lock))){
 		panic("Audit Security: Unable to lock ausec_io_lock.\n");
 	}
 	

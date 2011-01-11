@@ -4,12 +4,14 @@
  * ausec_wait(struct* ausec_info) : to get the next item to check
  * ausec_answer(int is_operation_allowed) : to send answer
  *
- * Pour ecrire un hook, il faut d'abord prendre le hook_lock, ecrire la
- * struct, prendre le answer_lock, lacher le io_lock,
- * et attendre le answer_lock, lire la reponse, lacher answer_lock, puis
- * lacher le hook_lock
+ * TODO: Translate this in english
+ * Pour ecrire un hook, il faut commencer par rendre le hook_lock, on verifie
+ * que le io_lock est pris, puis on ecrit dans la structure, puis on prend
+ * le answer_lock, on lache le io_lock, et on prend (bloquant) le answer_lock,
+ * lorsque l'on est debloque, on peut lire la reponse, lacher answer_lock,
+ * puis lacher le hook_lock
  *
- * les hooks ne doivent pas prendre le lock_auth, car on suppose que le daemon
+ * Les hooks ne doivent pas prendre le lock_auth, car on suppose que le daemon
  * est lance avant tous les autres programmes.
  **/
 
