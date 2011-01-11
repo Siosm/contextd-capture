@@ -46,7 +46,7 @@ static int			ausec_answer;
 
 static spinlock_t	ausec_answer_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_hook_lock = SPIN_LOCK_UNLOCKED;
-static spinlock_t	ausec_io_lock = SPIN_LOCK_LOCKED;
+static spinlock_t	ausec_io_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_auth_lock = SPIN_LOCK_UNLOCKED;
 
 #endif
