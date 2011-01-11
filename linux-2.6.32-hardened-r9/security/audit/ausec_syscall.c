@@ -45,16 +45,17 @@ asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 	// regarder s'il y a qqchose de pret a lire, sinon attendre.
 	spin_lock(&ausec_io_lock);
 	// copier les donnees dans le pointeur passe en arg
-	// TODO : faire les tests sur le pointeur donne par le processus
-	if(copy_to_user(user_as_i, &kernel_ausec_info, ausec_info_len)){
-		// si cela ne marche pas, on interdit l'operation et on relache tout
-		spin_unlock(&ausec_io_lock);
-		ausec_answer = false;
-		spin_unlock(&ausec_answer_lock);
-		return -EFAULT;
+	// TODO : faire les tests sur le pointeur donne par le processus ?
+	if(likely(user_as_i != NULL)){
+		if(likely(copy_to_user(user_as_i, &kernel_ausec_info, ausec_info_len) == 0)){
+			return 0;
+		}
 	}
-
-	return 0;
+	// si cela ne marche pas, on interdit l'operation et on relache tout
+	spin_unlock(&ausec_io_lock);
+	ausec_answer = false;
+	spin_unlock(&ausec_answer_lock);
+	return -EFAULT;
 }
 
 
@@ -71,4 +72,3 @@ asmlinkage long sys_ausec_answer(int answer)
 
 	return 0;
 }
-
