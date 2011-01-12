@@ -58,19 +58,19 @@ int dentry_path_(struct file *file, char * fullpath)
 {
 	struct dentry *parent = file->f_path.dentry;
 	char * mnt_point = file->f_path.mnt->mnt_devname;
-	char *path = fullpath;
-	char *path_tmp = NULL;
+	//char *path = fullpath;
+	//char *path_tmp = NULL;
 	int nb = 0, n = 0;
 	
-	path[n] = '\0';
+	fullpath[n] = '\0';
 	
 	while(!IS_ROOT(parent)){
 		nb = strlen(parent->d_name.name);
 		//path_tmp = path;
 		//path = vmalloc(n + nb + 1);
-		memcpy(path + nb + 1, path, n+1);
-		memcpy(path + 1, parent->d_name.name, nb);
-		*path = '/';
+		memcpy(fullpath + nb + 1, fullpath, n+1);
+		memcpy(fullpath + 1, parent->d_name.name, nb);
+		*fullpath = '/';
 		//vfree(path_tmp);
 		n += nb + 1;
 		nb = 0;
@@ -83,14 +83,15 @@ int dentry_path_(struct file *file, char * fullpath)
 	//vfree(path_tmp);
 	if (strcmp("/dev/root", mnt_point)) {
 		nb = strlen(mnt_point);
-		memcpy(path + nb, path, n+1);
-		memcpy(path, mnt_point, nb);
+		memcpy(fullpath + nb, fullpath, n+1);
+		memcpy(fullpath, mnt_point, nb);
 	}
 
 	return 0;
 }
 
 
+/*
 char * mount_point (struct file * file){
 	char * mnt_point = file->f_path.mnt->mnt_devname;
 
@@ -99,7 +100,7 @@ char * mount_point (struct file * file){
 	}
 
 	return mnt_point;
-}
+}*/
 
 
 /*

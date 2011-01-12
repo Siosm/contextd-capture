@@ -229,16 +229,17 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
+	/*
 	//if(likely(auth_started)){
-		pid_t pid= task_pid_nr(current);
+		//pid_t pid= task_pid_nr(current);
 		//if(likely(pid != daemon_pid)){
-			char * path = dentry_path_(dentry);
+			//char * path = dentry_path_(dentry);
 			printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
 			vfree(path);
 	//	}else{
 			return 0;
 	//	}
-	/*else{
+	else{
 		char * path = dentry_path_(dentry);
 		printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
 		vfree(path);
@@ -328,7 +329,7 @@ int audit_security_file_permission(struct file *file, int mask)
 	k_ausec_info.type = AUSEC_FILE;
 	k_ausec_info.pid = pid;
 	dentry_path_(file, k_ausec_info.ausec_struct.file.fullpath_filename);
-	strncpy(k_ausec_info.ausec_struct.file.filename, file->d_name.name, NAME_MAX);
+	strncpy(k_ausec_info.ausec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
 	strncpy(k_ausec_info.execname, current->comm, TASK_COMM_LEN);
 
 	if(likely(daemon_pid != -1)){
@@ -338,7 +339,7 @@ int audit_security_file_permission(struct file *file, int mask)
 			//printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
 			spin_unlock(&ausec_question_lock);
 			spin_lock(&ausec_answer_lock);
-			(ausec_answer == 0)? answer = 1: ausec_answer = 0;
+			answer = (ausec_answer == 0);
 			spin_unlock(&ausec_hook_lock);
 			return answer;
 		}
@@ -1189,7 +1190,7 @@ static __init int audit_security_init(void)
 	}
 
 	// Vérifie que l'on peut locker l'io_lock
-	if(unlikely((!spin_trylock(&ausec_question_lock)) && (!spin_trylock(&ausec_answer_lock)){
+	if(unlikely((!spin_trylock(&ausec_question_lock)) && (!spin_trylock(&ausec_answer_lock)))){
 		panic("Audit Security: Unable to lock ausec_question_lock or ausec_io_lock.\n");
 	}
 	

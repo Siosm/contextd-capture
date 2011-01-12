@@ -1,2 +1,2 @@
 all:
-	gcc main.cpp -o daemon
+	gcc main.c -o daemon
