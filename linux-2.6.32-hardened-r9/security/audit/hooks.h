@@ -44,9 +44,9 @@ static struct ausec_info	k_ausec_info;
 static const int	ausec_info_len = sizeof(struct ausec_info);
 static int			ausec_answer;
 
-static spinlock_t	ausec_answer_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_hook_lock = SPIN_LOCK_UNLOCKED;
-static spinlock_t	ausec_io_lock = SPIN_LOCK_UNLOCKED;
+static spinlock_t	ausec_question_lock = SPIN_LOCK_UNLOCKED;
+static spinlock_t	ausec_answer_lock = SPIN_LOCK_UNLOCKED;
 static spinlock_t	ausec_auth_lock = SPIN_LOCK_UNLOCKED;
 
 #endif

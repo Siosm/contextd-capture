@@ -79,6 +79,10 @@ int dentry_path_(struct dentry *dentry, char * fullpath)
 	memcpy(path, path_tmp, n);
 	vfree(path_tmp);
 	path[n] = '\0';
+	//if(strncpy()){
+	//	return -1;
+	//}		
+	vfree(path);
 
 	return 0;
 }
