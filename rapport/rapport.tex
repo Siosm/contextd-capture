@@ -77,21 +77,17 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus à la fin de la première période, dans le cadre de notre projet d'application de deuxième année.
+Ce rapport présente le travail et les résultats obtenus à la fin du premier semestre, dans le cadre de notre projet d'application de deuxième année.
 %TODO
 
 ~
 
-Le but de ce projet est de remplacer les plugins charger de la communication avec le daemon contextd. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels systèmes a connaissance des actions entreprises par les programmes.
-%TODO
+Le but de ce projet est de généraliser la communication entre les différentes applications exécutées sur PIGA-OS et le daemon contextd. 
+Ce daemon recueil auprès de celles-ci les différentes opérations qu'elles effectuent (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un contexte.
+Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging propre à chaque application. Le but de ce projet est donc de s'affranchir de l'utilisation relativement contraignante de ces plugings (il fallait en developper un pour chaque application, et pour chaque version de celles-ci). 
 
-~
+L'idée retenue est de déplacer les actions effectuées par le pluging au niveau du noyau par l'intermédiaire des appels systèmes.
 
-%TODO
-
-~
-
-%TODO
 
 \newpage
 
@@ -103,14 +99,13 @@ Pour pouvoir se séparer des plugins/modifications par applications, il est néc
 	\item la liste des connexions ouvertes par le systeme, et plus particulièrement les adresses IP de destination, et donc finalement le nom de domaine de destination.\\
 \end{itemize}
 
-De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre sont exécution.
+De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre son exécution.
 
 \section{Systemtap}
 
 \subsection{Principe de fonctionnement}
 
-Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessite pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables, controler... %TODO.
-
+Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessite pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appel système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
 \begin{figure}[hb]
 	\centering
 	\includegraphics[scale=0.4]{kretprob.png}
@@ -119,13 +114,15 @@ Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau g
 
 \subsection{Résultats obtenus}
 
-Nous avons partiellement atteint ces critères mais nous nous sommes rendu compte d'une particularité de l'implémentation de Systemtap qui ne corespondait pas avec notre besoin final. Nous nous sommes heurté à la simplicité de Systemtap qui vise un apprentissage rapide pour un usage ciblé.
+Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il ne nous est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels systèmes avant de les effectués.
 
-De plus, les instructions décrites dans un script écrit pour Systemtap sont exécutées après que le code de l'appel system correspondant ai été exécuté.
+De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins.
+
+Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il ne nous était impossible alors de récupérer le chemin complet du fichier.
+
+Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, Jérémy Briffaut, de nous orienter vers l'utilisation d'un module LSM.
 
 %\includegraphics[scale=0.4]{stap_internals.png} TODO
-
-Cela ne correspond donc pas au besoin énoncé précédement.
 
 
 \newpage
@@ -133,9 +130,15 @@ Cela ne correspond donc pas au besoin énoncé précédement.
 
 \section{Linux Security Modules}
 
-Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers les ``Linux Security Modules''.
+
 
 \subsection{Principe de fonctionnement}
+
+Les modules LSM sont au noyau ce que iptables est au réseau. 
+
+Le principe de fonctionnement est simple. Le module LSM est chargé dans le noyau Linux au démarrage. Une fois chargé, il se place entre l'appel système et l'exécution de celui-ci par l'intermédiaire de hooks. A chaque appel système est associé un hook que l'on peut considéré comme une fonction. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il renvoie 0 pour autoriser l'exécution de l'appel système. Toute valeur différente de 0 bloque l'appel système (et possiblement le programme à l'origine de l'appel).
+
+
 
 \begin{figure}[hb]
 	\centering
@@ -149,9 +152,38 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 	\caption{Permissive LSM hook. This hook allows the security policy to override a DAC restriction \cite{LSMINTRO}}
 \end{figure}
 
+L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de chargé dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
+
+Pour les besoins du développement, nous avons dû donc désactiver SELinux.
+
 \newpage
 
-\subsection{Résultats obtenus}
+\subsection{Ce qui a été réalisé}
+
+Nous avons donc développé un module LSM qui "hook" tous les appels systèmes. Par défaut, ces hooks sont "transparents" à l'excéption du hook "file permission" sur lequel nous travaillons. Par la suite, il faudra convenir des appels systèmes surlesquels il est intéressant d'intervenir.
+
+Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en ajoutant un choix dans menuconfig.
+
+Ensuite, nous avons commencer à chercher les différentes informations nécessaires à contextd pour son fonctionnement concernant le hook "file permission" à savoir :
+	\begin{itemize}
+		\item[-] le PID
+		\item[-] l'execname
+		\item[-] le chemin complet du fichier accédé (lecture/écriture/exécution)
+		\item[-] ...
+	\end{itemize}
+
+Nous avons également remarqué que le hook "socket bind" permet de récupérer des informations avant qu'une socket soit créée comme :
+	\begin{itemize}
+		\item[-] le PID
+		\item[-] l'execname
+		\item[-] la structure de la socket
+		\item[-] L'adresse de connexion
+		\item[-] ...
+	\end{itemize}
+
+La principal difficulté de cette étape est de localisé dans quels fichiers ses informations sont localisés dans l'ensemble du code source du noyau Linux.
+
+
 
 \newpage
 
