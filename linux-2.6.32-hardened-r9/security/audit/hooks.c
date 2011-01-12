@@ -329,8 +329,8 @@ int audit_security_file_permission(struct file *file, int mask)
 		if(likely(pid != daemon_pid)){
 			k_ausec_info.type = AUSEC_FILE;
 			k_ausec_info.pid = pid;
-			dentry_path_(file->f_path.dentry, k_ausec_info.ausec_struct.file.fullpath_filename);
-			strncpy(__exec_name__, k_ausec_info.execname);
+			dentry_path_(file, k_ausec_info.ausec_struct.file.fullpath_filename);
+			//strncpy(__exec_name__, k_ausec_info.execname);
 			//kernel_ausec_info.execname
 			// TODO Remplir la struct correctement
 			//ausec_info.file.full_path ... a remplir

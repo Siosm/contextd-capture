@@ -14,7 +14,7 @@ enum ausec_type {AUSEC_FILE, AUSEC_SOCKET};
 
 struct ausec_file {
 	char 		filename[NAME_MAX + 1];
-	char		fullpath_filename[PATH_MAX + 1]; // Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
+	char		fullpath_filename[PATH_MAX + NAME_MAX + 1]; // Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
 };
 
 struct ausec_socket {
@@ -24,8 +24,8 @@ struct ausec_socket {
 
 struct ausec_info {
 	pid_t		pid;
-	char		execname[NAME_MAX + 1];
-	char		fullpath_execname[PATH_MAX + 1];
+	char		execname[NAME_MAX];
+	char		fullpath_execname[PATH_MAX];
 	/**
 	 * Si l'on veut prendre en compte les contextes de sécurité SELinux, il
 	 * suffit de les rajouter dans cette structure : char * sc;
