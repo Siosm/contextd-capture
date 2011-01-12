@@ -1,2 +1,2 @@
 all:
-	gcc main.c -o daemon
+	gcc main.c syscall.c -o daemon

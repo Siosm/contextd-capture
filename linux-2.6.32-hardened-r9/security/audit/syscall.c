@@ -20,21 +20,24 @@
 #include <linux/pid.h>
 #include <asm-generic/uaccess.h>
 
-#include "hooks.h"
 
-
-asmlinkage long sys_ausec_auth(void)
+asmlinkage long sys_ausec_auth(int state)
 {
-	spin_lock(&ausec_auth_lock);
-	if(daemon_pid == -1){
-		daemon_pid = task_pid_nr(current);
-		if(daemon_pid <= 0){
-			return -1;
+	down_interruptible(ausec_auth_lock);
+	if(state){
+		if(daemon_pid == -1){
+			daemon_pid = task_pid_nr(current);
+			up(ausec_auth_lock);
+			return 0;
 		}
-		spin_unlock(&ausec_auth_lock);
-		return 0;
+	} else {
+		if(daemon_pid == task_pid_nr(current)){
+			daemon_pid = -1;
+			up(ausec_auth_lock);
+			return 0;
+		}
 	}
-	spin_unlock(&ausec_auth_lock);
+	up(ausec_auth_lock);
 
 	return -1;
 }
@@ -42,37 +45,37 @@ asmlinkage long sys_ausec_auth(void)
 
 asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 {
-	spin_lock(&ausec_auth_lock);
+	down_interruptible(ausec_auth_lock);
 	if(daemon_pid != task_pid_nr(current)){
-		spin_unlock(&ausec_auth_lock);
+		up(ausec_auth_lock);
 		return -1;
 	}
-	spin_lock(&ausec_question_lock);
+	down_interruptible(ausec_question_lock);
 	// TODO : faire les tests sur le pointeur donne par le processus ?
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, &k_ausec_info, ausec_info_len) == 0)){
-			spin_unlock(&ausec_auth_lock);
+			up(&ausec_auth_lock);
 			return 0;
 		}
 	}
 	// si erreur, on refuse l'operation
 	ausec_answer = false;
-	spin_unlock(&ausec_answer_lock);
-	spin_unlock(&ausec_auth_lock);
+	up(&ausec_answer_lock);
+	up(&ausec_auth_lock);
 	return -EFAULT;
 }
 
 
 asmlinkage long sys_ausec_answer(int answer)
 {
-	spin_lock(&ausec_auth_lock);
+	down_interruptible(ausec_auth_lock);
 	if(daemon_pid != task_pid_nr(current)){
-		spin_unlock(&ausec_auth_lock);
+		up(&ausec_auth_lock);
 		return -1;
 	}
 	ausec_answer = answer;
-	spin_unlock(&ausec_answer_lock);
-	spin_unlock(&ausec_auth_lock);
+	up(&ausec_answer_lock);
+	up(&ausec_auth_lock);
 
 	return 0;
 }
