@@ -54,6 +54,45 @@
 #include "hooks-func.h"
 
 
+int calculate_path(struct dentry *dentry, char *path, size_t len)
+{
+	int pos = 0, size = 0;
+
+	if (IS_ROOT(dentry)) {
+		return 0;
+	} else {
+		pos = calculate_path(dentry->d_parent, path, len)
+		
+		if (pos != -1 ) {
+			size = strlen(dentry->d_name.name);
+
+			if (pos + size + 1 < len) {
+				path[pos] = '/';
+				strncpy(path + pos + 1, dentry->d_name.name, size);
+				return pos + size + 1;
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
+} 
+
+int file_path(struct file *file, char *path) 
+{
+	char * mnt_point = file->f_path.mnt->mnt_devname;
+	int n = 0;
+	
+	if (strcmp("/dev/root", mnt_point)) {
+		n = strlen(mnt_point); 
+		strncpy(path, mnt_point, n);
+	}
+		
+	return calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
+}
+
+/*
 int dentry_path_(struct file *file, char * fullpath)
 {
 	struct dentry *parent = file->f_path.dentry;
@@ -89,7 +128,7 @@ int dentry_path_(struct file *file, char * fullpath)
 
 	return 0;
 }
-
+*/
 
 /*
 char * mount_point (struct file * file){
