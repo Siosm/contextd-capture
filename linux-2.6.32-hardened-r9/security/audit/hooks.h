@@ -7,6 +7,7 @@
 
 #include <linux/pid.h>
 #include <linux/limits.h>
+#include <linux/sched.h>
 #include <linux/spinlock.h>
 
 static int full_path_len = NAME_MAX + PATH_MAX;
@@ -24,8 +25,9 @@ struct ausec_socket {
 
 struct ausec_info {
 	pid_t		pid;
-	char		execname[NAME_MAX];
+	char		execname[TASK_COMM_LEN];
 	char		fullpath_execname[PATH_MAX];
+	int			mask;
 	/**
 	 * Si l'on veut prendre en compte les contextes de sécurité SELinux, il
 	 * suffit de les rajouter dans cette structure : char * sc;
