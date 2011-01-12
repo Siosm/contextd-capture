@@ -54,31 +54,38 @@
 #include "hooks-func.h"
 
 
-int dentry_path_(struct dentry *dentry, char * fullpath)
+int dentry_path_(struct file *file, char * fullpath)
 {
-	struct dentry *parent = dentry;
-	char *path = NULL;
+	struct dentry *parent = file->f_path.dentry;
+	char * mnt_point = file->f_path.mnt->mnt_devname;
+	char *path = fullpath;
 	char *path_tmp = NULL;
 	int nb = 0, n = 0;
-
+	
+	path[n] = '\0';
+	
 	while(!IS_ROOT(parent)){
 		nb = strlen(parent->d_name.name);
-		path_tmp = path;
-		path = vmalloc(n + nb + 1);
-		memcpy(path + nb + 1, path_tmp, n);
+		//path_tmp = path;
+		//path = vmalloc(n + nb + 1);
+		memcpy(path + nb + 1, path, n+1);
 		memcpy(path + 1, parent->d_name.name, nb);
 		*path = '/';
-		vfree(path_tmp);
+		//vfree(path_tmp);
 		n += nb + 1;
 		nb = 0;
 		parent = parent->d_parent;
 	}
 
-	path_tmp = path;
-	path = vmalloc(n + 1);
-	memcpy(path, path_tmp, n);
-	vfree(path_tmp);
-	path[n] = '\0';
+	//path_tmp = path;
+	//path = vmalloc(n + 1);
+	//memcpy(path + 1, path, n);
+	//vfree(path_tmp);
+	if (strcmp("/dev/root", mnt_point)) {
+		nb = strlen(mnt_point);
+		memcpy(path + nb, path, n+1);
+		memcpy(path, mnt_point, nb);
+	}
 
 	return 0;
 }
