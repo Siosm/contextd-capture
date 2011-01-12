@@ -1,13 +1,15 @@
+#ifndef __AUSEC_INFO_H__
+#define __AUSEC_INFO_H__
+
 /*
- * Defines structs and extern values for system calls
+ * Defines structs and static values for system calls
  **/
 
-#ifndef __AUDIT_SECURITY_HOOKS_H__
-#define __AUDIT_SECURITY_HOOKS_H__
+#include <unistd.h>
 
-#include <linux/pid.h>
-#include <linux/limits.h>
-#include <linux/sched.h>
+#define PATH_MAX 4096
+#define NAME_MAX 255
+#define TASK_COMM_LEN 16
 
 enum ausec_type {AUSEC_FILE, AUSEC_SOCKET};
 
@@ -35,7 +37,7 @@ struct ausec_info {
 	{
 		struct ausec_file file;
 		struct ausec_socket socket;
-	} ausec_struct;
+	};
 };
 
 #endif

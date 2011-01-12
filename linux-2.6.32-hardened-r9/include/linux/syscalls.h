@@ -69,6 +69,10 @@ struct perf_event_attr;
 #include <linux/key.h>
 #include <trace/syscall.h>
 
+#ifdef CONFIG_SECURITY_USERSPACE_AUDIT_SECURITY
+#include <../security/audit/hooks.h>
+#endif /* Audit Security */
+
 #define __SC_DECL1(t1, a1)	t1 a1
 #define __SC_DECL2(t2, a2, ...) t2 a2, __SC_DECL1(__VA_ARGS__)
 #define __SC_DECL3(t3, a3, ...) t3 a3, __SC_DECL2(__VA_ARGS__)
@@ -885,4 +889,11 @@ asmlinkage long sys_perf_event_open(
 asmlinkage long sys_mmap_pgoff(unsigned long addr, unsigned long len,
 			unsigned long prot, unsigned long flags,
 			unsigned long fd, unsigned long pgoff);
+
+#ifdef CONFIG_SECURITY_USERSPACE_AUDIT_SECURITY
+asmlinkage long sys_ausec_auth(int state);
+asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i);
+asmlinkage long sys_ausec_answer(int answer);
+#endif /* Audit Security */
+
 #endif

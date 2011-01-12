@@ -1,43 +1,3 @@
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/tracehook.h>
-#include <linux/errno.h>
-#include <linux/sched.h>
-#include <linux/security.h>
-#include <linux/xattr.h>
-#include <linux/capability.h>
-#include <linux/unistd.h>
-#include <linux/mm.h>
-#include <linux/mman.h>
-#include <linux/slab.h>
-#include <linux/pagemap.h>
-#include <linux/swap.h>
-#include <linux/spinlock.h>
-#include <linux/syscalls.h>
-#include <linux/file.h>
-#include <linux/fdtable.h>
-#include <linux/namei.h>
-#include <linux/mount.h>
-#include <linux/proc_fs.h>
-#include <linux/netfilter_ipv4.h>
-#include <linux/netfilter_ipv6.h>
-#include <linux/tty.h>
-#include <net/icmp.h>
-#include <net/ip.h>		/* for local_port_range[] */
-#include <net/tcp.h>		/* struct or_callable used in sock_rcv_skb */
-#include <net/net_namespace.h>
-#include <net/netlabel.h>
-#include <linux/uaccess.h>
-#include <asm/ioctls.h>
-#include <asm/atomic.h>
-#include <linux/bitops.h>
-#include <linux/interrupt.h>
-#include <linux/netdevice.h>	/* for network interface checks */
-#include <linux/netlink.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-#include <linux/dccp.h>
-#include <linux/quota.h>
 #include <linux/un.h>		/* for Unix socket types */
 #include <net/af_unix.h>	/* for Unix socket types */
 #include <linux/parser.h>
@@ -53,10 +13,13 @@
 
 #include <linux/sched.h>
 #include <linux/limits.h>
+#include <asm/semaphore.h>
 
 #include "hooks-func.h"
 #include "hooks.h"
 
+
+int ausec_info_len = sizeof(struct ausec_info);
 
 int audit_security_ptrace_access_check(struct task_struct *child, unsigned int mode)
 {
@@ -333,17 +296,17 @@ int audit_security_file_permission(struct file *file, int mask)
 	strncpy(k_ausec_info.execname, current->comm, TASK_COMM_LEN);
 
 	if(likely(daemon_pid != -1)){
-		spin_lock(&ausec_hook_lock);
+		down_interruptible(ausec_hook_lock);
 		if(likely(pid != daemon_pid)){
 			// TODO Remplir la struct correctement
 			//printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
-			spin_unlock(&ausec_question_lock);
-			spin_lock(&ausec_answer_lock);
+			up(ausec_question_lock);
+			down_interruptible(ausec_answer_lock);
 			answer = (ausec_answer == 0);
-			spin_unlock(&ausec_hook_lock);
+			up(ausec_hook_lock);
 			return answer;
 		}
-		spin_unlock(&ausec_hook_lock);
+		up(ausec_hook_lock);
 	} else {
 			printk(KERN_INFO "AuSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_ausec_info.ausec_struct.file.fullpath_filename, k_ausec_info.pid, k_ausec_info.execname, k_ausec_info.mask);
 	}
@@ -1190,9 +1153,14 @@ static __init int audit_security_init(void)
 	}
 
 	// Vérifie que l'on peut locker l'io_lock
-	if(unlikely((!spin_trylock(&ausec_question_lock)) && (!spin_trylock(&ausec_answer_lock)))){
-		panic("Audit Security: Unable to lock ausec_question_lock or ausec_io_lock.\n");
+	if(unlikely((!init_MUTEX(ausec_hook_lock))
+				&& (!init_MUTEX(ausec_question_lock))
+				&& (!init_MUTEX(ausec_answer_lock))
+				&& (!init_MUTEX(ausec_auth_lock)))){
+		panic("Audit Security: Unable to init_MUTEX.\n");
 	}
+	down(ausec_question_lock);
+	down(ausec_answer_lock);
 	
 	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
 	
