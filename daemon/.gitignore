@@ -1,0 +1,4 @@
+*.o
+daemon
+build/
+

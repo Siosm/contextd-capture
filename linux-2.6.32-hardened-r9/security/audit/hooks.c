@@ -327,17 +327,12 @@ int audit_security_file_permission(struct file *file, int mask)
 		pid= task_pid_nr(current);
 
 		if(likely(pid != daemon_pid)){
-			char * path = dentry_path_(file->f_path.dentry);
-			char * mnt_point = mount_point(file);
-
 			k_ausec_info.type = AUSEC_FILE;
 			k_ausec_info.pid = pid;
-			dentry_path_(file->f_path.dentry, k_ausec_info.ausec_struct.file.fullpath_filename);
+			dentry_path_(file, k_ausec_info.ausec_struct.file.fullpath_filename);
+			//strncpy(__exec_name__, k_ausec_info.execname);
 			//kernel_ausec_info.execname
 			// TODO Remplir la struct correctement
-			if (path == NULL){
-				return 0;
-			}
 			//ausec_info.file.full_path ... a remplir
 			if(mnt_point != NULL) {
 			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
@@ -345,11 +340,9 @@ int audit_security_file_permission(struct file *file, int mask)
 			//	printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
 			}
 
+			spin_unlock(&ausec_question_lock);
 			spin_lock(&ausec_answer_lock);
-			spin_unlock(&ausec_io_lock);
-			spin_lock(&ausec_answer_lock);
-			answer = ausec_answer;
-			spin_unlock(&ausec_answer_lock);
+			(ausec_answer == 0)? answer = 1: ausec_answer = 0;
 			vfree(path);
 			spin_unlock(&ausec_hook_lock);
 			return answer;
@@ -1213,8 +1206,8 @@ static __init int audit_security_init(void)
 	}
 
 	// Vérifie que l'on peut locker l'io_lock
-	if(unlikely(!spin_trylock(&ausec_io_lock))){
-		panic("Audit Security: Unable to lock ausec_io_lock.\n");
+	if(unlikely((!spin_trylock(&ausec_question_lock)) && (!spin_trylock(&ausec_answer_lock)){
+		panic("Audit Security: Unable to lock ausec_question_lock or ausec_io_lock.\n");
 	}
 	
 	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
