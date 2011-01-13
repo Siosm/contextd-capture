@@ -109,14 +109,51 @@
 \section{Linux Security Modules}
 \begin{frame}
 \frametitle{}
+	\begin{itemize}
+		\item[] Ce sont des modules noyau
+		\item[] Ils permettent de "hooker" les appels systèmes
+		\item[] Ils permettent d'interdir dynamiquement des appels systèmes
+	\end{itemize}
+~\\	
+\textbf{Les modules LSM réponde tout a fait à notre problématique}
+\end{frame}
 
+\begin{frame}
+\frametitle{Schéma}
+\begin{center}
+	\includegraphics[scale=0.30]{lsm1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Notre travail}
+\begin{itemize}
+	\item[-] Création du module LSM \\
+	\item[-] Possibilité d'activer le module ou non au moment de la compilation du noyau \\
+	\item[-] Manipulation de deux "hooks" \\
+	\begin{itemize}
+		\item[-] file permission : appelé à chaque fois qu'un fichier est lu
+		\item[-] socket bind : appelé à chaque création de socket (à venir)
+	\end{itemize}
+\end{itemize}
+\textbf{Hooks principaux en ce qui concerne contextd} \\
+\textbf{Évite de passer par ULOG pour la partie "réseau"} \\
 \end{frame}
 
 
-\subsection{Objectifs suivants}
+\section{Objectifs suivants}
 \begin{frame}
-\frametitle{}
-
+\frametitle{Prochaines étapes}
+\begin{enumerate}
+	\item Mettre en place la communication entre les espaces noyau et utilisateur
+	\begin{itemize}
+		\item[-] Via des sockets unix
+		\item[-] Via un proc filesystem
+		\item[-] Via ...
+		\item[-] Via un chardev
+	\end{itemize}
+	\item Création d'un démon qui fera le lien entre l'espace noyau et contextd
+\end{enumerate}
 \end{frame}
 
 \section{Conclusion}
