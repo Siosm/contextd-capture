@@ -10,9 +10,9 @@ struct ausec_info	k_ausec_info;
 int			ausec_answer;
 int			ausec_info_len = sizeof(struct ausec_info);
 
-DECLARE_MUTEX(ausec_hook_lock);
-DECLARE_MUTEX(ausec_question_lock);
-DECLARE_MUTEX(ausec_answer_lock);
-DECLARE_MUTEX(ausec_auth_lock);
+struct * semaphore ausec_hook_lock()
+struct * semaphore ausec_question_lock()
+struct * semaphore ausec_answer_lock()
+struct * semaphore ausec_auth_lock()
 
 #endif /* share.h */
