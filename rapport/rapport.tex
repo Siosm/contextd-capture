@@ -164,11 +164,11 @@ Création de 3 nouvels appels systèmes pour répondre au besoins de communicati
 
 Pour s'assurer que les communications ne vont pas se mélanger mais bien se dérouler dans l'ordre, nous avons utilisés des verrous au niveau du noyau. Il a donc était nécessaire de vérifier que la mise en place de ces verrous n'entrainait pas d'état bloquant indéfiniement.
 
-% \begin{figure}[hb]
-% 	\centering
-% 	\includegraphics[scale=0.45]{graphe_verrous.png}
-% 	\caption{Graphe des états des verrous au niveau du noyau}
-% \end{figure}
+\begin{figure}[hb]
+	\centering
+	\includegraphics[scale=1]{syscall_sync.pdf}
+	\caption{Communication entre les hooks LSM et les appels systèmes}
+\end{figure}
 %TODO Graphe d'états permettant d'assurer que les verrous dans les appels systèmes n'entrainent pas d'état bloquant sans sortie au niveau du noyau.
 
 \newpage
@@ -176,8 +176,6 @@ Pour s'assurer que les communications ne vont pas se mélanger mais bien se dér
 \clearemptydoublepage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
-
-
 
 Le retard sur la partie implémentation noyau est principalement dûe à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant et d'implémenter les appels systèmes, ...
 
