@@ -47,10 +47,11 @@
 \end{framed}}
 
 %%% TITRE DE PAGE
-\title{Capture d'activité système pour PIGA-SYSTRANS}
+\title{Contextd Capture}
+\subtitle{Capture d'activité système pour PIGA-SYSTRANS}
 \author{Dimitri~Gressin \and Timothée~Ravier}
 \institute{ENSI de Bourges}
-\date{\today}
+\date{20 janvier 2011}
 
 %%% POUR AVOIR UN PLAN QUI S'AFFICHE QUAND ON CHANGE DE SOUS-SECTION
 \AtBeginSection[ ]
@@ -74,16 +75,27 @@
 	\end{frame}
 }
 
-
 \section{Introduction}
 \begin{frame}
+\frametitle{Context\{e|d\}}
+\begin{itemize}
+	\item Commande différents sytèmes de sécurité pour autoriser une applications à effectuer certaines actions
+	\item Pour fonctionner, il doit avoir connaissance :
+		\begin{itemize}
+			\item des accès aux fichiers
+			\item des noms de domaine des sites visités
+		\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
 \frametitle{Présentation du sujet}
-\begin{enumerate}
-	\item Intercepter les appels systèmes au niveau de l'espace noyau
+\begin{itemize}
+	\item Intercepter les appels systèmes
 	\item Récupérer des informations telles que PID, fichiers ouverts, socket créée, etc.
 	\item Envoyer ces informations dans l'espace utilisateur au démon contextd
 	\item Retourner la réponse de contextd au noyau pour débloquer l'appel système
-\end{enumerate}
+\end{itemize}
 \end{frame}
 
 \section{Systemtap}
@@ -115,7 +127,7 @@
 		\item Ils permettent d'interdir dynamiquement des appels systèmes
 	\end{itemize}
 ~\\	
-\textbf{Les modules LSM réponde tout a fait à notre problématique}
+\textbf{Les modules LSM répondent tout à fait à notre problématique}
 \end{frame}
 
 \begin{frame}
@@ -128,38 +140,48 @@
 \begin{frame}
 \frametitle{Notre travail}
 \begin{itemize}
-	\item[-] Création du module LSM \\
-	\item[-] Possibilité d'activer le module ou non au moment de la compilation du noyau \\
-	\item[-] Manipulation de deux "hooks" \\
+	\item Création du module LSM\\
+	\item Ajout dans le mode de configuration standard du noyau\\
+	\item Manipulation de deux "hooks"\\
 	\begin{itemize}
-		\item[-] file permission : appelé à chaque fois qu'un fichier est lu
-		\item[-] socket bind : appelé à chaque création de socket (à venir)
+		\item file permission : appelé à chaque fois qu'un fichier est ouvert
+		\item socket bind : appelé à chaque création de socket (à venir)
 	\end{itemize}
 \end{itemize}
-\textbf{Hooks principaux en ce qui concerne contextd} \\
-\textbf{Évite de passer par ULOG pour la partie "réseau"} \\
+\textbf{Hooks principaux en ce qui concerne contextd}\\
+% \textbf{Évite de passer par ULOG pour la partie "réseau"}\\
 \end{frame}
-
 
 \section{Objectifs suivants}
 \begin{frame}
 \frametitle{Prochaines étapes}
 \begin{enumerate}
-	\item Mettre en place la communication entre les espaces noyau et utilisateur
+	\item Communication entre les espaces noyau et utilisateur :
 	\begin{itemize}
-		\item[-] Via des sockets unix
-		\item[-] Via un proc filesystem
-		\item[-] Via ...
-		\item[-] Via un chardev
+		\item[-] Via des sockets unix ?
+		\item[-] Via un proc filesystem ?
+		\item[-] Via un chardev ?
+		\item[-] Via des appels système !
 	\end{itemize}
-	\item Création d'un démon qui fera le lien entre l'espace noyau et contextd
+	\item Démon qui fera le lien entre l'espace noyau et contextd
+	\item Eventuellement remplacé à terme par un plugin contextd
 \end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Appels systèmes}
+\begin{center}
+	\includegraphics[scale=0.75]{global.pdf}
+\end{center}
 \end{frame}
 
 \section{Conclusion}
 \begin{frame}
-\frametitle{}
-
+\frametitle{Conclusion}
+\begin{itemize}
+	\item Certains objectifs sont atteints
+	\item Seule une petite partie du projet est visible pour l'instant
+\end{itemize}
 \end{frame}
 
 \end{document}
