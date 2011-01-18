@@ -83,9 +83,12 @@ Ce rapport présente le travail et les résultats obtenus à la fin du premier s
 
 ~
 
-Le but de ce projet est de généraliser la communication entre les différentes applications et le démon contextd. Contextd permet
-%TODO
-Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueil alors les différentes opérations qu'elles effectuent (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un contexte. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels systèmes a connaissance des actions entreprises par les programmes.
+Le but de ce projet est de généraliser la communication entre les différentes applications et le démon contextd. Contextd permet de commander différents systèmes de sécurité pour autoriser une applications à effectuer certaines actions.
+Pour fonctionner, il doit avoir connaissance, entre autres, des accès aux fichiers et des noms de domaine des sites visités.
+
+~
+
+Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les différentes opérations qu'elles effectuaient (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un contexte. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions entreprises par les programmes.
 %TODO
 
 ~
@@ -106,7 +109,7 @@ De plus, il faut que le programme puisse attendre la réponse de contextd avant 
 
 \subsection{Principe de fonctionnement}
 
-Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessite pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
+Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
 
 \begin{figure}[hb]
 	\centering
@@ -118,11 +121,11 @@ Nous avons ainsi commencer par utiliser Systemtap, un outil d'analyse du noyau g
 
 \subsection{Résultats obtenus}
 
-Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels systèmes avant de les effectués.
+Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels système avant de les effectuer.
 
 De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins.
 
-Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il n'était alors pas pertinent de récupérer le chemin complet du fichier, car cette recherche est inadapté et inefficace : il est nécessaire de parcourir l'intégralité du système de fichiers.
+Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il n'était alors pas pertinent de récupérer le chemin complet du fichier, car cette recherche est inadaptée et inefficace : il est nécessaire de parcourir l'intégralité du système de fichiers.
 
 Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, Jérémy Briffaut, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
 
@@ -156,7 +159,7 @@ Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il
 
 \subsection{Ce qui a été réalisé}
 
-Nous avons donc développé un module LSM qui "hook" les appels systèmes. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous travaillons. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
+Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous travaillons. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
 
 Par la suite, il faudra convenir des appels systèmes sur lesquels il est intéressant d'intervenir.
 
@@ -171,15 +174,15 @@ Ensuite, nous avons commencé à chercher les différentes informations nécessa
 	\end{itemize}
 
 Nous avons également remarqué que le hook "socket bind" permet de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Son fonctionnement doit être confirmé, car il pourrait nous affranchir d'utiliser une alternative telle que ULOG et iptables.
-	\begin{itemize}
-		\item[-] le PID
-		\item[-] l'execname
-		\item[-] la structure de la socket
-		\item[-] L'adresse de connexion
-		\item[-] ...
-	\end{itemize}
+% 	\begin{itemize}
+% 		\item[-] le PID
+% 		\item[-] l'execname
+% 		\item[-] la structure de la socket
+% 		\item[-] L'adresse de connexion
+% 		\item[-] ...
+% 	\end{itemize}
 
-La principal difficulté de cette étape était de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
+La principale difficulté de cette étape était de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
 
 L'étape suivante consiste à envoyer les informations récupérées dans l'espace noyau à l'espace utilisateur. Nous avons envisagé plusieurs pistes, pour l'instant restées infructueuses.
 
@@ -189,13 +192,13 @@ L'étape suivante consiste à envoyer les informations récupérées dans l'espa
 
 \subsubsection{Socket Unix}
 
-Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations sont correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
+Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
 
 \subsubsection{Proc fs}
 
 Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
 
-\subsection{Développement en cours : Appels système}
+\subsection{Développement en cours : appels système}
 
 Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
 
@@ -205,14 +208,14 @@ Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au
 	\caption{Communication entre le noyau, le démon et contextd}
 \end{figure}
 
-Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. A terme, ce comportement ne sera pas accepté.
+Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
 
 Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
 
 \begin{figure}[hb]
 	\centering
 	\includegraphics{syscall_sync.pdf}
-	\caption{Communication entre les hooks LSM et les appels systèmes}
+	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
 Cette idée n'est pas encore complétement implémentée et ne fonctionne donc pas encore.
@@ -225,7 +228,7 @@ Cette idée n'est pas encore complétement implémentée et ne fonctionne donc p
 
 Nous avons donc bien atteint les premiers objectifs consistants à récupérer des informations essentielles à contextd.
 
-Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels systèmes.
+Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
 
 Malheureusement, seule une petite partie du projet est visible, du fait du retard pris au départ, avec systemtap, et dû au temps de compilation du noyau. Mais l'évolution actuelle du projet nous permettra d'atteindre les objectifs à la fin de l'année.
 
