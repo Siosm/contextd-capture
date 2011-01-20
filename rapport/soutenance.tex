@@ -79,7 +79,7 @@
 \begin{frame}
 \frametitle{Context\{e|d\}}
 \begin{itemize}
-	\item Commande différents systèmes de sécurité pour autoriser une applications à effectuer certaines actions
+	\item Commande différents systèmes de sécurité pour autoriser une application à effectuer certaines actions
 	\item Pour fonctionner, il doit avoir connaissance :
 		\begin{itemize}
 			\item des accès aux fichiers
@@ -91,7 +91,7 @@
 \begin{frame}
 \frametitle{Présentation du sujet}
 \begin{itemize}
-	\item Intercepter les appels systèmes
+	\item Intercepter les appels système
 	\item Récupérer des informations telles que PID, fichiers ouverts, socket créée, etc.
 	\item Envoyer ces informations dans l'espace utilisateur au démon contextd
 	\item Retourner la réponse de contextd au noyau pour débloquer l'appel système
@@ -124,7 +124,7 @@
 	\begin{itemize}
 		\item Ce sont des modules noyau
 		\item Ils permettent de "hooker" les appels systèmes
-		\item Ils permettent d'interdir dynamiquement des appels systèmes
+		\item Ils permettent d'interdire dynamiquement des appels systèmes
 	\end{itemize}
 ~\\	
 \textbf{Les modules LSM répondent tout à fait à notre problématique}
