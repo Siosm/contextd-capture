@@ -3,3 +3,4 @@ build/
 *~
 doc/
 systemtap.kdev4
+.kdev4
