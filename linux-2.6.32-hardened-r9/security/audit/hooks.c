@@ -57,7 +57,7 @@
 
 #include "hooks-func.h"
 #include "hooks.h"
-
+#include "share.h"
 
 int ausec_info_len = sizeof(struct ausec_info);
 
