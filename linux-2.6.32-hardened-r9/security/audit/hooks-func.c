@@ -61,7 +61,7 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 	if (IS_ROOT(dentry)) {
 		return 0;
 	} else {
-		pos = calculate_path(dentry->d_parent, path, len)
+		pos = calculate_path(dentry->d_parent, path, len);
 		
 		if (pos != -1 ) {
 			size = strlen(dentry->d_name.name);

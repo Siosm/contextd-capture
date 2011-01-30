@@ -53,7 +53,7 @@
 
 #include <linux/sched.h>
 #include <linux/limits.h>
-#include <asm/semaphore.h>
+#include <linux/semaphore.h>
 
 #include "hooks-func.h"
 #include "hooks.h"
@@ -328,27 +328,27 @@ int audit_security_file_permission(struct file *file, int mask)
 {
 	int answer = -1;
 	pid_t pid = task_pid_nr(current);
-	k_ausec_info.mask = mask;
-	k_ausec_info.type = AUSEC_FILE;
-	k_ausec_info.pid = pid;
-	dentry_path_(file, k_ausec_info.ausec_struct.file.fullpath_filename);
-	strncpy(k_ausec_info.ausec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-	strncpy(k_ausec_info.execname, current->comm, TASK_COMM_LEN);
+	k_ausec_info()->mask = mask;
+	k_ausec_info()->type = AUSEC_FILE;
+	k_ausec_info()->pid = pid;
+	file_path(file, k_ausec_info()->ausec_struct.file.fullpath_filename);
+	strncpy(k_ausec_info()->ausec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+	strncpy(k_ausec_info()->execname, current->comm, TASK_COMM_LEN);
 
-	if(likely(daemon_pid != -1)){
-		down_interruptible(ausec_hook_lock);
-		if(likely(pid != daemon_pid)){
+	if(likely(*daemon_pid() != -1)){
+		down_interruptible(ausec_hook_lock());
+		if(likely(pid != *daemon_pid())){
 			// TODO Remplir la struct correctement
 			//printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
-			up(ausec_question_lock);
-			down_interruptible(ausec_answer_lock);
-			answer = (ausec_answer == 0);
-			up(ausec_hook_lock);
+			up(ausec_question_lock());
+			down_interruptible(ausec_answer_lock());
+			answer = (*ausec_answer() == 0);
+			up(ausec_hook_lock());
 			return answer;
 		}
-		up(ausec_hook_lock);
+		up(ausec_hook_lock());
 	} else {
-			printk(KERN_INFO "AuSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_ausec_info.ausec_struct.file.fullpath_filename, k_ausec_info.pid, k_ausec_info.execname, k_ausec_info.mask);
+			printk(KERN_INFO "AuSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_ausec_info()->ausec_struct.file.fullpath_filename, k_ausec_info()->pid, k_ausec_info()->execname, k_ausec_info()->mask);
 	}
 	
 	return 0;
@@ -1192,15 +1192,13 @@ static __init int audit_security_init(void)
 		panic("Audit Security: Unable to register with kernel.\n");
 	}
 
-	// Vérifie que l'on peut locker l'io_lock
-	if(unlikely((!init_MUTEX(ausec_hook_lock))
-				&& (!init_MUTEX(ausec_question_lock))
-				&& (!init_MUTEX(ausec_answer_lock))
-				&& (!init_MUTEX(ausec_auth_lock)))){
-		panic("Audit Security: Unable to init_MUTEX.\n");
-	}
-	down(ausec_question_lock);
-	down(ausec_answer_lock);
+	init_MUTEX(ausec_hook_lock());
+	init_MUTEX(ausec_question_lock());
+	init_MUTEX(ausec_answer_lock());
+	init_MUTEX(ausec_auth_lock());
+
+	down(ausec_question_lock());
+	down(ausec_answer_lock());
 	
 	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
 	

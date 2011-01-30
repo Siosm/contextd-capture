@@ -18,26 +18,30 @@
  **/
 
 #include <linux/pid.h>
+#include <linux/semaphore.h>
 #include <asm-generic/uaccess.h>
+
+#include "share.h"
+#include "hooks.h"
 
 
 asmlinkage long sys_ausec_auth(int state)
 {
-	down_interruptible(ausec_auth_lock);
+	down_interruptible(ausec_auth_lock());
 	if(state){
-		if(daemon_pid == -1){
-			daemon_pid = task_pid_nr(current);
-			up(ausec_auth_lock);
+		if(*daemon_pid() == -1){
+			*daemon_pid() = task_pid_nr(current);
+			up(ausec_auth_lock());
 			return 0;
 		}
 	} else {
-		if(daemon_pid == task_pid_nr(current)){
-			daemon_pid = -1;
-			up(ausec_auth_lock);
+		if(*daemon_pid() == task_pid_nr(current)){
+			*daemon_pid() = -1;
+			up(ausec_auth_lock());
 			return 0;
 		}
 	}
-	up(ausec_auth_lock);
+	up(ausec_auth_lock());
 
 	return -1;
 }
@@ -45,37 +49,37 @@ asmlinkage long sys_ausec_auth(int state)
 
 asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 {
-	down_interruptible(ausec_auth_lock);
-	if(daemon_pid != task_pid_nr(current)){
-		up(ausec_auth_lock);
+	down_interruptible(ausec_auth_lock());
+	if(*daemon_pid() != task_pid_nr(current)){
+		up(ausec_auth_lock());
 		return -1;
 	}
-	down_interruptible(ausec_question_lock);
+	down_interruptible(ausec_question_lock());
 	// TODO : faire les tests sur le pointeur donne par le processus ?
 	if(likely(user_as_i != NULL)){
-		if(likely(copy_to_user(user_as_i, &k_ausec_info, ausec_info_len) == 0)){
-			up(&ausec_auth_lock);
+		if(likely(copy_to_user(user_as_i, k_ausec_info(), sizeof(struct ausec_info)) == 0)){
+			up(ausec_auth_lock());
 			return 0;
 		}
 	}
 	// si erreur, on refuse l'operation
-	ausec_answer = false;
-	up(&ausec_answer_lock);
-	up(&ausec_auth_lock);
+	*ausec_answer() = false;
+	up(ausec_answer_lock());
+	up(ausec_auth_lock());
 	return -EFAULT;
 }
 
 
 asmlinkage long sys_ausec_answer(int answer)
 {
-	down_interruptible(ausec_auth_lock);
-	if(daemon_pid != task_pid_nr(current)){
-		up(&ausec_auth_lock);
+	down_interruptible(ausec_auth_lock());
+	if(*daemon_pid() != task_pid_nr(current)){
+		up(ausec_auth_lock());
 		return -1;
 	}
-	ausec_answer = answer;
-	up(&ausec_answer_lock);
-	up(&ausec_auth_lock);
+	*ausec_answer() = answer;
+	up(ausec_answer_lock());
+	up(ausec_auth_lock());
 
 	return 0;
 }

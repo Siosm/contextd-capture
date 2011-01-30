@@ -1,5 +1,5 @@
 #include <linux/pid.h>
-#include <asm-generic/uacces.h>
+// #include <asm-generic/uacces.h>
 
 #include "share.h"
 
@@ -32,25 +32,25 @@ int * ausec_answer()
 }
 
 
-struct * semaphore ausec_hook_lock()
+struct semaphore * ausec_hook_lock()
 {
 	return &ausec_hook_lock;
 }
 
 
-struct * semaphore ausec_question_lock()
+struct semaphore * ausec_question_lock()
 {
 	return &ausec_question_lock;
 }
 
 
-struct * semaphore ausec_answer_lock()
+struct semaphore * ausec_answer_lock()
 {
 	return &ausec_answer_lock;
 }
 
 
-struct * semaphore ausec_auth_lock()
+struct semaphore * ausec_auth_lock()
 {
 	return &ausec_auth_lock;
 }
