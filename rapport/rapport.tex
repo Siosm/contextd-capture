@@ -14,8 +14,9 @@
 % \fancyhead[LO]{\itshape\rightmark}
 % \fancyhead[RE]{\itshape\leftmark}
 \renewcommand{\headrulewidth}{0.5pt}
-\addtolength{\headheight}{0.5pt}
-\renewcommand\footrulewidth{0pt}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3.0cm, right=3.0cm, a4paper]{geometry}
+% \addtolength{\headheight}{0.5pt}
+% \renewcommand\footrulewidth{0pt}
 \fancypagestyle{plain}{
     \fancyhead{}
     \renewcommand{\headrulewidth}{0pt}}
@@ -24,11 +25,10 @@
 \usepackage{amssymb}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black,filecolor=black]{hyperref}
 \usepackage{framed}
-\usepackage{geometry}
 \usepackage[pdftex]{graphicx}
 \usepackage{makeidx}
-\addtolength{\textwidth}{1cm}
-\setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
+% \addtolength{\textwidth}{1cm}
+% \setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
 
 
 % nouvelle commande pour un joli nom
@@ -52,13 +52,15 @@
 \setlength{\parskip}{2.4ex}
 
 \title{
-\ligne{\Large}\textbf{Project de deuxième année}\\
-\Large Intégration des plugins contextd grâce aux ``Linux Security Modules''
-% \& Intégration Piga Systrans ?
 \ligne{\Large}
-} %TODO
+\textbf{Contextd Capture}\\
+\textbf{Project de deuxième année}\\
+\Large Capture d'activité système pour PIGA-SYSTRANS
+% \Large Généralisation des plugins de communication avec contextd
+\ligne{\Large}
+}
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
-\date{xx xxx 201x} %TODO
+\date{20 \textsc{janvier} 2011} %TODO
 
 % titre
 \maketitle
@@ -76,40 +78,38 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus après x mois dans le cadre de notre projet d'application de deuxième année.
+Ce rapport présente le travail et les résultats obtenus à la fin du premier semestre, dans le cadre de notre projet d'application de deuxième année.
 %TODO
 
 ~
 
-Le but de ce projet est de remplacer l'écriture de plugins pour contextd par application par un ``plugin'' général. L'idée de départ était d'utiliser Systemtap, un outils développé par ... pour ...
+Le but de ce projet est de généraliser la communication entre les différentes applications et le démon contextd. Contextd permet de commander différents systèmes de sécurité pour autoriser une applications à effectuer certaines actions.
+Pour fonctionner, il doit avoir connaissance, entre autres, des accès aux fichiers et des noms de domaine des sites visités.
+
+~
+
+Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les différentes opérations qu'elles effectuaient (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un contexte. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions entreprises par les programmes.
 %TODO
 
 ~
 
-Ici, ce sera donc plus qu'un plugin puisque les fonctionnalités telles les demandes d'ouverture de fichier, de connexion réseau, seront ``détectées'' par le ``sous-module'' LSM, puis transmisent à contextd.
-%TODO
+\section*{Objectifs} \addcontentsline{toc}{section}{Objectifs}
 
-~
-
-%TODO
-
-\newpage
-
-\section{Objectifs}
-
-Il fallait obtenir :
+Pour pouvoir se séparer des plugins/modifications par applications, il est nécessaire de communiquer à contextd certaines informations sur le comportement des programmes. Il faut notamment obtenir :
 \begin{itemize}
-	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes selinux associés
-	\item la liste des connexions ouvertes par le systeme et faire correspondre l'adresse ip avec le nom de domaine
+	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes SELinux associés, si le module SELinux est activé.
+	\item la liste des connexions ouvertes par le systeme, et plus particulièrement les adresses IP de destination, et donc finalement le nom de domaine de destination.\\
 \end{itemize}
 
+De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre son exécution.
+
+\newpage
 
 \section{Systemtap}
 
 \subsection{Principe de fonctionnement}
-Nous avons débuter avec Systemtap qui est %TODO
 
-Utilise les KProbes, et les Kretprobes\cite{IBMRBST}.
+Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
 
 \begin{figure}[hb]
 	\centering
@@ -117,41 +117,108 @@ Utilise les KProbes, et les Kretprobes\cite{IBMRBST}.
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
 \end{figure}
 
+\newpage
+
 \subsection{Résultats obtenus}
 
-Nous avons partiellement atteint ces critères mais nous nous sommes rendu compte d'une particularité de l'implémentation de Systemtap qui ne corespondait pas avec notre besoin final. Nous nous sommes heurté à la simplicité de Systemtap qui vise un apprentissage rapide pour un usage ciblé.
+Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels système avant de les effectuer.
 
-De plus, les instructions décrites dans un script écrit pour Systemtap sont exécutées après que le code de l'appel system correspondant ai été exécuté.
+De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins.
 
-%\includegraphics[scale=0.4]{stap_internals.png} TODO
+Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il n'était alors pas pertinent de récupérer le chemin complet du fichier, car cette recherche est inadaptée et inefficace : il est nécessaire de parcourir l'intégralité du système de fichiers.
 
-Cela ne correspond donc pas au besoin de sécurité énoncé précédement.
-
+Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, Jérémy Briffaut, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
 
 \newpage
 
-
 \section{Linux Security Modules}
 
-Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers les ``Linux Security Modules''.
-
 \subsection{Principe de fonctionnement}
+
+Les modules LSM sont au noyau ce que netfilter est au réseau.
+
+Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
 
 \begin{figure}[hb]
 	\centering
 	\includegraphics[scale=0.45]{lsm1.png}
-	\caption{LSM Hook Architecture \cite{LSMINTRO}}
+	\caption{Architecture des hooks LSM \cite{LSMINTRO}}
 \end{figure}
 
-\begin{figure}[hb]
+L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de charger dans le noyau qu'un seul et unique module LSM. Or, PIGA utilise déjà un module LSM modifié, celui de SELinux.
+
+Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il se pourrait que SELinux soit définitivement désactivé.
+
+\begin{figure}%[hb]
 	\centering
 	\includegraphics[scale=0.45]{lsm2.png}
-	\caption{Permissive LSM hook. This hook allows the security policy to override a DAC restriction \cite{LSMINTRO}}
+	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
 \end{figure}
 
 \newpage
 
-\subsection{Résultats obtenus}
+\subsection{Ce qui a été réalisé}
+
+Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous travaillons. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
+
+Par la suite, il faudra convenir des appels systèmes sur lesquels il est intéressant d'intervenir.
+
+Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en suivant les conventions de nommage des options de configuration.
+
+Ensuite, nous avons commencé à chercher les différentes informations nécessaires à contextd pour son fonctionnement, et plus particulièrement ce qui concerne le hook "file permission" :
+	\begin{itemize}
+		\item le PID
+		\item l'execname
+		\item le chemin complet du fichier
+		\item ...
+	\end{itemize}
+
+Nous avons également remarqué que le hook "socket bind" permet de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Son fonctionnement doit être confirmé, car il pourrait nous affranchir d'utiliser une alternative telle que ULOG et iptables.
+% 	\begin{itemize}
+% 		\item[-] le PID
+% 		\item[-] l'execname
+% 		\item[-] la structure de la socket
+% 		\item[-] L'adresse de connexion
+% 		\item[-] ...
+% 	\end{itemize}
+
+La principale difficulté de cette étape était de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
+
+L'étape suivante consiste à envoyer les informations récupérées dans l'espace noyau à l'espace utilisateur. Nous avons envisagé plusieurs pistes, pour l'instant restées infructueuses.
+
+\newpage
+
+\subsection{Idées abandonnées}
+
+\subsubsection{Socket Unix}
+
+Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
+
+\subsubsection{Proc fs}
+
+Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
+
+\subsection{Développement en cours : appels système}
+
+Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics{global.pdf}
+	\caption{Communication entre le noyau, le démon et contextd}
+\end{figure}
+
+Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
+
+Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics{syscall_sync.pdf}
+	\caption{Communication entre les hooks LSM et les appels système}
+\end{figure}
+
+Cette idée n'est pas encore complétement implémentée et ne fonctionne donc pas encore.
 
 \newpage
 
@@ -159,22 +226,15 @@ Nous avons donc décider avec l'accord de Jérémy Briffaut de nous tourner vers
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
-Ce projet aura été pour nous l'occasion d'apprendre un langage de programmation orienté objets, qui nous a permis de gagner en efficacité lors de la phase de développement. En revanche, le fait que nous découvrions le C++ a limité nos possibilités d'optimisations. Le temps de traitement d'un graphe contenant une grande quantité de noeud étant élevé, il paraît nécessaire de paralléliser les algorithmes que nous avons appliqués, pour tirer pleinement partie des machines multi-coeurs ou multi-processeurs, par exemple en utilisant les Intel Threading Building Blocks \cite{IBMRBST}.
+Nous avons donc bien atteint les premiers objectifs consistants à récupérer des informations essentielles à contextd.
 
-De plus, bien que vérifiée, notre implémentation de l'algorithme de décomposition modulaire peut contenir des bugs. Il faut donc prévoir un outils permettant la vérification des résultats obtenus par cette méthode avec ceux obtenus par le parcours simple de graphes. Il sera donc toujours nécessaire de produire l'intégralité des chemins entre deux noeuds à partir du graphe d'origine pour s'assurer que les graphes réduits sont bien justes.
+Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
 
-Il faut noter, au vu des résultats, que la décomposition modulaire de graphes permettra fort probablement non seulement d'accélerer le parcours de graphes une fois l'intégralité des chemins générés mais aussi de réduire la taille finale de l'ensemble formé par tous les chemins.
-
-Enfin, notre programme se limite à la décomposition de graphes orientés. Les algorithmes diffèrent de ceux applicables aux graphes non-orientés et leur mise en oeuvre nécessiterai la réécriture d'une grande partie du code pour assurer la rapidité et l'efficacité de notre implémentation.
-
+Malheureusement, seule une petite partie du projet est visible, du fait du retard pris au départ, avec systemtap, et dû au temps de compilation du noyau. Mais l'évolution actuelle du projet nous permettra d'atteindre les objectifs à la fin de l'année.
 
 \newpage
 \addcontentsline{toc}{section}{Annexes}
-\addcontentsline{toc}{subsection}{Remarques}
 \addcontentsline{toc}{subsection}{Liens et références}
-\subsection*{Remarques}
-
-Un fichier de configuration est présent avec les sources du kernel 2.6.32-hardened. Il correspond aux options nécessaire à la compilation dans une machine virtuelle Virtualbox. L'option autorisant nos modifications y est aussi activée. Elle est situé dans Security -> SELinux userspace audit.
 
 \subsection*{Liens et références}
 \begin{thebibliography}{40}
@@ -182,7 +242,9 @@ Un fichier de configuration est présent avec les sources du kernel 2.6.32-harde
 
 \bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
 
-\bibitem{SOURCE} Code source (kernel 2.6.32 hardened et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+\bibitem{SOURCE} Code source (kernel 2.6.32 hardened r9 et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+
+\bibitem{LKDSE} \textit{Linux Kernel Development, Second Edition}, Robert Love, Novell Press
 \end{thebibliography}
 
 %\printindex

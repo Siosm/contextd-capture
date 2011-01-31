@@ -47,10 +47,11 @@
 \end{framed}}
 
 %%% TITRE DE PAGE
-\title{Simplification modulaire de graphe}
-\author{Nicolas~Cornu \and Timothée~Ravier}
+\title{Contextd Capture}
+\subtitle{Capture d'activité système pour PIGA-SYSTRANS}
+\author{Dimitri~Gressin \and Timothée~Ravier}
 \institute{ENSI de Bourges}
-\date{\today}
+\date{20 janvier 2011}
 
 %%% POUR AVOIR UN PLAN QUI S'AFFICHE QUAND ON CHANGE DE SOUS-SECTION
 \AtBeginSection[ ]
@@ -68,107 +69,119 @@
 {
 	\framenumberoff
 	\watermarkoff
-	\institute{} % Vire le champ institut sur cette page
+	\institute{École Nationale Supérieure d'Ingénieurs de Bourges} % Vire le champ institut sur cette page
 	\begin{frame}
 	\titlepage
 	\end{frame}
 }
 
-
-\section{Principe}
-\subsection{Introduction}
+\section{Introduction}
 \begin{frame}
-\frametitle{Introduction}
-\textbf{Simplification modulaire} : Regrouper ensemble les noeuds ayant des propriétés similaires.\\
-\textbf{But} : Simplifier les graphes pour travailler dessus.\\
-\textbf{Application} : Calculer l'ensemble des chemins entre deux noeuds.\\
-\end{frame}
-
-\subsection{Fonctionnalités}
-\begin{frame}
-\frametitle{Fonctionnalités}
+\frametitle{Context\{e|d\}}
 \begin{itemize}
-\item Importation de graphes depuis un fichier ``PIGA'' (.pol)
-\item Calcul de l'arbre modulaire
-\item Calcul du graphe groupé
-\item Calcul du graphe simplifié en précisant les noeuds
-\item Exportation en fichier PIGA (.pol) ou Graphviz
-\end{itemize}
-\end{frame}
-
-\subsection{Algorithme}
-\begin{frame}
-\frametitle{Algorithme}
-\begin{center}
-	\includegraphics[scale=0.2]{diag.png}
-\end{center}
-\end{frame}
-
-\section{Résultats}
-\subsection{Graphes simples}
-\begin{frame}
-\frametitle{Graphes simples}
-Fonctionne très bien avec de petits graphes.\\
-\includegraphics[scale=0.3]{test-1.png}\hfill{}
-\includegraphics[scale=0.45]{test-links.png}
-
-\end{frame}
-\subsection{Graphe réel}
-\begin{frame}
-\frametitle{Graphe réel}
-\begin{itemize}
-	\item Impossible de faire le graphe entier en un temps raisonnable\\
-	\item \textbf{Causes}
+	\item Commande différents systèmes de sécurité pour autoriser une application à effectuer certaines actions
+	\item Pour fonctionner, il doit avoir connaissance :
 		\begin{itemize}
-		\item Trop de noeud (1704)
-		\item Algorithmes pas assez optimisés
+			\item des accès aux fichiers
+			\item des noms de domaine des sites visités
 		\end{itemize}
 \end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Présentation du sujet}
+\begin{itemize}
+	\item Intercepter les appels système
+	\item Récupérer des informations telles que PID, fichiers ouverts, socket créée, etc.
+	\item Envoyer ces informations dans l'espace utilisateur au démon contextd
+	\item Retourner la réponse de contextd au noyau pour débloquer l'appel système
+\end{itemize}
+\end{frame}
+
+\section{Systemtap}
+\begin{frame}
+\frametitle{Systemtap}
+\begin{center}
+	\includegraphics[scale=0.25]{kretprob.png}
+\end{center}
+\end{frame}
 
 \begin{frame}
-Nous avons donc travaillé sur moins de noeuds.
+\frametitle{Systemtap}
+\begin{itemize}
+	\item Les scripts sont exécutés après les appels système
+	\item Impossibilité de suspendre un appel système
+	\item Les données accessibles sont inexploitables
+\end{itemize}
+~\\
+\textbf{Systemtap ne répondait absolument pas à nos besoins}
+
+\end{frame}
+
+\section{Linux Security Modules}
+\begin{frame}
+\frametitle{}
+	\begin{itemize}
+		\item Ce sont des modules noyau
+		\item Ils permettent de "hooker" les appels système
+		\item Ils permettent d'interdire dynamiquement des appels système
+	\end{itemize}
+~\\	
+\textbf{Les modules LSM répondent tout à fait à notre problématique}
+\end{frame}
+
+\begin{frame}
+\frametitle{Schéma}
 \begin{center}
-\begin{tabular}{|c|c|}
-	\hline
-	Nombre de noeuds & Temps (sec.) \\
-	\hline
-	10 & 0,03 \\
-	\hline
-	20 & 0,3\\
-	\hline
-	30 & 1\\
-	\hline
-	40 & 2\\
-	\hline
-	50 & 4\\
-	\hline
-	70 & 34\\
-	\hline
-	80 & 180\\
-	\hline
-	100 & 630\\
-	\hline
-	120 & 1290 \\
-	\hline
-	150 & 3960\\
-	\hline
-\end{tabular}
+	\includegraphics[scale=0.30]{lsm1.png}
 \end{center}
-\textbf{Et pour 1704 noeuds ?}
+\end{frame}
+
+\begin{frame}
+\frametitle{Notre travail}
+\begin{itemize}
+	\item Création du module LSM\\
+	\item Ajout dans le mode de configuration standard du noyau\\
+	\item Manipulation de deux "hooks"\\
+	\begin{itemize}
+		\item file permission : appelé à chaque fois qu'un fichier est ouvert
+		\item socket bind : appelé à chaque création de socket (à venir)
+	\end{itemize}
+\end{itemize}
+\textbf{Hooks principaux en ce qui concerne contextd}\\
+% \textbf{Évite de passer par ULOG pour la partie "réseau"}\\
+\end{frame}
+
+\section{Objectifs suivants}
+\begin{frame}
+\frametitle{Prochaines étapes}
+\begin{enumerate}
+	\item Communication entre les espaces noyau et utilisateur :
+	\begin{itemize}
+		\item[-] Via des sockets unix ?
+		\item[-] Via un proc filesystem ?
+		\item[-] Via un chardev ?
+		\item[-] Via des appels système !
+	\end{itemize}
+	\item Démon qui fera le lien entre l'espace noyau et contextd
+	\item Eventuellement remplacé à terme par un plugin contextd
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Appels système}
+\begin{center}
+	\includegraphics[scale=0.75]{global.pdf}
+\end{center}
 \end{frame}
 
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
-\textbf{Limitations}
 \begin{itemize}
-\item Ne gêre que les graphes non-orientés.
-\item Vitesse (multi-thread).
+	\item Certains objectifs sont atteints
+	\item Seule une petite partie du projet est visible pour l'instant
 \end{itemize}
-
 \end{frame}
-
 
 \end{document}
