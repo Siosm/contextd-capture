@@ -343,13 +343,11 @@
 #define __NR_rt_tgsigqueueinfo	335
 #define __NR_perf_event_open	336
 
-/*
-#ifdef CONFIG_SECURITY_USERSPACE_AUDIT_SECURITY
-#define __NR_ausec_auth	337
-#define __NR_ausec_wait	338
-#define __NR_ausec_answer	339
-#endif
-*/
+// #ifdef CONFIG_SECURITY_USERSPACE_AUDIT_SECURITY
+// #define __NR_ausec_auth	337
+// #define __NR_ausec_wait	338
+// #define __NR_ausec_answer	339
+// #endif /* Audit Security */
 
 #ifdef __KERNEL__
 
