@@ -15,7 +15,6 @@
 #define __NR_ausec_wait 338
 #define __NR_ausec_answer 339
 
-
 long ausec_auth(int state);
 long ausec_wait(struct ausec_info * user_as_i);
 long ausec_answer(int answer);
