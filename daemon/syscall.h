@@ -10,10 +10,10 @@
 #define false 0
 
 // appels system sur x64 : 299, 300, 301
-// appels system sur i386 : 338, 339, 340
-#define __NR_ausec_auth 299
-#define __NR_ausec_wait 300
-#define __NR_ausec_answer 301
+// appels system sur i386 : 337, 338, 339
+#define __NR_ausec_auth 337
+#define __NR_ausec_wait 338
+#define __NR_ausec_answer 339
 
 
 long ausec_auth(int state);

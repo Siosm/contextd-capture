@@ -27,6 +27,7 @@
 
 asmlinkage long sys_ausec_auth(int state)
 {
+/*
 	down_interruptible(ausec_auth_lock());
 	if(state){
 		if(*daemon_pid() == -1){
@@ -44,11 +45,15 @@ asmlinkage long sys_ausec_auth(int state)
 	up(ausec_auth_lock());
 
 	return -1;
+*/
+	printk(KERN_INFO "appel systeme effectue");
+	return 0;
 }
 
 
 asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 {
+/*
 	down_interruptible(ausec_auth_lock());
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
@@ -67,11 +72,14 @@ asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 	up(ausec_answer_lock());
 	up(ausec_auth_lock());
 	return -EFAULT;
+*/
+	return 0;
 }
 
 
 asmlinkage long sys_ausec_answer(int answer)
 {
+/*
 	down_interruptible(ausec_auth_lock());
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
@@ -81,5 +89,7 @@ asmlinkage long sys_ausec_answer(int answer)
 	up(ausec_answer_lock());
 	up(ausec_auth_lock());
 
+	return 0;
+*/
 	return 0;
 }
