@@ -315,9 +315,9 @@ int audit_security_file_permission(struct file *file, int mask)
 	}
 
 	if(mnt_point != NULL) {
-	//	printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
 	} else {
-	//	printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
+		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
 	}
 	vfree(path);
 	return 0;
@@ -984,7 +984,7 @@ static struct security_operations audit_ops = {
 //	.inode_link =					audit_security_inode_link,
 //	.inode_unlink =					audit_security_inode_unlink,
 //	.inode_symlink =				audit_security_inode_symlink,
-	.inode_mkdir =					audit_security_inode_mkdir,
+//	.inode_mkdir =					audit_security_inode_mkdir,
 //	.inode_rmdir =					audit_security_inode_rmdir,
 //	.inode_mknod =					audit_security_inode_mknod,
 //	.inode_rename =					audit_security_inode_rename,
