@@ -347,7 +347,6 @@
 #define __NR_ausec_wait	338
 #define __NR_ausec_answer	339
 
-
 #ifdef __KERNEL_
 #define NR_syscalls 340
 

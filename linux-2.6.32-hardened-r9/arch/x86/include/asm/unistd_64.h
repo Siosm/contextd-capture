@@ -661,12 +661,12 @@ __SYSCALL(__NR_pwritev, sys_pwritev)
 __SYSCALL(__NR_rt_tgsigqueueinfo, sys_rt_tgsigqueueinfo)
 #define __NR_perf_event_open			298
 __SYSCALL(__NR_perf_event_open, sys_perf_event_open)
-// #define __NR_ausec_auth			299
-// __SYSCALL(__NR_ausec_auth, sys_ausec_auth)
-// #define __NR_ausec_wait			300
-// __SYSCALL(__NR_ausec_wait, sys_ausec_wait)
-// #define __NR_ausec_answer			301
-// __SYSCALL(__NR_ausec_answer, sys_ausec_answer)
+#define __NR_ausec_auth			299
+__SYSCALL(__NR_ausec_auth, sys_ausec_auth)
+#define __NR_ausec_wait			300
+__SYSCALL(__NR_ausec_wait, sys_ausec_wait)
+#define __NR_ausec_answer			301
+__SYSCALL(__NR_ausec_answer, sys_ausec_answer)
 
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR
