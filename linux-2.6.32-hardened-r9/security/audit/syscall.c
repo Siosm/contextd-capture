@@ -27,36 +27,34 @@
 
 asmlinkage long sys_ausec_auth(int state)
 {
-/*
 	down_interruptible(ausec_auth_lock());
 	if(state){
 		if(*daemon_pid() == -1){
 			*daemon_pid() = task_pid_nr(current);
 			up(ausec_auth_lock());
+			printk(KERN_INFO "AuSec: Process %d successfully registered", task_pid_nr(current));
 			return 0;
 		}
 	} else {
 		if(*daemon_pid() == task_pid_nr(current)){
 			*daemon_pid() = -1;
 			up(ausec_auth_lock());
+			printk(KERN_INFO "AuSec: Process %d NOT registered ; Current is %d", task_pid_nr(current), *daemon_pid());
 			return 0;
 		}
 	}
 	up(ausec_auth_lock());
 
 	return -1;
-*/
-	printk(KERN_INFO "appel systeme effectue");
-	return 0;
 }
 
 
 asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 {
-/*
 	down_interruptible(ausec_auth_lock());
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
+		printk(KERN_INFO "AuSec: Process %d FAILED to wait as it isn't registered ; Current is %d", task_pid_nr(current), *daemon_pid());
 		return -1;
 	}
 	down_interruptible(ausec_question_lock());
@@ -71,25 +69,23 @@ asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 	*ausec_answer() = false;
 	up(ausec_answer_lock());
 	up(ausec_auth_lock());
+	printk(KERN_INFO "AuSec: Process %d, error in data transfer to userspace ; Current is %d", task_pid_nr(current), *daemon_pid());
 	return -EFAULT;
-*/
-	return 0;
 }
 
 
 asmlinkage long sys_ausec_answer(int answer)
 {
-/*
+
 	down_interruptible(ausec_auth_lock());
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
+		printk(KERN_INFO "AuSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), *daemon_pid());
 		return -1;
 	}
 	*ausec_answer() = answer;
 	up(ausec_answer_lock());
 	up(ausec_auth_lock());
 
-	return 0;
-*/
 	return 0;
 }
