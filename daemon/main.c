@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	}
 	printf("The daemon is authenticated with the kernel.\n");
 
-	while((i < 10) && (keep_going)){
+	while(keep_going){
 		ausec_wait(usai);
 
 		if(usai->type == AUSEC_FILE){
@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
 		}
 
 		ausec_answer(true);
-		i++;
 	}
 
 	printf("Stopping daemon and telling the kenel.\n");

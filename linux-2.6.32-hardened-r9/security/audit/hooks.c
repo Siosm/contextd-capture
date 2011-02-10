@@ -339,7 +339,6 @@ int audit_security_file_permission(struct file *file, int mask)
 		down_interruptible(ausec_hook_lock());
 		if(likely(pid != *daemon_pid())){
 			// TODO Remplir la struct correctement
-			//printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
 			up(ausec_question_lock());
 			down_interruptible(ausec_answer_lock());
 			answer = (*ausec_answer() == 0);
