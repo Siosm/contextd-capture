@@ -20,6 +20,7 @@
 #include <linux/pid.h>
 #include <linux/semaphore.h>
 #include <asm-generic/uaccess.h>
+#include <linux/linkage.h>
 
 #include "share.h"
 #include "hooks.h"
