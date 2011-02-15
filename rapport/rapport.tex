@@ -155,6 +155,10 @@ Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il
 	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
 \end{figure}
 
+L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de chargé dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
+
+Pour les besoins du développement, nous avons dû donc désactiver SELinux.
+
 \newpage
 
 \subsection{Ce qui a été réalisé}
@@ -250,3 +254,4 @@ Malheureusement, seule une petite partie du projet est visible, du fait du retar
 %\printindex
 
 \end{document}
+s

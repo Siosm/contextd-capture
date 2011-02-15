@@ -337,3 +337,6 @@ ENTRY(sys_call_table)
 	.long sys_pwritev
 	.long sys_rt_tgsigqueueinfo	/* 335 */
 	.long sys_perf_event_open
+	.long sys_ausec_auth
+	.long sys_ausec_wait
+	.long sys_ausec_answer

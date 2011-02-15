@@ -54,36 +54,83 @@
 #include "hooks-func.h"
 
 
-char * dentry_path_(struct dentry *dentry)
+int calculate_path(struct dentry *dentry, char *path, size_t len)
 {
-	struct dentry *parent = dentry;
-	char *path = NULL;
-	char *path_tmp = NULL;
-	int nb = 0, n = 0;
+	int pos = 0, size = 0;
 
+	if (IS_ROOT(dentry)) {
+		return 0;
+	} else {
+		pos = calculate_path(dentry->d_parent, path, len);
+		
+		if (pos != -1 ) {
+			size = strlen(dentry->d_name.name);
+
+			if (pos + size + 1 < len) {
+				path[pos] = '/';
+				strncpy(path + pos + 1, dentry->d_name.name, size);
+				return pos + size + 1;
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
+} 
+
+int file_path(struct file *file, char *path) 
+{
+	char * mnt_point = file->f_path.mnt->mnt_devname;
+	int n = 0;
+	
+	if (strcmp("/dev/root", mnt_point)) {
+		n = strlen(mnt_point); 
+		strncpy(path, mnt_point, n);
+	}
+		
+	return calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
+}
+
+/*
+int dentry_path_(struct file *file, char * fullpath)
+{
+	struct dentry *parent = file->f_path.dentry;
+	char * mnt_point = file->f_path.mnt->mnt_devname;
+	//char *path = fullpath;
+	//char *path_tmp = NULL;
+	int nb = 0, n = 0;
+	
+	fullpath[n] = '\0';
+	
 	while(!IS_ROOT(parent)){
 		nb = strlen(parent->d_name.name);
-		path_tmp = path;
-		path = vmalloc(n + nb + 1);
-		memcpy(path + nb + 1, path_tmp, n);
-		memcpy(path + 1, parent->d_name.name, nb);
-		*path = '/';
-		vfree(path_tmp);
+		//path_tmp = path;
+		//path = vmalloc(n + nb + 1);
+		memcpy(fullpath + nb + 1, fullpath, n+1);
+		memcpy(fullpath + 1, parent->d_name.name, nb);
+		*fullpath = '/';
+		//vfree(path_tmp);
 		n += nb + 1;
 		nb = 0;
 		parent = parent->d_parent;
 	}
 
-	path_tmp = path;
-	path = vmalloc(n + 1);
-	memcpy(path, path_tmp, n);
-	vfree(path_tmp);
-	path[n] = '\0';
+	//path_tmp = path;
+	//path = vmalloc(n + 1);
+	//memcpy(path + 1, path, n);
+	//vfree(path_tmp);
+	if (strcmp("/dev/root", mnt_point)) {
+		nb = strlen(mnt_point);
+		memcpy(fullpath + nb, fullpath, n+1);
+		memcpy(fullpath, mnt_point, nb);
+	}
 
-	return path;
+	return 0;
 }
+*/
 
-
+/*
 char * mount_point (struct file * file){
 	char * mnt_point = file->f_path.mnt->mnt_devname;
 
@@ -92,7 +139,7 @@ char * mount_point (struct file * file){
 	}
 
 	return mnt_point;
-}
+}*/
 
 
 /*

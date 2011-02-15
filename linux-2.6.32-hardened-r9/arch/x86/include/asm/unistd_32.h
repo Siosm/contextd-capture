@@ -343,9 +343,12 @@
 #define __NR_rt_tgsigqueueinfo	335
 #define __NR_perf_event_open	336
 
-#ifdef __KERNEL__
+#define __NR_ausec_auth	337
+#define __NR_ausec_wait	338
+#define __NR_ausec_answer	339
 
-#define NR_syscalls 337
+#ifdef __KERNEL_
+#define NR_syscalls 340
 
 #define __ARCH_WANT_IPC_PARSE_VERSION
 #define __ARCH_WANT_OLD_READDIR
