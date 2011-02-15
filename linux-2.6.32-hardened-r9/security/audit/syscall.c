@@ -51,6 +51,7 @@ asmlinkage long sys_ausec_auth(int state)
 
 asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 {
+	/*
 	down_interruptible(ausec_auth_lock());
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
@@ -71,6 +72,8 @@ asmlinkage long sys_ausec_wait(struct ausec_info * user_as_i)
 	up(ausec_auth_lock());
 	printk(KERN_INFO "AuSec: Process %d, error in data transfer to userspace ; Current is %d", task_pid_nr(current), *daemon_pid());
 	return -EFAULT;
+	*/
+	return 0;
 }
 
 
