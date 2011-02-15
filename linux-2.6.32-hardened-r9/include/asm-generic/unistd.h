@@ -623,8 +623,16 @@ __SYSCALL(__NR_rt_tgsigqueueinfo, sys_rt_tgsigqueueinfo)
 #define __NR_perf_event_open 241
 __SYSCALL(__NR_perf_event_open, sys_perf_event_open)
 
+#define __NR_ausec_auth 242
+__SYSCALL(__NR_ausec_auth, sys_ausec_auth)
+#define __NR_ausec_question 243
+__SYSCALL(__NR_ausec_question, sys_ausec_question)
+#define __NR_ausec_answer 244
+__SYSCALL(__NR_ausec_answer, sys_ausec_answer)
+
+
 #undef __NR_syscalls
-#define __NR_syscalls 242
+#define __NR_syscalls 245
 
 /*
  * All syscalls below here should go away really,

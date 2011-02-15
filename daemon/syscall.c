@@ -5,15 +5,15 @@
 #include "ausec_info.h"
 
 
-long ausec_auth(int state)
+long ausec_reg(int state)
 {
-	return syscall(__NR_ausec_auth, state);
+	return syscall(__NR_ausec_reg, state);
 }
 
 
-long ausec_wait(struct ausec_info * user_as_i)
+long ausec_question(struct ausec_info * user_as_i)
 {
-	return syscall(__NR_ausec_wait, user_as_i);
+	return syscall(__NR_ausec_question, user_as_i);
 }
 
 

@@ -1,0 +1,9 @@
+config SECURITY_USERSPACE_AUDIT_SECURITY
+	bool "Userspace audit securty"
+	depends on AUDIT && NET && INET #&& SECURITY_NETWORK
+	select NETWORK_SECMARK
+	default n
+	help
+		Module d'audit d'application userspace. Pas de controle d'acces particulier.
+
+
