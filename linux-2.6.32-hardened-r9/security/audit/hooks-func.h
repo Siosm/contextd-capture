@@ -14,4 +14,3 @@ int calculate_path(struct dentry *, char *, size_t);
 //int print_info_audit_file(struct inode *, struct dentry *, int , char *);
 
 #endif
-
