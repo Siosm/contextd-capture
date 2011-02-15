@@ -343,9 +343,12 @@
 #define __NR_rt_tgsigqueueinfo	335
 #define __NR_perf_event_open	336
 
-#define __NR_ausec_auth	337
-#define __NR_ausec_wait	338
-#define __NR_ausec_answer	339
+#define __NR_ausec_auth <last_system_call_num + 1 >
+#define __NR_ausec_wait <last_system_call_num + 1 >
+#define __NR_ausec_answer <last_system_call_num + 1 >
+//#define __NR_ausec_auth	337
+//#define __NR_ausec_wait	338
+//#define __NR_ausec_answer	339
 
 #ifdef __KERNEL_
 #define NR_syscalls 340
