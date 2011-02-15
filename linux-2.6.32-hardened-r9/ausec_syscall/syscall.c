@@ -22,8 +22,8 @@
 #include <asm-generic/uaccess.h>
 #include <linux/linkage.h>
 
-#include <security/audit/share.h>
-#include <security/audit/hooks.h>
+#include <../security/audit/share.h>
+#include <../security/audit/hooks.h>
 
 
 asmlinkage long sys_ausec_auth(int state)
