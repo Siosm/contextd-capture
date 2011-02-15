@@ -233,21 +233,29 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-/*
-	//if(likely(auth_started)){
-		//pid_t pid= task_pid_nr(current);
-		//if(likely(pid != daemon_pid)){
-			//char * path = dentry_path_(dentry);
-			printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
-			vfree(path);
-	//	}else{
-			return 0;
-	//	}
-	else{
-		char * path = dentry_path_(dentry);
-		printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
-		vfree(path);
-	}*/
+	int answer = -1;
+	pid_t pid = task_pid_nr(current);
+
+	if(likely(*daemon_pid() != -1)){
+		down(ausec_hook_lock());
+		if(likely(pid != *daemon_pid())){
+			k_ausec_info()->ausec_struct.dir.mode = mode;
+			k_ausec_info()->type = AUSEC_DIR;
+			k_ausec_info()->pid = pid;
+			//file_path(file, k_ausec_info()->ausec_struct.dir.fullpath_filename);
+			//strncpy(k_ausec_info()->ausec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+			strncpy(k_ausec_info()->execname, current->comm, TASK_COMM_LEN);
+			// TODO Remplir la struct correctement
+			up(ausec_question_lock());
+			down(ausec_answer_lock());
+			answer = (*ausec_answer() == 0);
+			up(ausec_hook_lock());
+			return answer;
+		}
+		up(ausec_hook_lock());
+	} else {
+			printk(KERN_INFO "AuSecu: mkdir: __, pid: %d, execname: %s, mode: %d", k_ausec_info()->pid, current->comm, mode);
+	}
 
 	return 0;
 }
@@ -328,9 +336,10 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int audit_security_file_permission(struct file *file, int mask)
 {
+/*
 	int answer = -1;
 	pid_t pid = task_pid_nr(current);
-	k_ausec_info()->mask = mask;
+	k_ausec_info()->ausec_struct.file.mask = mask;
 	k_ausec_info()->type = AUSEC_FILE;
 	k_ausec_info()->pid = pid;
 	file_path(file, k_ausec_info()->ausec_struct.file.fullpath_filename);
@@ -351,6 +360,7 @@ int audit_security_file_permission(struct file *file, int mask)
 	} else {
 			printk(KERN_INFO "AuSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_ausec_info()->ausec_struct.file.fullpath_filename, k_ausec_info()->pid, k_ausec_info()->execname, k_ausec_info()->mask);
 	}
+*/
 
 	return 0;
 }
