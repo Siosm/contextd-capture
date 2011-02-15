@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <signal.h>
+#include <string.h>
 
 #include "ausec_info.h"
 #include "syscall.h"
