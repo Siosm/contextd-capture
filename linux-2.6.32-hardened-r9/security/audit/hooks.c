@@ -51,7 +51,16 @@
 #include <linux/mutex.h>
 #include <linux/posix-timers.h>
 
+#include <linux/sched.h>
+#include <linux/limits.h>
+#include <linux/semaphore.h>
+
 #include "hooks-func.h"
+#include "hooks.h"
+#include "share.h"
+
+int ausec_info_len = sizeof(struct ausec_info);
+
 
 int audit_security_ptrace_access_check(struct task_struct *child, unsigned int mode)
 {
@@ -224,9 +233,30 @@ int audit_security_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int audit_security_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	char * path = dentry_path_(dentry);
-	printk(KERN_INFO "Audit Security: Dossier cree: %s", path);
-	vfree(path);
+	int answer = -1;
+	pid_t pid = task_pid_nr(current);
+
+	if(likely(*daemon_pid() != -1)){
+		down(ausec_hook_lock());
+		if(likely(pid != *daemon_pid())){
+			k_ausec_info()->ausec_struct.dir.mode = mode;
+			k_ausec_info()->type = AUSEC_DIR;
+			k_ausec_info()->pid = pid;
+			//file_path(file, k_ausec_info()->ausec_struct.dir.fullpath_filename);
+			//strncpy(k_ausec_info()->ausec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+			strncpy(k_ausec_info()->execname, current->comm, TASK_COMM_LEN);
+			// TODO Remplir la struct correctement
+			up(ausec_question_lock());
+			down(ausec_answer_lock());
+			answer = (*ausec_answer() == 0);
+			up(ausec_hook_lock());
+			return answer;
+		}
+		up(ausec_hook_lock());
+	} else {
+			printk(KERN_INFO "AuSecu: mkdir: __, pid: %d, execname: %s, mode: %d", k_ausec_info()->pid, current->comm, mode);
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(audit_security_inode_mkdir);
@@ -306,20 +336,32 @@ void audit_security_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int audit_security_file_permission(struct file *file, int mask)
 {
-	char * path = dentry_path_(file->f_path.dentry);
-	char * mnt_point = mount_point(file);
-	pid_t pid= task_pid_nr(current); 	
-	
-	if (path == NULL) {
-		return 0;
-	}
+/*
+	int answer = -1;
+	pid_t pid = task_pid_nr(current);
+	k_ausec_info()->ausec_struct.file.mask = mask;
+	k_ausec_info()->type = AUSEC_FILE;
+	k_ausec_info()->pid = pid;
+	file_path(file, k_ausec_info()->ausec_struct.file.fullpath_filename);
+	strncpy(k_ausec_info()->ausec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+	strncpy(k_ausec_info()->execname, current->comm, TASK_COMM_LEN);
 
-	if(mnt_point != NULL) {
-		printk(KERN_INFO "AuSecu: Acces au fichier : %s%s (PID %d EXECNAME %s) mask: %d", mnt_point, path, pid, current->comm, mask);
+	if(likely(*daemon_pid() != -1)){
+		down(ausec_hook_lock());
+		if(likely(pid != *daemon_pid())){
+			// TODO Remplir la struct correctement
+			up(ausec_question_lock());
+			down(ausec_answer_lock());
+			answer = (*ausec_answer() == 0);
+			up(ausec_hook_lock());
+			return answer;
+		}
+		up(ausec_hook_lock());
 	} else {
-		printk(KERN_INFO "AuSecu: Acces au fichier : %s (PID %d EXECNAME %s) mask: %d", path, pid, current->comm, mask);
+			printk(KERN_INFO "AuSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_ausec_info()->ausec_struct.file.fullpath_filename, k_ausec_info()->pid, k_ausec_info()->execname, k_ausec_info()->mask);
 	}
-	vfree(path);
+*/
+
 	return 0;
 }
 
@@ -1159,9 +1201,16 @@ static __init int audit_security_init(void)
 
 	if (register_security(&audit_ops))
 		panic("Audit Security: Unable to register with kernel.\n");
+
+	init_MUTEX(ausec_hook_lock());
+	init_MUTEX(ausec_question_lock());
+	init_MUTEX(ausec_answer_lock());
+	init_MUTEX(ausec_auth_lock());
+
+	down(ausec_question_lock());
+	down(ausec_answer_lock());
 	
-	if (sys_mknod("/dev/auditsecurity", 700, S_IFIFO))
-		panic("Audit Security: Unable to create fifo.\n");
+	printk(KERN_INFO "Audit Security:  Waiting for daemon.\n");
 
 	return 0;
 }
