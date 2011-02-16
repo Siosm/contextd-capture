@@ -35,26 +35,26 @@ int main(int argc, char* argv[])
 	printf("The daemon is authenticated with the kernel.\n");
 
 	while(keep_going){
-		ausec_question(usai);
+		if(ausec_question(usai) == 0){
+			switch (usai->type){
+				case AUSEC_FILE:
+					printf("Ausec, file access: %s, pid: %d, execname: %s, mask: %d\n",
+							usai->file.fullpath_filename, usai->pid,
+							usai->execname, usai->file.mask);
+					break;		
+				case AUSEC_DIR:
+					printf("Ausec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
+							usai->dir.fullpath_filename, usai->pid,
+							usai->execname, usai->dir.mode);
+					break;
+				default:
+					break;
+			}
 
-		switch (usai->type){
-			case AUSEC_FILE:
-				printf("Ausec, file access: %s, pid: %d, execname: %s, mask: %d\n",
-						usai->file.fullpath_filename, usai->pid,
-						usai->execname, usai->file.mask);
-				break;		
-			case AUSEC_DIR:
-				printf("Ausec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
-						usai->dir.fullpath_filename, usai->pid,
-						usai->execname, usai->dir.mode);
-				break;
-			default:
-				break;
+			sleep(1);
+
+			ausec_answer(true);
 		}
-
-		sleep(1);
-
-		ausec_answer(true);
 	}
 
 	printf("Stopping daemon and telling the kenel.\n");
