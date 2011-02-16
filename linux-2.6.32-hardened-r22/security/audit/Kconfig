@@ -1,4 +1,4 @@
-config SECURITY_USERSPACE_AUDIT_SECURITY
+config SECURITY_AUDIT
 	bool "Userspace audit securty"
 	depends on AUDIT && NET && INET #&& SECURITY_NETWORK
 	select NETWORK_SECMARK

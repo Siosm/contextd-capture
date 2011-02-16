@@ -1,5 +1,5 @@
-#ifndef __AUDIT_SECURITY_SHARE_H__
-#define __AUDIT_SECURITY_SHARE_H__
+#ifndef __SECURITY_AUDIT_SHARE_H__
+#define __SECURITY_AUDIT_SHARE_H__
 
 #include <linux/pid.h>
 #include <linux/semaphore.h>
