@@ -1,9 +1,11 @@
 #ifndef __AUSEC_INFO_H__
 #define __AUSEC_INFO_H__
 
+
 /*
  * Defines structs and static values for system calls
  **/
+
 
 #include <unistd.h>
 
@@ -11,17 +13,32 @@
 #define NAME_MAX 255
 #define TASK_COMM_LEN 16
 
-enum ausec_type {AUSEC_FILE, AUSEC_SOCKET};
+
+enum ausec_type {AUSEC_FILE, AUSEC_SOCKET, AUSEC_DIR};
+
 
 struct ausec_file {
 	char 		filename[NAME_MAX + 1];
-	char		fullpath_filename[PATH_MAX + NAME_MAX + 1]; // Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
+	char		fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	// Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
+	int			mask;
 };
 
+
 struct ausec_socket {
+	//TODO
 	//struct aaa	ip_dest;
 	int			port;
 };
+
+
+struct ausec_dir {
+	char 		filename[NAME_MAX + 1];
+	char		fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	// Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier mounter d'un repertoire
+	int			mode;
+};
+
 
 struct ausec_info {
 	pid_t		pid;
@@ -37,6 +54,7 @@ struct ausec_info {
 	{
 		struct ausec_file file;
 		struct ausec_socket socket;
+		struct ausec_dir dir;
 	};
 };
 
