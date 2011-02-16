@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <signal.h>
+#include <string.h>
 
 #include "ausec_info.h"
 #include "syscall.h"
@@ -8,11 +10,22 @@
 
 int keep_going = 1;
 
+void signal_manager(int signal)
+{
+	printf(" detected...\n");
+	keep_going = 0;
+}
+
 int main(int argc, char* argv[])
 {
 	struct ausec_info * usai = malloc(sizeof(struct ausec_info));
 	int i = 0;
+	struct sigaction action;
 
+	memset(&action, 0, sizeof(struct sigaction));
+  	action.sa_handler = signal_manager;
+  	sigaction(SIGINT, &action, NULL);
+	
 	if(ausec_auth(true) != 0){
 		printf("FAILED to authenticate with the kernel.\n");
 		return -1;

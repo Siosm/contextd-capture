@@ -12,15 +12,15 @@
 // appels system sur x64 : 299, 300, 301
 // appels system sur i386 : 337, 338, 339
 #ifdef __X86_64
-#define __NR_ausec_auth 299
-#define __NR_ausec_wait 300
-#define __NR_ausec_answer 301
+#define __NR_sys_ausec_rec 242
+#define __NR_sys_ausec_question 243
+#define __NR_sys_ausec_answer 244
 #endif
 
 #ifdef __I686
-#define __NR_ausec_auth 337
-#define __NR_ausec_wait 338
-#define __NR_ausec_answer 339
+#define __NR_sys_ausec_rec 242
+#define __NR_sys_ausec_question 243
+#define __NR_sys_ausec_answer 244
 #endif
 
 long ausec_auth(int state);
