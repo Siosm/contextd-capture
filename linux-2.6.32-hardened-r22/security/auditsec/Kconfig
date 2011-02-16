@@ -1,0 +1,9 @@
+config SECURITY_AUDITSEC
+	bool "Userspace contextd capture LSM hook"
+	depends on AUDIT && NET && INET #&& SECURITY_NETWORK
+	select NETWORK_SECMARK
+	default n
+	help
+		Module pour communiquer avec contextd pour la gestion des applications userspace.
+
+

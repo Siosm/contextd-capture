@@ -1,5 +1,5 @@
-#ifndef __HOOKS_FUNC_H__
-#define __HOOKS_FUNC_H__
+#ifndef __AUDITSEC_HOOKS_FUNC_H__
+#define __AUDITSEC_HOOKS_FUNC_H__
 
 #include <linux/file.h>
 #include <linux/mount.h>

@@ -6,13 +6,11 @@
 #include "ausec_info.h"
 #include "syscall.h"
 
-// TODO : GÃrer les signaux
-
 int keep_going = 1;
 
 void signal_manager(int signal)
 {
-	printf(" detected...\n");
+	printf("^C detected...\n");
 	keep_going = 0;
 }
 
@@ -22,31 +20,47 @@ int main(int argc, char* argv[])
 	int i = 0;
 	struct sigaction action;
 
+	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
   	action.sa_handler = signal_manager;
   	sigaction(SIGINT, &action, NULL);
 	
-	if(ausec_register(true) != 0){
+	while((ausec_register(true) != 0) && (i < 10)){
 		printf("FAILED to authenticate with the kernel.\n");
-		return -1;
+		++i;
 	}
+	if((i == 10) || (keep_going == 0))
+		return -1;
+
 	printf("The daemon is authenticated with the kernel.\n");
 
 	while(keep_going){
-		ausec_question(usai);
+		if(ausec_question(usai) == 0){
+			switch (usai->type){
+				case AUSEC_FILE:
+					printf("Ausec, file access: %s, pid: %d, execname: %s, mask: %d\n",
+							usai->file.fullpath_filename, usai->pid,
+							usai->execname, usai->file.mask);
+					break;		
+				case AUSEC_DIR:
+					printf("Ausec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
+							usai->dir.fullpath_filename, usai->pid,
+							usai->execname, usai->dir.mode);
+					break;
+				default:
+					break;
+			}
 
-		if(usai->type == AUSEC_FILE){
-			printf("Ausec, file access: %s, pid: %d, execname: %s, mask: %d\n",
-					usai->file.fullpath_filename, usai->pid,
-					usai->execname, usai->mask);
+			sleep(1);
+
+			ausec_answer(true);
 		}
-
-		ausec_answer(true);
 	}
 
 	printf("Stopping daemon and telling the kenel.\n");
 	if(ausec_register(false) != 0){
-		printf("The kernel is NOT ok. You should reboot.\n");
+		printf("The kernel state may NOT be ok. You should reboot.\n");
+		return -1;
 	}
 	printf("The kernel is ok.\n");
 
