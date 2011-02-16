@@ -3,8 +3,8 @@
  **/
 
 
-#ifndef __SECURITY_AUDIT_HOOKS_H__
-#define __SECURITY_AUDIT_HOOKS_H__
+#ifndef __AUDITSEC_HOOKS_H__
+#define __AUDITSEC_HOOKS_H__
 
 
 #include <linux/pid.h>

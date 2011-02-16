@@ -28,7 +28,9 @@
 
 asmlinkage long sys_ausec_reg(int state)
 {
-	int tmp = down_interruptible(ausec_auth_lock());
+	if(down_interruptible(ausec_auth_lock()) != 0)
+		return -1;
+		
 	if(state){
 		if(*daemon_pid() == -1){
 			*daemon_pid() = task_pid_nr(current);
@@ -52,7 +54,9 @@ asmlinkage long sys_ausec_reg(int state)
 
 asmlinkage long sys_ausec_question(struct ausec_info * user_as_i)
 {
-	int tmp = down_interruptible(ausec_auth_lock());
+	if(down_interruptible(ausec_auth_lock()) != 0)
+		return -1;
+
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
 		printk(KERN_INFO "AuSec: Process %d FAILED to wait as it isn't registered ; Current is %d", task_pid_nr(current), *daemon_pid());
@@ -80,7 +84,9 @@ asmlinkage long sys_ausec_question(struct ausec_info * user_as_i)
 asmlinkage long sys_ausec_answer(int answer)
 {
 
-	int tmp = down_interruptible(ausec_auth_lock());
+	if(down_interruptible(ausec_auth_lock()) != 0)
+		return -1;
+
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
 		printk(KERN_INFO "AuSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), *daemon_pid());
