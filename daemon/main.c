@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	printf("The daemon is authenticated with the kernel.\n");
 
 	while(keep_going){
-		ausec_wait(usai);
+		ausec_question(usai);
 
 		if(usai->type == AUSEC_FILE){
 			printf("Ausec, file access: %s, pid: %d, execname: %s, mask: %d\n",

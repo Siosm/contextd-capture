@@ -5,7 +5,7 @@
 #include "ausec_info.h"
 
 
-long ausec_reg(int state)
+long ausec_register(int state)
 {
 	return syscall(__NR_sys_ausec_reg, state);
 }

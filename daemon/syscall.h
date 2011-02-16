@@ -11,13 +11,13 @@
 
 // appels system sur x64 : 299, 300, 301
 // appels system sur i386 : 337, 338, 339
-#ifdef __X86_64
+#ifdef __x86_64
 #define __NR_sys_ausec_reg 242
 #define __NR_sys_ausec_question 243
 #define __NR_sys_ausec_answer 244
 #endif
 
-#ifdef __I686
+#ifdef __i686
 #define __NR_sys_ausec_reg 242
 #define __NR_sys_ausec_question 243
 #define __NR_sys_ausec_answer 244
