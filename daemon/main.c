@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
   	action.sa_handler = signal_manager;
   	sigaction(SIGINT, &action, NULL);
 	
-	if(ausec_auth(true) != 0){
+	if(ausec_register(true) != 0){
 		printf("FAILED to authenticate with the kernel.\n");
 		return -1;
 	}
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 	}
 
 	printf("Stopping daemon and telling the kenel.\n");
-	if(ausec_auth(false) != 0){
+	if(ausec_register(false) != 0){
 		printf("The kernel is NOT ok. You should reboot.\n");
 	}
 	printf("The kernel is ok.\n");
