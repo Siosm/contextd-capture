@@ -59,12 +59,13 @@ asmlinkage long sys_ausec_question(struct ausec_info * user_as_i)
 
 	if(*daemon_pid() != task_pid_nr(current)){
 		up(ausec_auth_lock());
-		printk(KERN_INFO "AuSec: Process %d FAILED to wait as it isn't registered ; Current is %d", task_pid_nr(current), *daemon_pid());
+		printk(KERN_INFO "AuSec: Process %d FAILED to wait: NOT registered ; Current is %d", task_pid_nr(current), *daemon_pid());
 		return -1;
 	}
 	up(ausec_auth_lock());
-	/*
-	down_interruptible(ausec_question_lock());
+	if(down_interruptible(ausec_question_lock()) != 0)
+		return -1;
+
 	// TODO : faire les tests sur le pointeur donne par le processus ?
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, k_ausec_info(), sizeof(struct ausec_info)) == 0)){
@@ -76,8 +77,6 @@ asmlinkage long sys_ausec_question(struct ausec_info * user_as_i)
 	up(ausec_answer_lock());
 	printk(KERN_INFO "AuSec: Process %d, error in data transfer to userspace ; Current is %d", task_pid_nr(current), *daemon_pid());
 	return -EFAULT;
-	*/
-	return 0;
 }
 
 
