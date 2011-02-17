@@ -57,7 +57,7 @@ struct getcpu_cache;
 struct old_linux_dirent;
 struct perf_event_attr;
 
-struct ausec_info;
+struct auditsec_info;
 
 #include <linux/types.h>
 #include <linux/aio_abi.h>
@@ -887,7 +887,7 @@ asmlinkage long sys_perf_event_open(
 asmlinkage long sys_mmap_pgoff(unsigned long addr, unsigned long len,
 			unsigned long prot, unsigned long flags,
 			unsigned long fd, unsigned long pgoff);
-asmlinkage long sys_ausec_reg(int state);
-asmlinkage long sys_ausec_question(struct ausec_info * user_as_i);
-asmlinkage long sys_ausec_answer(int answer);
+asmlinkage long sys_auditsec_reg(int state);
+asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i);
+asmlinkage long sys_auditsec_answer(int answer);
 #endif

@@ -342,9 +342,9 @@
 #define __NR_pwritev		334
 #define __NR_rt_tgsigqueueinfo	335
 #define __NR_perf_event_open	336
-#define __NR_ausec_reg	337
-#define __NR_ausec_question	338
-#define __NR_ausec_answer	339
+#define __NR_auditsec_reg	337
+#define __NR_auditsec_question	338
+#define __NR_auditsec_answer	339
 
 #ifdef __KERNEL__
 

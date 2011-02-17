@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 
-#include "ausec_info.h"
+#include "auditsec_info.h"
 
 #define true 1
 #define false 0
@@ -12,19 +12,19 @@
 // appels system sur x64 : 299, 300, 301
 // appels system sur i386 : 337, 338, 339
 #ifdef __x86_64
-#define __NR_sys_ausec_reg 299
-#define __NR_sys_ausec_question 300
-#define __NR_sys_ausec_answer 301
+#define __NR_sys_auditsec_reg 299
+#define __NR_sys_auditsec_question 300
+#define __NR_sys_auditsec_answer 301
 #endif
 
 #ifdef __i686
-#define __NR_sys_ausec_reg 337
-#define __NR_sys_ausec_question 338
-#define __NR_sys_ausec_answer 339
+#define __NR_sys_auditsec_reg 337
+#define __NR_sys_auditsec_question 338
+#define __NR_sys_auditsec_answer 339
 #endif
 
-long ausec_register(int state);
-long ausec_wait(struct ausec_info * user_as_i);
-long ausec_answer(int answer);
+long auditsec_register(int state);
+long auditsec_wait(struct auditsec_info * user_as_i);
+long auditsec_answer(int answer);
 
 #endif
