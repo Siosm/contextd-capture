@@ -244,7 +244,9 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			k_auditsec_info()->pid = pid;
 			//file_path(file, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
 			//strncpy(k_auditsec_info()->auditsec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-			strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+			//strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+			get_task_comm(k_auditsec_info()->execname, current);
+			//get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			// TODO Remplir la struct correctement
 			up(auditsec_question_lock());
 			down(auditsec_answer_lock());
@@ -344,7 +346,8 @@ int auditsec_file_permission(struct file *file, int mask)
 	k_auditsec_info()->pid = pid;
 	file_path(file, k_auditsec_info()->auditsec_struct.file.fullpath_filename);
 	strncpy(k_auditsec_info()->auditsec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-	strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+	get_task_comm(k_auditsec_info()->execname, current);
+	get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 	
 	if (pid != *daemon_pid()) {
 		if (likely(*daemon_pid() != -1)){

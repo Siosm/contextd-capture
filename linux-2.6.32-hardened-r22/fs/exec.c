@@ -979,10 +979,27 @@ char *get_task_comm(char *buf, struct task_struct *tsk)
 	return buf;
 }
 
+char *get_task_full_exec_path(char *buf, struct task_struct *tsk)
+{
+	/* buf must be at least sizeof(tsk->comm) in size */
+	task_lock(tsk);
+	strncpy(buf, tsk->fullpath, sizeof(tsk->fullpath));
+	task_unlock(tsk);
+	return buf;
+}
+
 void set_task_comm(struct task_struct *tsk, char *buf)
 {
 	task_lock(tsk);
 	strlcpy(tsk->comm, buf, sizeof(tsk->comm));
+	task_unlock(tsk);
+	perf_event_comm(tsk);
+}
+
+void set_task_full_exec_path(struct task_struct *tsk, char *buf)
+{
+	task_lock(tsk);
+	strlcpy(tsk->fullpath, buf, sizeof(tsk->fullpath));
 	task_unlock(tsk);
 	perf_event_comm(tsk);
 }
@@ -1023,9 +1040,10 @@ EXPORT_SYMBOL(flush_old_exec);
 
 void setup_new_exec(struct linux_binprm * bprm)
 {
-	int i, ch;
+	int i, j=0, ch;
 	char * name;
 	char tcomm[sizeof(current->comm)];
+	char tfullpath[sizeof(current->fullpath)];
 
 	arch_pick_mmap_layout(current->mm);
 
@@ -1041,14 +1059,23 @@ void setup_new_exec(struct linux_binprm * bprm)
 
 	/* Copies the binary name from after last slash */
 	for (i=0; (ch = *(name++)) != '\0';) {
-		if (ch == '/')
+		if (ch == '/') {
+			j += i + 1; 
 			i = 0; /* overwrite what we wrote */
+		}
 		else
 			if (i < (sizeof(tcomm) - 1))
 				tcomm[i++] = ch;
 	}
 	tcomm[i] = '\0';
 	set_task_comm(current, tcomm);
+
+	/* Copied the binary full path name until last slash */
+	name = bprm->filename;
+	name[j] = '\0';
+	strncpy(tfullpath, name, j+1);
+
+	set_task_full_exec_path(current, tfullpath);
 
 	/* Set the new mm task size. We have to do that late because it may
 	 * depend on TIF_32BIT which is only updated in flush_thread() on

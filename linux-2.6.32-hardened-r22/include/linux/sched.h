@@ -61,6 +61,7 @@ struct sched_param {
 #include <linux/errno.h>
 #include <linux/nodemask.h>
 #include <linux/mm_types.h>
+#include <linux/limits.h>
 
 #include <asm/system.h>
 #include <asm/page.h>
@@ -1366,6 +1367,10 @@ struct task_struct {
 				     - access with [gs]et_task_comm (which lock
 				       it with task_lock())
 				     - initialized normally by setup_new_exec */
+	char fullpath[PATH_MAX]; /* path excluded previously 
+				     - access with [gs]et_task_full_exec_path (which lock
+				       it with task_lock())
+				     - initialized normally by setup_new_exec */
 /* file system info */
 	int link_count, total_link_count;
 #ifdef CONFIG_SYSVIPC
@@ -2236,6 +2241,8 @@ struct task_struct *fork_idle(int);
 
 extern void set_task_comm(struct task_struct *tsk, char *from);
 extern char *get_task_comm(char *to, struct task_struct *tsk);
+extern char *get_task_full_exec_path(char *to, struct task_struct *tsk);
+extern void set_task_full_exec_path(struct task_struct *tsk, char *from);
 
 #ifdef CONFIG_SMP
 extern void wait_task_context_switch(struct task_struct *p);
