@@ -234,27 +234,28 @@ int auditsec_inode_symlink(struct inode *dir, struct dentry *dentry,
 int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int answer = -1;
-	pid_t pid = task_pid_nr(current);
+
+	k_auditsec_info()->pid = task_pid_nr(current);
+	strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+
+	k_auditsec_info()->type = AUDITSEC_DIR;
+	//file_path(file, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
+	//strncpy(k_auditsec_info()->auditsec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+	k_auditsec_info()->auditsec_struct.dir.mode = mode;
 
 	if(likely(*daemon_pid() != -1)){
-		down(auditsec_hook_lock());
-		if(likely(pid != *daemon_pid())){
-			k_auditsec_info()->auditsec_struct.dir.mode = mode;
-			k_auditsec_info()->type = AUDITSEC_DIR;
-			k_auditsec_info()->pid = pid;
-			//file_path(file, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
-			//strncpy(k_auditsec_info()->auditsec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-			strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
-			// TODO Remplir la struct correctement
+		if(likely(k_auditsec_info()->pid != *daemon_pid())){
+			down(auditsec_hook_lock());
+			// TODO Finir de remplir la struct correctement
 			up(auditsec_question_lock());
 			down(auditsec_answer_lock());
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 			return answer;
 		}
-		up(auditsec_hook_lock());
 	} else {
-			printk(KERN_INFO "AuditSec: mkdir: __, pid: %d, execname: %s, mode: %d", k_auditsec_info()->pid, current->comm, mode);
+		printk(KERN_INFO "AuditSec: mkdir: __, pid: %d, execname: %s, mode: %d",
+				k_auditsec_info()->pid, current->comm, mode);
 	}
 
 	return 0;
@@ -336,34 +337,33 @@ void auditsec_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int auditsec_file_permission(struct file *file, int mask)
 {
-
 	int answer = -1;
-	pid_t pid = task_pid_nr(current);
-	k_auditsec_info()->auditsec_struct.file.mask = mask;
+
+	k_auditsec_info()->pid = task_pid_nr(current);
+	strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+
 	k_auditsec_info()->type = AUDITSEC_FILE;
-	k_auditsec_info()->pid = pid;
+	k_auditsec_info()->auditsec_struct.file.mask = mask;
 	file_path(file, k_auditsec_info()->auditsec_struct.file.fullpath_filename);
 	strncpy(k_auditsec_info()->auditsec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-	strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
 	
-	if (pid != *daemon_pid()) {
+	if (k_auditsec_info()->pid != *daemon_pid()) {
 		if (likely(*daemon_pid() != -1)){
 			down(auditsec_hook_lock());
-			if(likely(pid != *daemon_pid())){
-				// TODO Remplir la struct correctement
-				up(auditsec_question_lock());
-				down(auditsec_answer_lock());
-				answer = (*auditsec_answer() == 0);
-				up(auditsec_hook_lock());
-				return answer;
-			}
+			// TODO Finir de remplir la struct correctement
+			up(auditsec_question_lock());
+			down(auditsec_answer_lock());
+			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
+			return answer;
 		} else {
-				printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d", k_auditsec_info()->auditsec_struct.file.fullpath_filename, k_auditsec_info()->pid, k_auditsec_info()->execname, k_auditsec_info()->auditsec_struct.file.mask);
+			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+					k_auditsec_info()->auditsec_struct.file.fullpath_filename,
+					k_auditsec_info()->pid, k_auditsec_info()->execname,
+					k_auditsec_info()->auditsec_struct.file.mask);
 		}
-	} else {
-		return 0;
 	}
+
 	return 0;
 }
 
