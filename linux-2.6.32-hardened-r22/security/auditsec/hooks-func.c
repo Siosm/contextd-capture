@@ -89,7 +89,9 @@ int file_path(struct file *file, char *path)
 		strncpy(path, mnt_point, n);
 	}
 		
-	return calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
+	n = calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
+	path[n] = '\0';
+	return n+1;
 }
 
 /*
