@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 				case AUDITSEC_FILE:
 					printf("AuditSec, file access: %s, pid: %d, execname: %s, mask: %d\n",
 							usai->auditsec_struct.file.fullpath_filename, usai->pid,
-							usai->execname, usai->auditsec_struct.file.ask);
+							usai->execname, usai->auditsec_struct.file.mask);
 					break;		
 				case AUDITSEC_DIR:
 					printf("AuditSec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
