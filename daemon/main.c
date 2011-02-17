@@ -52,8 +52,6 @@ int main(int argc, char* argv[])
 					break;
 			}
 
-			sleep(1);
-
 			auditsec_answer(true);
 		}
 	}
