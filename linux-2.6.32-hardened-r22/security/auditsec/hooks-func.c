@@ -94,6 +94,15 @@ int file_path(struct file *file, char *path)
 	return n+1;
 }
 
+int dir_path(struct dentry *dentry, char *path) 
+{
+	int n = 0;
+	
+	n = calculate_path(dentry, path + n, NAME_MAX + PATH_MAX - n);
+	path[n] = '\0';
+	return n+1;
+}
+
 /*
 int dentry_path_(struct file *file, char * fullpath)
 {

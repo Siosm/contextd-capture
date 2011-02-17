@@ -7,6 +7,8 @@
 
 int file_path(struct file *, char *);
 
+int dir_path(struct dentry *, char *);
+
 int calculate_path(struct dentry *, char *, size_t); 
 
 //int mount_point (struct file *, char * mnt_point);

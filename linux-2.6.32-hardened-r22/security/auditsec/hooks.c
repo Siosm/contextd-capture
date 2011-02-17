@@ -234,9 +234,9 @@ int auditsec_inode_symlink(struct inode *dir, struct dentry *dentry,
 int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int answer = -1;
-	//char fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	char fullpath_filename[PATH_MAX + NAME_MAX + 1];
 
-	//dir_path(file, fullpath_filename);
+	dir_path(dentry, fullpath_filename);
 	if (task_pid_nr(current) > *daemon_pid()) {
 		if(likely(*daemon_pid() != -1)){
 			if(likely(task_pid_nr(current) != *daemon_pid())){
@@ -245,11 +245,10 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 				k_auditsec_info()->pid = task_pid_nr(current);
 				strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
 				k_auditsec_info()->type = AUDITSEC_DIR;
-				//file_path(file, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
+				dir_path(dentry, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
 				//strncpy(k_auditsec_info()->auditsec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-				//strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
 				get_task_comm(k_auditsec_info()->execname, current);
-				//get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
+				get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 				k_auditsec_info()->auditsec_struct.dir.mode = mode;
 				// TODO Finir de remplir la struct correctement
 	
