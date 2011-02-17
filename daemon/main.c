@@ -39,15 +39,16 @@ int main(int argc, char* argv[])
 			switch (usai->type){
 				case AUDITSEC_FILE:
 					printf("AuditSec, file access: %s, pid: %d, execname: %s, mask: %d\n",
-							usai->file.fullpath_filename, usai->pid,
-							usai->execname, usai->file.mask);
+							usai->auditsec_struct.file.fullpath_filename, usai->pid,
+							usai->execname, usai->auditsec_struct.file.ask);
 					break;		
 				case AUDITSEC_DIR:
 					printf("AuditSec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
-							usai->dir.fullpath_filename, usai->pid,
-							usai->execname, usai->dir.mode);
+							usai->auditsec_struct.dir.fullpath_filename, usai->pid,
+							usai->execname, usai->auditsec_struct.dir.mode);
 					break;
 				default:
+					printf("AuditSec, can't determine struct type !");
 					break;
 			}
 

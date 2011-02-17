@@ -44,7 +44,6 @@ struct auditsec_info {
 	pid_t		pid;
 	char		execname[TASK_COMM_LEN];
 	char		fullpath_execname[PATH_MAX];
-	int			mask;
 	/**
 	 * Si l'on veut prendre en compte les contextes de sécurité SELinux, il
 	 * suffit de les rajouter dans cette structure : char * sc;
@@ -55,7 +54,7 @@ struct auditsec_info {
 		struct auditsec_file file;
 		struct auditsec_socket socket;
 		struct auditsec_dir dir;
-	};
+	} auditsec_struct;
 };
 
 #endif

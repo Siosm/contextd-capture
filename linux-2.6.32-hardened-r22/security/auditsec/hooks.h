@@ -32,7 +32,8 @@ struct auditsec_socket {
 
 struct auditsec_dir {
 	char 		filename[NAME_MAX + 1];
-	char		fullpath_filename[PATH_MAX + NAME_MAX + 1]; // Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier monté d'un repertoire
+	char		fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	// Doute sur la taille dans le cas d'un fichier appartenant a un systeme de fichier monté d'un repertoire
 	int			mode;
 };
 
