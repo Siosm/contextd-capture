@@ -38,14 +38,15 @@ int main(int argc, char* argv[])
 			switch (usai->type){
 				case AUDITSEC_FILE:
 					if(strcmp("sshd", usai->execname) != 0){
-					printf("AuditSec, file access: %s, pid: %d, execname: %s%s, mask: %d\n",
-							usai->auditsec_struct.file.fullpath_filename, usai->pid,
-							usai->fullpath_execname, usai->execname, usai->auditsec_struct.file.mask);
+					printf("AuditSec, file access: %s%s, pid: %d, execname: %s%s, mask: %d\n",
+							usai->auditsec_struct.file.fullpath, usai->auditsec_struct.file.name,
+							usai->pid, usai->fullpath_execname, usai->execname,
+							usai->auditsec_struct.file.mask);
 					} 
-					break;		
+					break;
 				case AUDITSEC_DIR:
 					printf("AuditSec, mkdir: %s, pid: %d, execname:%s%s, mode: %d\n",
-							usai->auditsec_struct.dir.fullpath_filename, usai->pid,
+							usai->auditsec_struct.dir.fullpath, usai->pid,
 							usai->fullpath_execname, usai->execname, usai->auditsec_struct.dir.mode);
 					break;
 				default:

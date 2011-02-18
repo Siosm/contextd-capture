@@ -19,11 +19,37 @@
 
 #include <linux/pid.h>
 #include <linux/semaphore.h>
-#include <asm-generic/uaccess.h>
+#include <linux/uaccess.h>
 #include <linux/linkage.h>
+#include <linux/vmalloc.h>
 
 #include "share.h"
 #include "hooks.h"
+
+void pid_branch (struct task_struct *tsk) 
+{
+	pid_t *branch = NULL;
+	pid_t *tmp = NULL;
+	int n = 0, i = 0;
+
+	while(*tsk != NULL) {
+		tmp = branch;
+		branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
+		for(i=0; i<n; i++) branch[i] = tmp[i];
+		vfree(tmp);
+		branch[n] = task_pid_nr(tsk);
+		tsk = tsk->real_parent;
+		n++;
+	}
+	tmp = branch;
+	branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
+	for(i=0; i<n; i++) branch[i] = tmp[i];
+	vfree(tmp);
+	branch[n] = 0;
+
+	*daemon_pid() = branch;
+}
+
 
 
 asmlinkage long sys_auditsec_reg(int state)
@@ -32,20 +58,23 @@ asmlinkage long sys_auditsec_reg(int state)
 		return -1;
 		
 	if(state){
-		if(*daemon_pid() == -1){
-			*daemon_pid() = task_pid_nr(current);
+		if(*daemon_pid() == NULL){
+			pid_branch(current);
 			up(auditsec_auth_lock());
-			printk(KERN_INFO "AuditSec: Process %d successfully registered", task_pid_nr(current));
+			printk(KERN_INFO "AuditSec: Process %d successfully registered",
+					task_pid_nr(current));
 			return 0;
 		}
 	} else {
-		if(*daemon_pid() == task_pid_nr(current)){
-			*daemon_pid() = -1;
+		if(**daemon_pid() == task_pid_nr(current)){
+			vfree(*daemon_pid());
+			*daemon_pid() = NULL;
 			up(auditsec_auth_lock());
-			printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d", task_pid_nr(current), *daemon_pid());
 			return 0;
 		}
 	}
+	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
+			task_pid_nr(current), **daemon_pid());
 	up(auditsec_auth_lock());
 
 	return -1;
@@ -57,12 +86,23 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	if(down_interruptible(auditsec_auth_lock()) != 0)
 		return -1;
 
-	if(*daemon_pid() != task_pid_nr(current)){
+	if(*daemon_pid() == NULL){
+		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered",
+				task_pid_nr(current));
 		up(auditsec_auth_lock());
-		printk(KERN_INFO "AuditSec: Process %d FAILED to wait: NOT registered ; Current is %d", task_pid_nr(current), *daemon_pid());
 		return -1;
 	}
+
+	if(**daemon_pid() != task_pid_nr(current)){
+		up(auditsec_auth_lock());
+		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered ; Current is %d",
+				task_pid_nr(current), **daemon_pid());
+		up(auditsec_auth_lock());
+		return -1;
+	}
+
 	up(auditsec_auth_lock());
+
 	if(down_interruptible(auditsec_question_lock()) != 0)
 		return -1;
 
@@ -75,7 +115,8 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	// si erreur, on refuse l'operation
 	*auditsec_answer() = false;
 	up(auditsec_answer_lock());
-	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace ; Current is %d", task_pid_nr(current), *daemon_pid());
+	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace ; Current is %d",
+			task_pid_nr(current), **daemon_pid());
 	return -EFAULT;
 }
 
@@ -86,11 +127,19 @@ asmlinkage long sys_auditsec_answer(int answer)
 	if(down_interruptible(auditsec_auth_lock()) != 0)
 		return -1;
 
-	if(*daemon_pid() != task_pid_nr(current)){
+	if(*daemon_pid() == NULL){
+		printk(KERN_INFO "AuditSec: Process %d FAILED to answer: NOT registered",
+				task_pid_nr(current));
 		up(auditsec_auth_lock());
-		printk(KERN_INFO "AuditSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), *daemon_pid());
 		return -1;
 	}
+
+	if(**daemon_pid() != task_pid_nr(current)){
+		up(auditsec_auth_lock());
+		printk(KERN_INFO "AuditSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), **daemon_pid());
+		return -1;
+	}
+
 	up(auditsec_auth_lock());
 	*auditsec_answer() = answer;
 	up(auditsec_answer_lock());

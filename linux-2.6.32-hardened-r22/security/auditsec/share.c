@@ -5,9 +5,9 @@
 #include "hooks.h"
 
 
-pid_t * daemon_pid()
+pid_t ** daemon_pid()
 {
-	static pid_t		daemon_pid = -1;
+	static pid_t *		daemon_pid = NULL;
 	return &daemon_pid;
 }
 

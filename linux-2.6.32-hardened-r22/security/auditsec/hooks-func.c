@@ -103,31 +103,6 @@ int dir_path(struct dentry *dentry, char *path)
 	return n+1;
 }
 
-void pid_branch (struct task_struct *tsk) 
-{
-	pid_t *branch = NULL;
-	pid_t *tmp = NULL;
-	int n = 0, i = 0;
-
-	while(*tsk != NULL) {
-		tmp = branch;
-		branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
-		for(i=0; i<n; i++) branch[i] = tmp[i];
-		vfree(tmp);
-		branch[n] = task_pid_nr(tsk);
-		tsk = tsk->real_parent;
-		n++;
-	}
-	tmp = branch;
-	branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
-	for(i=0; i<n; i++) branch[i] = tmp[i];
-	vfree(tmp);
-	branch[n] = 0;
-
-	*daemon_pid() = branch;
-}
-
-
 /*
 int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
 {

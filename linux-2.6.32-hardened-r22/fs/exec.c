@@ -1040,7 +1040,7 @@ EXPORT_SYMBOL(flush_old_exec);
 
 void setup_new_exec(struct linux_binprm * bprm)
 {
-	int i, j=0, ch;
+	int i, j = 0, ch;
 	char * name;
 	char tcomm[sizeof(current->comm)];
 	char tfullpath[sizeof(current->fullpath)];
@@ -1070,10 +1070,10 @@ void setup_new_exec(struct linux_binprm * bprm)
 	tcomm[i] = '\0';
 	set_task_comm(current, tcomm);
 
-	/* Copied the binary full path name until last slash */
+	/* Copies the binary full path */
 	name = bprm->filename;
 	name[j] = '\0';
-	strncpy(tfullpath, name, j+1);
+	strncpy(tfullpath, name, j + 1);
 
 	set_task_full_exec_path(current, tfullpath);
 
