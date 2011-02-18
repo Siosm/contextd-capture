@@ -37,9 +37,11 @@ int main(int argc, char* argv[])
 		if(auditsec_question(usai) == 0){
 			switch (usai->type){
 				case AUDITSEC_FILE:
+					if(strcmp("sshd", usai->execname) != 0){
 					printf("AuditSec, file access: %s, pid: %d, execname: %s%s, mask: %d\n",
 							usai->auditsec_struct.file.fullpath_filename, usai->pid,
 							usai->fullpath_execname, usai->execname, usai->auditsec_struct.file.mask);
+					} 
 					break;		
 				case AUDITSEC_DIR:
 					printf("AuditSec, mkdir: %s, pid: %d, execname:%s%s, mode: %d\n",
