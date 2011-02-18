@@ -237,7 +237,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	char fullpath_filename[PATH_MAX + NAME_MAX + 1];
 
 	dir_path(dentry, fullpath_filename);
-	if (task_pid_nr(current) > *daemon_pid()) {
+	if (task_pid_nr(current) != *daemon_pid()) {
 		if(likely(*daemon_pid() != -1)){
 			if(likely(task_pid_nr(current) != *daemon_pid())){
 				down(auditsec_hook_lock());
@@ -347,7 +347,7 @@ int auditsec_file_permission(struct file *file, int mask)
 
 	file_path(file, fullpath_filename);
 
-	if (task_pid_nr(current) > *daemon_pid()) {
+	if (task_pid_nr(current) != *daemon_pid()) {
 		if (likely(*daemon_pid() != -1)){
 			down(auditsec_hook_lock());
 
