@@ -26,18 +26,10 @@ int main(int argc, char* argv[])
   	sigaction(SIGINT, &action, NULL);
 	
 	while(keep_going){
-		#ifdef DEF_A
-		printf("A trying to open file test\t");
+		printf("%s: trying to open file test\t", *argv);
 		filedes = open("test", O_RDWR);
 		close(filedes);
-		printf("A file test opened & closed\n");
-		#endif
-		#ifdef DEF_B
-		printf("B trying to open file test\t");
-		filedes = open("test", O_RDWR);
-		close(filedes);
-		printf("B file test opened & closed\n");
-		#endif
+		printf("%s: file test opened & closed\n", *argv);
 	}
 
 	return 0;

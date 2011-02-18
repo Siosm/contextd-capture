@@ -1,7 +1,7 @@
 all: cibleA cibleB
 
 cibleA:
-	gcc main.c -o testA -DDEF_A
+	gcc main.c -o testA 
 
 cibleB:
-	gcc main.c -o testB -DDEF_B
+	gcc main.c -o testB
