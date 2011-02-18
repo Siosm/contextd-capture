@@ -22,9 +22,8 @@ int main(int argc, char* argv[])
 
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
-  	action.sa_handler = signal_manager;
-  	sigaction(SIGINT, &action, NULL);
-	
+	action.sa_handler = signal_manager;
+	sigaction(SIGINT, &action, NULL);
 	while((auditsec_register(true) != 0) && (i < 10)){
 		printf("FAILED to authenticate with the kernel.\n");
 		++i;
