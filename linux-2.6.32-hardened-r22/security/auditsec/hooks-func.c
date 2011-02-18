@@ -110,7 +110,7 @@ int pid_branch (struct task_struct *tsk)
 	pid_t *tmp = NULL;
 	int n = 0, i =0;
 
-	while(*tsk != NULL) {
+	while(tsk != NULL){
 		tmp = branch;
 		vfree(branch);
 		branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
