@@ -11,6 +11,8 @@ int dir_path(struct dentry *, char *);
 
 int calculate_path(struct dentry *, char *, size_t); 
 
+int dir_path(struct dentry *dentry, char *path);
+
 //int mount_point (struct file *, char * mnt_point);
 
 //int print_info_audit_file(struct inode *, struct dentry *, int , char *);
