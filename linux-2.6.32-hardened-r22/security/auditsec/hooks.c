@@ -270,7 +270,6 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
 					fullpath, task_pid_nr(current), current->comm, mode);
 	}
-
 	vfree(fullpath);
 
 	return 0;

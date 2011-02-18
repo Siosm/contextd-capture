@@ -34,7 +34,7 @@ asmlinkage long sys_auditsec_reg(int state)
 		
 	if(state){
 		if(*daemon_pid() == NULL){
-			**daemon_pid() = task_pid_nr(current);
+			pid_branch(current);
 			up(auditsec_auth_lock());
 			printk(KERN_INFO "AuditSec: Process %d successfully registered",
 					task_pid_nr(current));
