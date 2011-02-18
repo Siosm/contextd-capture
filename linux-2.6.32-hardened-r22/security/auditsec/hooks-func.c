@@ -103,6 +103,25 @@ int dir_path(struct dentry *dentry, char *path)
 	return n+1;
 }
 
+int pid_branch (struct task_struct *tsk) 
+{
+	pid_t *branch = NULL;
+	pid_t *tmp = NULL;
+	int n = 0, i =0;
+
+	while(*tsk != NULL) {
+		tmp = branch;
+		vfree(branch);
+		branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
+		for(i=0; i<n; i++) branch[i] = tmp[i];
+		vfree(tmp);
+		branch[n] = task_pid_nr(tsk);
+		tsk = tsk->real_parent;
+		n++;
+	}
+	return n;
+}
+
 /*
 int dentry_path_(struct file *file, char * fullpath)
 {
