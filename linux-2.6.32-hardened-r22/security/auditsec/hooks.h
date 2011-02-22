@@ -41,7 +41,7 @@ struct auditsec_dir {
 struct auditsec_info {
 	pid_t		pid;
 	char		execname[TASK_COMM_LEN];
-	char		fullpath_execname[PATH_MAX + 1];
+	//char		fullpath_execname[PATH_MAX + 1];
 	/**
 	 * Si l'on veut prendre en compte les contextes de sécurité SELinux, il
 	 * suffit de les rajouter dans cette structure : char * sc;

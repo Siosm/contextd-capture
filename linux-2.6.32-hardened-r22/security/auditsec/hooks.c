@@ -240,8 +240,10 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
 
+	spin_lock(auditsec_pid_lock());
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
+			spin_unlock(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
@@ -249,7 +251,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			k_auditsec_info()->type = AUDITSEC_DIR;
 			strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
-			get_task_comm(k_auditsec_info()->execname, current);
+			//get_task_comm(k_auditsec_info()->execname, current);
 			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->auditsec_struct.dir.mode = mode;
 			// TODO Finir de remplir la struct correctement
@@ -261,9 +263,11 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			vfree(fullpath);
 			return answer;
 		}
+		spin_unlock(auditsec_pid_lock());
 	} else {
-			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
-					fullpath, task_pid_nr(current), current->comm, mode);
+		spin_unlock(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+				fullpath, task_pid_nr(current), current->comm, mode);
 	}
 	vfree(fullpath);
 
