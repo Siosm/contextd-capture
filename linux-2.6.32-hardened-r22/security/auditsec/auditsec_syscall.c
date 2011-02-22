@@ -21,35 +21,9 @@
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
 #include <linux/linkage.h>
-#include <linux/vmalloc.h>
 
 #include "share.h"
 #include "hooks.h"
-
-void pid_branch (struct task_struct *tsk) 
-{
-	pid_t *branch = NULL;
-	pid_t *tmp = NULL;
-	int n = 0, i = 0;
-
-	while(*tsk != NULL) {
-		tmp = branch;
-		branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
-		for(i=0; i<n; i++) branch[i] = tmp[i];
-		vfree(tmp);
-		branch[n] = task_pid_nr(tsk);
-		tsk = tsk->real_parent;
-		n++;
-	}
-	tmp = branch;
-	branch = (pid_t *) vmalloc((n+1)*sizeof(pid_t));
-	for(i=0; i<n; i++) branch[i] = tmp[i];
-	vfree(tmp);
-	branch[n] = 0;
-
-	*daemon_pid() = branch;
-}
-
 
 
 asmlinkage long sys_auditsec_reg(int state)
@@ -66,15 +40,14 @@ asmlinkage long sys_auditsec_reg(int state)
 			return 0;
 		}
 	} else {
-		if(**daemon_pid() == task_pid_nr(current)){
-			vfree(*daemon_pid());
+		if(*daemon_pid() == task_pid_nr(current)){
 			*daemon_pid() = NULL;
 			up(auditsec_auth_lock());
 			return 0;
 		}
 	}
 	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
-			task_pid_nr(current), **daemon_pid());
+			task_pid_nr(current), *daemon_pid());
 	up(auditsec_auth_lock());
 
 	return -1;
@@ -96,7 +69,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	if(**daemon_pid() != task_pid_nr(current)){
 		up(auditsec_auth_lock());
 		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered ; Current is %d",
-				task_pid_nr(current), **daemon_pid());
+				task_pid_nr(current), *daemon_pid());
 		up(auditsec_auth_lock());
 		return -1;
 	}
@@ -116,7 +89,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	*auditsec_answer() = false;
 	up(auditsec_answer_lock());
 	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace ; Current is %d",
-			task_pid_nr(current), **daemon_pid());
+			task_pid_nr(current), *daemon_pid());
 	return -EFAULT;
 }
 

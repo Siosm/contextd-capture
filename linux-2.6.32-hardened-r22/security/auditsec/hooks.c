@@ -236,17 +236,12 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	int		answer = -1;
 	char *	fullpath = NULL;
 	//char	execname[NAME_MAX + 1]; //FIXME
-	int		i = 0;
-	bool	is_familly = false;
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
 
-	if(*daemon_pid() != NULL){
-		for(i = 0; (*(*daemon_pid() + i) != 0) && !is_familly; ++i){
-			is_familly = (task_pid_nr(current) == *(*daemon_pid() + i));
-		}
-		if(!is_familly){
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
@@ -353,17 +348,12 @@ int auditsec_file_permission(struct file *file, int mask)
 {
 	int		answer = -1;
 	char *	fullpath = NULL;
-	bool	is_familly = false;
-	int		i = 0;
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	file_path(file, fullpath);
 
-	if(*daemon_pid() != NULL){
-		for(i = 0; (*(*daemon_pid() + i) != 0) && !is_familly; ++i){
-			is_familly = (task_pid_nr(current) == *(*daemon_pid() + i));
-		}
-		if(!is_familly){
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
