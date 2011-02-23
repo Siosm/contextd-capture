@@ -4,7 +4,7 @@
 
 #include <linux/pid.h>
 #include <linux/semaphore.h>
-#include <linux/spinlock>
+#include <linux/spinlock.h>
 
 
 pid_t * daemon_pid(void);
