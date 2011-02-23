@@ -13,8 +13,6 @@
  * lire la reponse,
  * liberer auditsec_hook_lock.
  *
- * Les hooks ne doivent pas prendre le lock_auth, car on suppose que le daemon
- * est lance avant tous les autres programmes.
  **/
 
 #include <linux/pid.h>

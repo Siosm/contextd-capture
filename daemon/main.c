@@ -24,14 +24,14 @@ int main(int argc, char* argv[])
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
-	while((auditsec_register(true) != 0) && (i < 10)){
-		printf("FAILED to authenticate with the kernel.\n");
+	while((auditsec_register(true) != 0) && (i < 5)){
+		printf("FAILED to register with the kernel.\n");
 		++i;
 	}
 	if((i == 10) || (keep_going == 0))
 		return -1;
 
-	printf("The daemon is authenticated with the kernel.\n");
+	printf("The daemon is registered with the kernel.\n");
 
 	while(keep_going){
 		if(auditsec_question(usai) == 0){

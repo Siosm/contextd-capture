@@ -235,7 +235,6 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int		answer = -1;
 	char *	fullpath = NULL;
-	//char	execname[NAME_MAX + 1]; //FIXME
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
@@ -247,12 +246,10 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
-			strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+			get_task_comm(k_auditsec_info()->execname, current);
 			k_auditsec_info()->type = AUDITSEC_DIR;
 			strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
-			//get_task_comm(k_auditsec_info()->execname, current);
-			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->auditsec_struct.dir.mode = mode;
 			// TODO Finir de remplir la struct correctement
 
@@ -356,13 +353,14 @@ int auditsec_file_permission(struct file *file, int mask)
 	fullpath = vmalloc(PATH_MAX + 1);
 	file_path(file, fullpath);
 
+	spin_lock(auditsec_pid_lock());
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
+			spin_unlock(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
 			get_task_comm(k_auditsec_info()->execname, current);
-			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->type = AUDITSEC_FILE;
 			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
@@ -376,9 +374,11 @@ int auditsec_file_permission(struct file *file, int mask)
 			vfree(fullpath);
 			return answer;
 		}
+		spin_unlock(auditsec_pid_lock());
 	} else {
-			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-					fullpath, task_pid_nr(current), current->comm, mask);
+		spin_unlock(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);
 	}
 	vfree(fullpath);
 
@@ -1225,11 +1225,10 @@ static __init int auditsec_init(void)
 	init_MUTEX(auditsec_hook_lock());
 	init_MUTEX(auditsec_question_lock());
 	init_MUTEX(auditsec_answer_lock());
-	init_MUTEX(auditsec_auth_lock());
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
-	
+
 	printk(KERN_INFO "AuditSec:  Waiting for daemon.\n");
 
 	return 0;
