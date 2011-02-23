@@ -233,36 +233,41 @@ int auditsec_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	int answer = -1;
-	char fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	int		answer = -1;
+	char *	fullpath = NULL;
 
-	dir_path(dentry, fullpath_filename);
-	if (task_pid_nr(current) != *daemon_pid()) {
-		if(likely(*daemon_pid() != -1)){
-			if(likely(task_pid_nr(current) != *daemon_pid())){
-				down(auditsec_hook_lock());
-	
-				k_auditsec_info()->pid = task_pid_nr(current);
-				strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
-				k_auditsec_info()->type = AUDITSEC_DIR;
-				dir_path(dentry, k_auditsec_info()->auditsec_struct.dir.fullpath_filename);
-				//strncpy(k_auditsec_info()->auditsec_struct.dir.filename, file->f_path.dentry->d_name.name, NAME_MAX);
-				get_task_comm(k_auditsec_info()->execname, current);
-				get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
-				k_auditsec_info()->auditsec_struct.dir.mode = mode;
-				// TODO Finir de remplir la struct correctement
-	
-				up(auditsec_question_lock());
-				down(auditsec_answer_lock());
-				answer = (*auditsec_answer() == 0);
-				up(auditsec_hook_lock());
-				return answer;
-			}
-		} else {
-			printk(KERN_INFO "AuditSec: mkdir: __, pid: %d, execname: %s, mode: %d",
-					task_pid_nr(current), current->comm, mode);
+	fullpath = vmalloc(PATH_MAX + 1);
+	dir_path(dentry, fullpath);
+
+	spin_lock(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			spin_unlock(auditsec_pid_lock());
+			down(auditsec_hook_lock());
+
+			k_auditsec_info()->pid = task_pid_nr(current);
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->type = AUDITSEC_DIR;
+			strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
+			k_auditsec_info()->auditsec_struct.dir.mode = mode;
+			// TODO Finir de remplir la struct correctement
+
+			up(auditsec_question_lock());
+			down(auditsec_answer_lock());
+			answer = (*auditsec_answer() == 0);
+			up(auditsec_hook_lock());
+			vfree(fullpath);
+			return answer;
 		}
+		spin_unlock(auditsec_pid_lock());
+	} else {
+		spin_unlock(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+				fullpath, task_pid_nr(current), current->comm, mode);
 	}
+	vfree(fullpath);
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(auditsec_inode_mkdir);
@@ -342,21 +347,23 @@ void auditsec_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int auditsec_file_permission(struct file *file, int mask)
 {
-	int answer = -1;
-	char fullpath_filename[PATH_MAX + NAME_MAX + 1];
+	int		answer = -1;
+	char *	fullpath = NULL;
 
-	file_path(file, fullpath_filename);
+	fullpath = vmalloc(PATH_MAX + 1);
+	file_path(file, fullpath);
 
-	if (task_pid_nr(current) != *daemon_pid()) {
-		if (likely(*daemon_pid() != -1)){
+	spin_lock(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			spin_unlock(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
 			get_task_comm(k_auditsec_info()->execname, current);
-			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->type = AUDITSEC_FILE;
-			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath_filename, fullpath_filename, PATH_MAX + NAME_MAX + 1);
-			strncpy(k_auditsec_info()->auditsec_struct.file.filename, file->f_path.dentry->d_name.name, NAME_MAX);
+			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
 			k_auditsec_info()->auditsec_struct.file.mask = mask;
 			// TODO Finir de remplir la struct correctement
 
@@ -364,12 +371,16 @@ int auditsec_file_permission(struct file *file, int mask)
 			down(auditsec_answer_lock());
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
+			vfree(fullpath);
 			return answer;
-		} else {
-			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-					fullpath_filename, task_pid_nr(current), current->comm, mask);
 		}
+		spin_unlock(auditsec_pid_lock());
+	} else {
+		spin_unlock(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);
 	}
+	vfree(fullpath);
 
 	return 0;
 }
@@ -1214,11 +1225,10 @@ static __init int auditsec_init(void)
 	init_MUTEX(auditsec_hook_lock());
 	init_MUTEX(auditsec_question_lock());
 	init_MUTEX(auditsec_answer_lock());
-	init_MUTEX(auditsec_auth_lock());
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
-	
+
 	printk(KERN_INFO "AuditSec:  Waiting for daemon.\n");
 
 	return 0;

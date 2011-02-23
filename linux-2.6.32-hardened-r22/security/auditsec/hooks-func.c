@@ -62,7 +62,7 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 		return 0;
 	} else {
 		pos = calculate_path(dentry->d_parent, path, len);
-		
+
 		if (pos != -1 ) {
 			size = strlen(dentry->d_name.name);
 
@@ -77,99 +77,31 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 			return -1;
 		}
 	}
-} 
+}
 
-int file_path(struct file *file, char *path) 
+int file_path(struct file *file, char *path)
 {
 	char * mnt_point = file->f_path.mnt->mnt_devname;
 	int n = 0;
-	
+
 	if (strcmp("/dev/root", mnt_point)) {
-		n = strlen(mnt_point); 
+		n = strlen(mnt_point);
 		strncpy(path, mnt_point, n);
 	}
-		
+
 	n = calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
 	path[n] = '\0';
 	return n+1;
 }
 
-int dir_path(struct dentry *dentry, char *path) 
+int dir_path(struct dentry *dentry, char *path)
 {
 	int n = 0;
-	
+
 	n = calculate_path(dentry, path + n, NAME_MAX + PATH_MAX - n);
 	path[n] = '\0';
 	return n+1;
 }
-
-/*
-int dentry_path_(struct file *file, char * fullpath)
-{
-	struct dentry *parent = file->f_path.dentry;
-	char * mnt_point = file->f_path.mnt->mnt_devname;
-	//char *path = fullpath;
-	//char *path_tmp = NULL;
-	int nb = 0, n = 0;
-	
-	fullpath[n] = '\0';
-	
-	while(!IS_ROOT(parent)){
-		nb = strlen(parent->d_name.name);
-		//path_tmp = path;
-		//path = vmalloc(n + nb + 1);
-		memcpy(fullpath + nb + 1, fullpath, n+1);
-		memcpy(fullpath + 1, parent->d_name.name, nb);
-		*fullpath = '/';
-		//vfree(path_tmp);
-		n += nb + 1;
-		nb = 0;
-		parent = parent->d_parent;
-	}
-
-	//path_tmp = path;
-	//path = vmalloc(n + 1);
-	//memcpy(path + 1, path, n);
-	//vfree(path_tmp);
-	if (strcmp("/dev/root", mnt_point)) {
-		nb = strlen(mnt_point);
-		memcpy(fullpath + nb, fullpath, n+1);
-		memcpy(fullpath, mnt_point, nb);
-	}
-
-	return 0;
-}
-*/
-
-/*
-char * mount_point (struct file * file){
-	char * mnt_point = file->f_path.mnt->mnt_devname;
-
-	if (!strcmp("/dev/root", mnt_point)) {
-		return NULL;
-	}
-
-	return mnt_point;
-}*/
-
-
-/*
-int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
-{
-	//char * path_buf = vmalloc(sizeof(char) * PATH_MAX);
-	char * path_buf = NULL;
-	//if(path_buf == NULL){
-	//	printk(KERN_INFO "USA: %s: %s (vmalloc failed)", hook_name, dentry->d_name.name);
-	//	return 1;
-	//}
-	path_buf = dentry_path_(dentry);
-	//dentry_path(dentry, path_buf, PATH_MAX);
-	printk(KERN_INFO "USA: %s: %s, mask: %d", hook_name, path_buf, mask);
-	vfree(path_buf);
-
-	return 0;
-}
-*/
 
 
 /*
@@ -191,7 +123,7 @@ char * get_context(void)
 	if (rc == -ERANGE) {
 		kfree(context);
 
-		// Need a larger buffer.  Query for the right size. 
+		// Need a larger buffer.  Query for the right size.
 		rc = inode->i_op->getxattr(dentry, XATTR_NAME_SELINUX,
 					   NULL, 0);
 		if (rc < 0) {

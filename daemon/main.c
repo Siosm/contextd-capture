@@ -24,34 +24,50 @@ int main(int argc, char* argv[])
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
-	while((auditsec_register(true) != 0) && (i < 10)){
-		printf("FAILED to authenticate with the kernel.\n");
+	while((auditsec_register(true) != 0) && (i < 5)){
+		printf("FAILED to register with the kernel.\n");
 		++i;
 	}
 	if((i == 10) || (keep_going == 0))
 		return -1;
 
-	printf("The daemon is authenticated with the kernel.\n");
+	printf("The daemon is registered with the kernel.\n");
 
 	while(keep_going){
 		if(auditsec_question(usai) == 0){
+			#ifdef DEBUG
 			switch (usai->type){
 				case AUDITSEC_FILE:
+<<<<<<< HEAD
 					if(strcmp("sshd", usai->execname)){
 					//printf("AuditSec, file access: %s, pid: %d, execname: %s%s, mask: %d\n",
 					//		usai->auditsec_struct.file.fullpath_filename, usai->pid,
 					//		usai->fullpath_execname, usai->execname, usai->auditsec_struct.file.mask);
+=======
+					if(strcmp("sshd", usai->execname) != 0){
+					printf("AuditSec, file access: %s%s, pid: %d, execname: %s, mask: %d\n",
+							usai->auditsec_struct.file.fullpath,
+							usai->auditsec_struct.file.name, usai->pid,
+							usai->execname, usai->auditsec_struct.file.mask);
+>>>>>>> 7fc6dc8acb2213f9fcc54e8bbd8611d9438599ee
 					} 
-					break;		
+					break;
 				case AUDITSEC_DIR:
+<<<<<<< HEAD
 					//printf("AuditSec, mkdir: %s, pid: %d, execname:%s%s, mode: %d\n",
 					//		usai->auditsec_struct.dir.fullpath_filename, usai->pid,
 					//		usai->fullpath_execname, usai->execname, usai->auditsec_struct.dir.mode);
+=======
+					printf("AuditSec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
+							usai->auditsec_struct.dir.fullpath, usai->pid,
+							usai->execname, usai->auditsec_struct.dir.mode);
+>>>>>>> 7fc6dc8acb2213f9fcc54e8bbd8611d9438599ee
 					break;
 				default:
 					printf("AuditSec, can't determine struct type !");
 					break;
 			}
+			#endif /* DEBUG */
 
 			auditsec_answer(true);
 		}

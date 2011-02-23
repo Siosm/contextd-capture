@@ -1,4 +1,5 @@
 #include <linux/pid.h>
+#include <linux/spinlock.h>
 // #include <asm-generic/uacces.h>
 
 #include "share.h"
@@ -7,7 +8,7 @@
 
 pid_t * daemon_pid()
 {
-	static pid_t		daemon_pid = -1;
+	static pid_t 		daemon_pid = -1;
 	return &daemon_pid;
 }
 
@@ -47,8 +48,15 @@ struct semaphore * auditsec_answer_lock()
 }
 
 
-struct semaphore * auditsec_auth_lock()
+/*struct semaphore * auditsec_auth_lock()
 {
 	static DECLARE_MUTEX(auditsec_auth_lock);
 	return &auditsec_auth_lock;
+}*/
+
+
+spinlock_t * auditsec_pid_lock()
+{
+	static spinlock_t auditsec_pid_lock = SPIN_LOCK_UNLOCKED;
+	return &auditsec_pid_lock;
 }
