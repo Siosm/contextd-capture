@@ -1,6 +1,7 @@
 #include <linux/pid.h>
-#include <linux/spinlock.h>
-// #include <asm-generic/uacces.h>
+#include <linux/semaphore.h>
+#include <linux/rwsem.h>
+
 
 #include "share.h"
 #include "hooks.h"
@@ -48,15 +49,8 @@ struct semaphore * auditsec_answer_lock()
 }
 
 
-/*struct semaphore * auditsec_auth_lock()
+struct rw_semaphore * auditsec_pid_lock()
 {
-	static DECLARE_MUTEX(auditsec_auth_lock);
-	return &auditsec_auth_lock;
-}*/
-
-
-spinlock_t * auditsec_pid_lock()
-{
-	static spinlock_t auditsec_pid_lock = SPIN_LOCK_UNLOCKED;
+	static DECLARE_RWSEM(auditsec_pid_lock);
 	return &auditsec_pid_lock;
 }
