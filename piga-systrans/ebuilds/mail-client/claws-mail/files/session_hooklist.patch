@@ -1,0 +1,74 @@
+Index: src/common/session.c
+===================================================================
+RCS file: //claws/src/common/session.c,v
+retrieving revision 1.23.2.24
+diff -u -r1.23.2.24 session.c
+--- src/common/session.c	28 Jul 2009 18:35:58 -0000	1.23.2.24
++++ src/common/session.c	11 Jan 2010 12:57:00 -0000
+@@ -116,9 +116,19 @@
+  */
+ gint session_connect(Session *session, const gchar *server, gushort port)
+ {
++	gboolean refuseLoading;
++	
+ #ifdef G_OS_UNIX
+ 	session->server = g_strdup(server);
+ 	session->port = port;
++	
++	// hook_on_session_connect
++	refuseLoading=hooks_invoke(SESSION_ON_OPEN_HOOKLIST, session);
++	if(refuseLoading)
++	{
++		session_close(session);
++		return -1;
++	}
+ 
+ 	session->conn_id = sock_connect_async(server, port, session_connect_cb,
+ 					      session);
+@@ -134,6 +144,11 @@
+ 
+ 	session->server = g_strdup(server);
+ 	session->port = port;
++	
++	// hook_on_session_connect
++	refuseLoading=hooks_invoke(SESSION_ON_OPEN_HOOKLIST, session);
++	if(!refuseLoading)
++		session_close(session);
+ 
+ 	sock = sock_connect(server, port);
+ 	if (sock == NULL) {
+@@ -323,6 +338,8 @@
+  */
+ static gint session_close(Session *session)
+ {
++	gboolean refuseLoading;
++	
+ 	cm_return_val_if_fail(session != NULL, -1);
+ 
+ #ifdef G_OS_UNIX
+@@ -345,6 +362,8 @@
+ 		session->sock = NULL;
+ 		session->state = SESSION_DISCONNECTED;
+ 		debug_print("session (%p): closed\n", session);
++		
++		hooks_invoke(SESSION_ON_CLOSE_HOOKLIST, session);
+ 	}
+ 
+ 	return 0;
+Index: src/common/session.h
+===================================================================
+RCS file: //claws/src/common/session.h,v
+retrieving revision 1.8.2.16
+diff -u -r1.8.2.16 session.h
+--- src/common/session.h	9 Jan 2009 17:47:11 -0000	1.8.2.16
++++ src/common/session.h	11 Jan 2010 12:57:00 -0000
+@@ -33,6 +33,9 @@
+ 
+ #define SESSION_BUFFSIZE	4096
+ 
++#define SESSION_ON_OPEN_HOOKLIST "session_on_open_hooklist"
++#define SESSION_ON_CLOSE_HOOKLIST "session_on_close_hooklist"
++
+ typedef struct _Session	Session;
+ 
+ #define SESSION(obj)	((Session *)obj)

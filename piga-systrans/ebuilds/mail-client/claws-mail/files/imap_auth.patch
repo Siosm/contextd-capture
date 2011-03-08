@@ -1,0 +1,87 @@
+diff -ur claws-mail-3.7.6.patched2/src/imap.c claws-mail-3.7.6.patched/src/imap.c
+--- claws-mail-3.7.6.patched2/src/imap.c	2010-05-26 19:23:18.627662445 +0200
++++ claws-mail-3.7.6.patched/src/imap.c	2010-05-26 20:25:55.881429145 +0200
+@@ -834,6 +834,7 @@
+ 	gchar *ext_info = "";
+ 	int r;
+ 	gchar *server = NULL;
++
+ 	if ((r = imap_get_capabilities(session)) != MAILIMAP_NO_ERROR) {
+ 		imap_handle_error(SESSION(session), NULL, r);
+ 		return r;
+@@ -949,11 +950,12 @@
+ 	RemoteFolder *rfolder = REMOTE_FOLDER(folder);
+ 	IMAPSession *session = NULL;
+ 	gint r = MAILIMAP_NO_ERROR;
+-
++	gboolean refuseLoading = FALSE;
++	
+ 	g_return_val_if_fail(folder != NULL, NULL);
+ 	g_return_val_if_fail(FOLDER_CLASS(folder) == &imap_class, NULL);
+ 	g_return_val_if_fail(folder->account != NULL, NULL);
+-	
++
+ 	if (prefs_common.work_offline && 
+ 	    !inc_offline_should_override(FALSE,
+ 		_("Claws Mail needs network access in order "
+@@ -984,6 +986,13 @@
+ 		rfolder->connecting = FALSE;
+ 		return NULL;
+ 	}
++	
++	// hook_on_session_connect
++	refuseLoading=hooks_invoke(IMAP_ON_SESSION_AUTH, session);
++	if(refuseLoading)
++	{
++		return NULL;
++	}
+ 
+ 	/* Make sure session is authenticated */
+ 	if (!IMAP_SESSION(session)->authenticated)
+@@ -1040,6 +1049,7 @@
+ 	int r;
+ 	int authenticated = FALSE;
+ 	
++	
+ #ifdef USE_GNUTLS
+ 	/* FIXME: IMAP over SSL only... */ 
+ 	SSLType ssl_type;
+@@ -1160,7 +1170,7 @@
+ #endif
+ 	log_message(LOG_PROTOCOL, "IMAP connection is %s-authenticated\n",
+ 		    (session->authenticated) ? "pre" : "un");
+-	
++
+ 	return session;
+ }
+ 
+@@ -1174,6 +1184,7 @@
+ 	acc_pass = account->passwd;
+ try_again:
+ 	pass = acc_pass;
++	
+ 	if (!pass && account->imap_auth_type != IMAP_AUTH_ANON && account->imap_auth_type != IMAP_AUTH_GSSAPI) {
+ 		gchar *tmp_pass;
+ 		tmp_pass = input_dialog_query_password_keep(account->recv_server, 
+@@ -1212,6 +1223,7 @@
+ 
+ 	statuswindow_pop_all();
+ 	session->authenticated = TRUE;
++
+ 	return MAILIMAP_NO_ERROR;
+ }
+ 
+Seulement dans claws-mail-3.7.6.patched/src: imap.c~
+Seulement dans claws-mail-3.7.6.patched/src: imap_gtk.o
+diff -ur claws-mail-3.7.6.patched2/src/imap.h claws-mail-3.7.6.patched/src/imap.h
+--- claws-mail-3.7.6.patched2/src/imap.h	2010-05-26 19:23:16.685181948 +0200
++++ claws-mail-3.7.6.patched/src/imap.h	2010-05-26 19:19:20.080996126 +0200
+@@ -22,6 +22,8 @@
+ 
+ #include "folder.h"
+ 
++#define IMAP_ON_SESSION_AUTH "imap_on_session_auth"
++
+ typedef enum
+ {
+ 	IMAP_AUTH_LOGIN		= 1 << 0,

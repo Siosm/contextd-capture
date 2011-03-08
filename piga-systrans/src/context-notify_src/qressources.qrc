@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/icons" >
+        <file>images/systrayicon.png</file>
+    </qresource>
+    <qresource prefix="/translations" >
+        <file>context-notify_fr.qm</file>
+    </qresource>
+</RCC>

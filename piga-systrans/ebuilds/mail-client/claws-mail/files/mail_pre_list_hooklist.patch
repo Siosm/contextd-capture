@@ -1,0 +1,36 @@
+Index: src/msgcache.c
+===================================================================
+RCS file: //claws/src/msgcache.c,v
+retrieving revision 1.16.2.69
+diff -u -r1.16.2.69 msgcache.c
+--- src/msgcache.c	16 May 2009 08:57:46 -0000	1.16.2.69
++++ src/msgcache.c	11 Jan 2010 12:24:15 -0000
+@@ -257,8 +257,11 @@
+ {
+ 	MsgInfoList **listptr = user_data;
+ 	MsgInfo *msginfo = value;
++	gboolean refuseLoading;
+ 
+-	*listptr = g_slist_prepend(*listptr, procmsg_msginfo_new_ref(msginfo));
++	refuseLoading=hooks_invoke(MAIL_PRE_LIST_HOOKLIST, msginfo);
++	if(!refuseLoading)
++		*listptr = g_slist_prepend(*listptr, procmsg_msginfo_new_ref(msginfo));
+ }
+ 
+ MsgInfoList *msgcache_get_msg_list(MsgCache *cache)
+Index: src/msgcache.h
+===================================================================
+RCS file: //claws/src/msgcache.h,v
+retrieving revision 1.5.2.8
+diff -u -r1.5.2.8 msgcache.h
+--- src/msgcache.h	9 Jan 2009 17:46:57 -0000	1.5.2.8
++++ src/msgcache.h	11 Jan 2010 12:24:15 -0000
+@@ -31,6 +31,8 @@
+ #include "procmsg.h"
+ #include "folder.h"
+ 
++#define MAIL_PRE_LIST_HOOKLIST "mail_pre_list_hooklist"
++
+ MsgCache   	*msgcache_new				(void);
+ void	   	 msgcache_destroy			(MsgCache *cache);
+ MsgCache   	*msgcache_read_cache			(FolderItem *item,

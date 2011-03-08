@@ -1,0 +1,43 @@
+ <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+ <node>
+   <interface name="com.piga.contextd">
+      <method name="register_application">
+         <arg type="s" name="app_name" direction="in"/>
+         <arg type="u" name="app_pid" direction="in"/>
+         <arg type="s" direction="out" />
+      </method>
+      
+      <method name="is_registered">
+         <arg type="s" direction="out" />
+      </method>
+      
+      <method name="context_changed">
+         <arg type="s" name="xml_context" direction="in"/>
+         <arg type="s" direction="out" />
+      </method>
+
+	 <method name="required_context">
+	    <arg type="s" name="xml_context" direction="in"/>
+	    <arg type="s" direction="out" />
+	 </method>
+      
+      <method name="current_global_context">
+         <arg type="s" direction="out" />
+      </method>
+      
+      <method name="current_local_context">
+         <arg type="s" direction="out" />
+      </method>
+	  
+	  <method name="register_for_context_changes_updates">
+	     <arg type="s" direction="out" />
+	  </method>
+
+      <signal name="globalContextChanged">
+         <arg type="s" name="previous_context"/>
+         <arg type="s" name="new_context"/>
+      </signal>
+   </interface>
+ </node>
+

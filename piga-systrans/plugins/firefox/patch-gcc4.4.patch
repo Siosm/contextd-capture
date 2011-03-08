@@ -1,0 +1,49 @@
+diff -ur mozilla/toolkit/crashreporter/google-breakpad/src/client/linux/handler/exception_handler.cc mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler/exception_handler.cc
+--- mozilla/toolkit/crashreporter/google-breakpad/src/client/linux/handler/exception_handler.cc	2008-02-25 19:18:08.000000000 +0100
++++ mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler/exception_handler.cc	2009-05-21 19:44:47.000000000 +0200
+@@ -38,6 +38,7 @@
+ #include <cstdlib>
+ #include <ctime>
+ #include <linux/limits.h>
++#include <stdio.h>
+ 
+ #include "client/linux/handler/exception_handler.h"
+ #include "common/linux/guid_creator.h"
+Seulement dans mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler: exception_handler.cc~
+diff -ur mozilla/toolkit/crashreporter/google-breakpad/src/client/linux/handler/minidump_generator.cc mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler/minidump_generator.cc
+--- mozilla/toolkit/crashreporter/google-breakpad/src/client/linux/handler/minidump_generator.cc	2008-02-25 19:18:08.000000000 +0100
++++ mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler/minidump_generator.cc	2009-05-21 19:44:15.000000000 +0200
+@@ -41,6 +41,7 @@
+ #include <cstdlib>
+ #include <ctime>
+ #include <string.h>
++#include <stdio.h>
+ 
+ #include "common/linux/file_id.h"
+ #include "client/linux/handler/linux_thread.h"
+Seulement dans mozilla2/toolkit/crashreporter/google-breakpad/src/client/linux/handler: minidump_generator.cc~
+diff -ur mozilla/toolkit/crashreporter/google-breakpad/src/common/linux/dump_symbols.cc mozilla2/toolkit/crashreporter/google-breakpad/src/common/linux/dump_symbols.cc
+--- mozilla/toolkit/crashreporter/google-breakpad/src/common/linux/dump_symbols.cc	2008-02-25 19:18:09.000000000 +0100
++++ mozilla2/toolkit/crashreporter/google-breakpad/src/common/linux/dump_symbols.cc	2009-05-21 19:45:13.000000000 +0200
+@@ -45,6 +45,7 @@
+ #include <functional>
+ #include <vector>
+ #include <string.h>
++#include <stdio.h>
+ 
+ #include "common/linux/dump_symbols.h"
+ #include "common/linux/file_id.h"
+Seulement dans mozilla2/toolkit/crashreporter/google-breakpad/src/common/linux: dump_symbols.cc~
+diff -ur mozilla/toolkit/xre/nsAppRunner.cpp mozilla2/toolkit/xre/nsAppRunner.cpp
+--- mozilla/toolkit/xre/nsAppRunner.cpp	2008-11-17 15:36:43.000000000 +0100
++++ mozilla2/toolkit/xre/nsAppRunner.cpp	2009-05-21 19:45:53.000000000 +0200
+@@ -1459,7 +1459,7 @@
+   if (NS_FAILED(rv))
+     return rv;
+ 
+-#elif
++#else
+ #error Oops, you need platform-specific code here
+ #endif
+ 
+Seulement dans mozilla2/toolkit/xre: nsAppRunner.cpp~

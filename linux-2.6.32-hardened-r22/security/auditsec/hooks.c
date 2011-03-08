@@ -12,7 +12,7 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/swap.h>
-#include <linux/spinlock.h>
+// #include <linux/spinlock.h>
 #include <linux/syscalls.h>
 #include <linux/file.h>
 #include <linux/fdtable.h>
@@ -54,6 +54,7 @@
 #include <linux/sched.h>
 #include <linux/limits.h>
 #include <linux/semaphore.h>
+#include <linux/rwsem.h>
 
 #include "hooks-func.h"
 #include "hooks.h"
@@ -235,27 +236,21 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
 	int		answer = -1;
 	char *	fullpath = NULL;
-	//char	execname[NAME_MAX + 1]; //FIXME
-	int		i = 0;
-	bool	is_familly = false;
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
 
-	if(*daemon_pid() != NULL){
-		for(i = 0; (*(*daemon_pid() + i) != 0) && !is_familly; ++i){
-			is_familly = (task_pid_nr(current) == *(*daemon_pid() + i));
-		}
-		if(!is_familly){
+	down_read(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			up_read(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
-			strncpy(k_auditsec_info()->execname, current->comm, TASK_COMM_LEN);
+			get_task_comm(k_auditsec_info()->execname, current);
 			k_auditsec_info()->type = AUDITSEC_DIR;
 			strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
-			get_task_comm(k_auditsec_info()->execname, current);
-			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->auditsec_struct.dir.mode = mode;
 			// TODO Finir de remplir la struct correctement
 
@@ -266,9 +261,11 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			vfree(fullpath);
 			return answer;
 		}
+		up_read(auditsec_pid_lock());
 	} else {
-			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
-					fullpath, task_pid_nr(current), current->comm, mode);
+		up_read(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+				fullpath, task_pid_nr(current), current->comm, mode);
 	}
 	vfree(fullpath);
 
@@ -353,22 +350,18 @@ int auditsec_file_permission(struct file *file, int mask)
 {
 	int		answer = -1;
 	char *	fullpath = NULL;
-	bool	is_familly = false;
-	int		i = 0;
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	file_path(file, fullpath);
 
-	if(*daemon_pid() != NULL){
-		for(i = 0; (*(*daemon_pid() + i) != 0) && !is_familly; ++i){
-			is_familly = (task_pid_nr(current) == *(*daemon_pid() + i));
-		}
-		if(!is_familly){
+	down_read(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			up_read(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
 			get_task_comm(k_auditsec_info()->execname, current);
-			get_task_full_exec_path(k_auditsec_info()->fullpath_execname, current);
 			k_auditsec_info()->type = AUDITSEC_FILE;
 			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
@@ -382,9 +375,11 @@ int auditsec_file_permission(struct file *file, int mask)
 			vfree(fullpath);
 			return answer;
 		}
+		up_read(auditsec_pid_lock());
 	} else {
-			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-					fullpath, task_pid_nr(current), current->comm, mask);
+		up_read(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);
 	}
 	vfree(fullpath);
 
@@ -1231,11 +1226,12 @@ static __init int auditsec_init(void)
 	init_MUTEX(auditsec_hook_lock());
 	init_MUTEX(auditsec_question_lock());
 	init_MUTEX(auditsec_answer_lock());
-	init_MUTEX(auditsec_auth_lock());
+
+	init_rwsem(auditsec_pid_lock());
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
-	
+
 	printk(KERN_INFO "AuditSec:  Waiting for daemon.\n");
 
 	return 0;

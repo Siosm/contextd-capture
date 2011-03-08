@@ -1,0 +1,631 @@
+2009-07-03 [paul]	1.0.21
+
+	1.0.21 released
+
+2009-07-03 [paul]	1.0.20cvs3
+
+	* po/es.po
+	* po/fi.po
+	* po/it.po
+		updated by Ricardo Mones, Tommi Pirinen, Andrea Spadaccini
+
+2009-07-03 [paul]	1.0.20cvs2
+
+	* configure.ac
+	* po/id.po
+		added Indonesian translation, submitted by MSulchan Darmawan
+
+2009-03-08 [paul]	1.0.20cvs1
+
+	* configure.ac
+	* po/ja.po
+		add Japanese translation, submitted by kazken3
+
+2009-03-06 [paul]	1.0.20
+
+	1.0.20 released
+
+2009-03-06 [paul]	1.0.19cvs2
+
+	* po/fi.po
+	* po/hu.po
+		updated by Flammie Pirinen and Pader Rezso
+
+2008-12-21 [paul]	1.0.19cvs1
+
+	* configure.ac
+	* po/nl.po
+		add Dutch translation by Marcel Pol
+
+2008-12-19 [paul]	1.0.19
+
+	1.0.19 released
+
+2008-12-19 [paul]	1.0.18cvs3
+
+	* po/cs.po
+	* po/ru.po
+		updated by David Vachulka, Aleksei Miheev
+
+2008-12-07 [paul]	1.0.18cvs2
+
+	* configure.ac
+		check for compiler before setting CFLAGS
+
+2008-11-28 [colin]	1.0.18cvs1
+
+	* po/fr.po
+		Update
+
+2008-10-10 [paul]	1.0.18
+
+	1.0.18 released
+
+2008-10-04 [colin]	1.0.17cvs1
+
+	* src/acpi_notifier.c
+		Win32: set translation dir
+
+2008-10-03 [paul]	1.0.17
+
+	1.0.17 released
+
+2008-10-03 [paul]	1.0.16cvs2
+
+	* configure.ac
+	* po/ru.po
+		added by Aleksei Miheev
+	* po/ca.po
+	* po/fi.po
+	* po/hu.po
+		updated by Miquel Oliete, Flammie Pirinen,
+		Pader Rezo
+
+2008-08-07 [colin]	1.0.16cvs1
+
+	* src/acpi_notifier.c
+		Undeprecate
+
+2008-04-18 [paul]	1.0.16
+
+	1.0.16 released
+
+	* po/fi.po
+	* po/fr.po
+	* po/it.po
+		updated by Flammie Pirinen, Colin/wwwp, and 
+		Andrea Spadaccini
+
+2008-03-12 [colin]	1.0.15cvs3
+
+	* configure.ac
+	* src/acpi_notifier.c
+		Enable -Wall
+
+2008-03-12 [paul]	1.0.15cvs2
+
+	* src/acpi_notifier.c
+		updated following changes in Claws Mail
+
+2008-02-09 [paul]	1.0.15cvs1
+
+	* Makefile.am
+		enter the po/ dir sooner
+
+2008-02-08 [paul]	1.0.15
+
+	1.0.15 released
+
+2008-02-08 [paul]	1.0.14cvs1
+
+	* po/fi.po
+	* po/it.po
+		updated by Flammie Pirinen and Andrea Spadaccini
+
+2007-12-17 [paul]	1.0.14
+
+	1.0.14 released
+
+2007-12-17 [paul]	1.0.13cvs2
+
+	* po/hu.po
+	* po/it.po
+		updated by Pader Rezso and Andrea Spadaccini
+
+2007-11-29 [ticho]	1.0.13cvs1
+
+	* configure.ac
+		Updated claws-mail minimum version.
+
+2007-11-19 [paul]	1.0.13
+
+	1.0.13 released
+
+2007-11-19 [paul]	1.0.12cvs5
+
+	* po/es.po
+	* po/fi.po
+	* po/hu.po
+	* po/it.po
+	* po/pt_BR.po
+	* po/sk.po
+		updated by Ricardo Mones Lastra, Flammie Pirinen,
+		Pader Rezso, Andrea Spadaccini, Frederico Goncalves
+		Guimaraes, and Andrej Kacian
+
+2007-10-04 [colin]	1.0.12cvs4
+
+	* src/acpi_notifier.c
+		Verify success on writes
+
+2007-09-20 [paul]	1.0.12cvs3
+
+	* po/it.po
+		updated by Andrea Spadaccini
+
+2007-09-16 [mones]	1.0.12cvs2
+
+	* src/acpi_notifier.c
+		Fix building
+
+2007-09-16 [colin]	1.0.12cvs1
+
+	* src/acpi_notifier.c
+		Update URLs for Acer modules
+
+2007-09-03 [paul]	1.0.12
+
+	1.0.12 released
+
+2007-09-03 [paul]	1.0.11cvs6
+
+	* po/ca.po
+	* po/es.po
+	* po/fi.po
+	* po/hu.po
+	* po/sk.po
+		updated by Miquel Oliete, Ricardo Mones Lastra,
+		Flammie Pirinen, Pader Rezso, Andrej Kacian
+
+2007-08-16 [paul]	1.0.11cvs5
+
+	* configure.ac
+		use pkgconfig to check for gtk and glib
+
+2007-08-03 [colin]	1.0.11cvs4
+
+	* src/acpi_notifier.c
+		Fix crash on plugin unload
+
+2007-07-23 [colin]	1.0.11cvs3
+
+	* src/acpi_notifier.c
+		Fix license
+
+2007-07-11 [colin]	1.0.11cvs2
+
+	* COPYING
+	* src/acpi_notifier.c
+	* src/gettext.h
+		Upgrade to GPLv3 or later 
+
+2007-07-07 [paul]	1.0.11cvs1
+
+	* po/fi.po
+		updated by Flammie Pirinen
+
+2007-07-03 [paul]	1.0.11
+
+	1.0.11 released
+
+2007-07-03 [paul]	1.0.10cvs3
+
+	* po/hu.po
+	* po/pt_BR.po
+		updated by Pader Rezso and Frederico
+		Goncalves Guimaraes
+
+2007-06-21 [colin]	1.0.10cvs2
+
+	* src/acpi_notifier.c
+		Update plugin API
+
+2007-06-02 [colin]	1.0.10cvs1
+
+	* configure.ac
+	* src/acpi_notifier.c
+		Get rid of the thread that wakes up every
+		second and writes status, even when necessary.
+		Only use hooks and g_timeouts instead.
+		Requires 2.9.2cvs27
+
+2007-05-08 [paul]	1.0.10
+
+	1.0.10 released
+
+2007-05-05 [colin]	1.0.9cvs1
+
+	* src/acpi_notifier.c
+		Add asus_laptop (supercedes asus_acpi in the
+		kernel)
+
+2007-04-16 [paul]	1.0.9
+
+	1.0.9 released
+
+2007-04-16 [paul]	1.0.8cvs3
+
+	* po/ca.po
+	* po/es.po
+	* po/hu.po
+	* po/pt_BR.po
+	* po/sr.po
+		updated by Miquel Oliete, Ricardo Mones Lastra,
+		Pader Rezso, Frederico Goncalves Guimaraes, and
+		Aleksandar Urosevic
+
+2007-03-03 [paul]	1.0.8cvs2
+
+	* po/Makevars
+		fix COPYRIGHT_HOLDER and
+		MSGID_BUGS_ADDRESS
+
+2007-03-03 [paul]	1.0.8cvs1
+
+	* configure.ac
+	* po/cs.po
+		added Czech translation, submitted by Tim <timbrain@post.cz>
+
+2007-02-26 [paul]	1.0.8
+
+	1.0.8 released
+
+2007-02-26 [paul]	1.0.7cvs3
+
+        * configure.ac
+	* po/ca.po
+	* po/pl.po
+		addded new Catalan and Polish translations,
+		by Miquel Oliete and Pawel Pekala
+	* po/de.po
+	* po/es.po
+	* po/fi.po
+	* po/hu.po
+	* po/pt_BR.po
+		updated by Stephan Sachse, Ricardo Mones Lastra,
+		Flammie Pirinen, Pader Rezso, and Frederico
+		Goncalves Guimaraes
+
+2007-01-29 [colin]	1.0.7cvs2
+
+	* src/acpi_notifier.c
+		Fix empty string translation
+
+2007-01-21 [colin]	1.0.7cvs1
+
+	* po/hu.po
+	* configure.ac
+		Add Hungarian Translation by
+		Pader Rezso <rezso@rezso.net>
+
+2007-01-15 [paul]	1.0.7
+
+	1.0.7 released
+
+2007-01-12 [paul]	1.0.6cvs1
+
+	* po/fr.po
+	* src/acpi_notifier.c
+		Update translation and factorize strings
+		Patch by Fabien
+
+2007-01-09 [paul]	1.0.6
+
+	1.0.6 released
+
+2007-01-09 [paul]	1.0.5cvs2
+
+	* po/es.po
+	* po/fi.po
+	* po/it.po
+		updated by Ricardo Mones Lastra, Tommi Pirinen,
+		and Andrea Spadaccini
+
+2006-12-15 [ticho]	1.0.5cvs1
+
+	* configure.ac
+	* src/acpi_notifier.c
+		Use check_plugin_version() for version check.
+
+2006-12-04 [paul]	1.0.5
+
+	1.0.5 released
+
+2006-11-28 [paul]	1.0.4cvs3
+
+	* configure.ac
+		bump required version of Claws
+		following renaming
+		Thanks to Charles Edwards for the
+		reminder
+
+2006-11-27 [paul]	1.0.4cvs2
+
+	* debian/README.Debian
+	* src/acpi_notifier.c
+		renaming
+
+2006-11-07 [paul]	1.0.4cvs1
+
+	* ChangeLog
+	* INSTALL
+	* NEWS
+	* configure.ac
+	* debian/README.Debian
+	* debian/changelog
+	* debian/control
+	* debian/copyright
+	* debian/files
+	* debian/rules
+	* src/Makefile.am
+	* src/acpi_notifier.c
+		Name change
+
+2006-11-07 [paul]	1.0.4
+
+	1.0.4 released
+
+2006-11-07 [paul]	1.0.3cvs1
+
+	* po/it.po
+	* po/sk.po
+		updated by Andrea Spadaccini and
+		Andrej Kacian
+
+2006-09-25 [paul]	1.0.3
+
+	1.0.3 released
+
+2006-09-25 [paul]	1.0.2cvs11
+
+	* po/de.po
+	* po/es.po
+	* po/fi.po
+	* po/fr.po
+	* po/pt_BR.po
+	* po/sk.po
+		updated by Stephan Sachse, Ricardo Mones Lastra,
+		Flammie Pirinen, Fabien Vantard, Frederico Goncalves
+		Guimaraes, and Andrej Kacian
+
+2006-09-22 [ticho]	1.0.2cvs10
+
+	* configure.ac
+		Update required claws-mail version to 2.4.0.200.
+
+2006-09-01 [wwp]	1.0.2cvs9
+
+	* .cvsignore
+		ignore more files.
+
+2006-09-01 [wwp]	1.0.2cvs8
+
+	* commitHelper
+		sync w/ commitHelper in claws-mail module:
+		use CVSEDITOR env. var. if set.
+
+2006-08-30 [colin]	1.0.2cvs7
+
+	* src/acpi_notifier.c
+		Put LED off when unloading
+
+2006-08-29 [paul]	1.0.2cvs6
+
+	* .cvsignore
+	* src/acpi_notifier.c
+		remove references to pluginconfig.h(.in),
+		the files ceased to exist
+
+2006-08-28 [paul]	1.0.2cvs5
+
+	* configure.ac
+	* po/Makefile.in.in
+	* po/Makevars
+	* po/stamp-po
+	* src/Makefile.am
+	* src/acpi_notifier.c
+                require autoconf 2.60, enabling building
+		with gettext 0.15 (gettext 0.14.x build still
+		possible). Replace Makefiles with versions
+		from gettext 0.15.
+		Remove configure option --with-localedir. The
+		option that is provided directly by autoconf
+		2.60 can be used instead: --localedir
+		Add missing file in po/
+		All thanks to Colin																
+
+2006-08-27 [wwp]	1.0.2cvs4
+
+	* src/acpi_notifier.c
+		fix plugin compilation (N_ undefined).
+
+2006-08-27 [colin]	1.0.2cvs3
+
+	* src/acpi_notifier.c
+		Implement plugin_provides()
+
+2006-08-18 [paul]	1.0.2cvs2
+
+	* configure.ac
+		bump up GLib and GTK+ minimum required versions,
+		following Claws
+
+2006-08-09 [colin]	1.0.2cvs1
+
+	* src/acpi_notifier.c
+		Don't wait for the thread if we're
+		exiting. Requires SC 2.4.0cvs36
+
+2006-06-12 [paul]	1.0.2
+
+	1.0.2 released
+
+2006-06-12 [paul]	1.0.1cvs6
+
+	* po/Makefile.in.in
+		fix autoconf warning
+
+2006-06-06 [wwp]	1.0.1cvs5
+
+	* po/.cvsignore
+		ignore more generated files.
+
+2006-06-06 [wwp]	1.0.1cvs4
+
+	* src/.cvsignore
+		don't ignore deprecated files.
+
+2006-06-06 [wwp]	1.0.1cvs3
+
+	* .cvsignore
+	* config/.cvsignore
+	* m4/.cvsignore
+	* src/.cvsignore
+		ignore more generated files.
+
+2006-06-06 [wwp]	1.0.1cvs2
+
+	* src/plugin_version.h.in
+	* src/acpi_notifier.c
+	* src/Makefile.am
+	* configure.ac
+		fix/unify/simplify autostuff, get rid of src/plugin_version.h{,.in} (use pluginconfig.h instead).
+
+2006-06-03 [wwp]	1.0.1cvs1
+
+	* commitHelper
+	* PATCHSETS
+		introducing commitHelp for plugins too.
+
+2006-04-07 [colin] 	1.0.1
+
+	* configure.ac
+		Optionnaly handle --prefix.
+		Patch by Pawel Pekala.
+
+2006-04-06 [paul]
+
+	* po/es.po
+	* po/fi.po
+	* po/fr.po
+	* po/pt_BR.po
+	* po/sk.po
+		updated by Ricardo Mones Lastra, Tommi Pirinen, 
+		Fabien Vantard, Frederico Goncalves Guimaraes, and 
+		Andrej Kacian
+
+2006-03-14 [colin]	1.0
+
+	* src/acpi_notifier.c
+		Add preference for last commit
+
+2006-03-14 [colin]	0.9
+
+	* src/acpi_notifier.c
+		Quickly blink when an alertpanel is open
+
+2006-01-29 [paul]
+
+	* po/fi.po
+		updated by Flammie Pirinen
+
+2006-01-28 [paul]
+
+	* po/zh_CN.po
+		updated by  Ralgh Young <bamanzi@gmail.com>
+
+2006-01-27 [paul]
+
+	* configure.ac
+	* po/es.po
+	* po/fr.po
+	* po/it.po
+	* po/sr.po
+		added/updated translations by Ricardo Mones Lastra,
+		Fabien Vantard, Andrea Spadaccini, and Aleksandar Urosevic
+
+2006-01-26 [paul]
+
+	* Makefile.am
+	* configure.ac
+	* mkinstalldirs   ** REMOVED **
+	* config/config.rpath	** ADDED **
+	* config/mkinstalldirs	** ADDED **
+	* config/Makefile.am	** ADDED **
+	* m4/Makefile.am	** ADDED **
+		fix build
+
+	* po/pt_BR.po
+		translation submitted by Frederico Goncalves Guimaraes
+		<fggdebian@yahoo.com.br>
+
+2006-01-08 [paul]
+
+	* po/sk.po
+		translation submitted by Andrej Kacian <andrej@kacian.sk>
+
+2006-01-08 [paul]
+
+	* po/de.po
+		translation submitted by Stephan Sachse <white@dev-zero.com>
+
+2006-01-01 [paul]
+
+	* po/fi.po
+		translation submitted by Flammie Pirinen <flammie@iki.fi>
+
+2005-12-23 [paul]
+
+	* po/es.po
+		translation submitted by Ricardo Mones Lastra
+		<mones@users.sf.net>
+
+2005-12-19  gettextize  <bug-gnu-gettext@gnu.org> 0.8
+
+	* Makefile.am (SUBDIRS): Add po.
+	(ACLOCAL_AMFLAGS): New variable.
+	(EXTRA_DIST): Add config.rpath, mkinstalldirs, m4/ChangeLog.
+	* configure.ac (AC_OUTPUT): Add po/Makefile.in.
+
+2005-12-15 [paul]	0.7
+
+	* Add plugin_version()
+
+2005-12-07 [colin]	0.6
+
+	* Add plugin_licence()
+
+2005-11-26 [colin]	0.5
+
+	* Add support for acer_acpi in addition to acerhk
+	* Add support for some Fujitsu laptops via userland
+	  'apanelc' program
+	* Use better warning messages
+
+2005-11-04 [colin]	0.4
+
+	* add IBM laptops and fix a copy/paste mistake
+	  Patch by Thomas de Grenier de Latour 
+	  <degrenier@easyconnect.fr>
+
+2005-11-04 [colin]	0.3
+
+	* stuff ... (forgot to fill in at the time)
+
+2005-11-04 [colin]	0.2
+
+	* stuff ... (forgot to fill in at the time)
+
+2005-08-30 [colin]	0.1
+
+	* initial release

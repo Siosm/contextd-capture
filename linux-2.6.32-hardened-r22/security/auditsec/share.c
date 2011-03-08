@@ -1,13 +1,15 @@
 #include <linux/pid.h>
-// #include <asm-generic/uacces.h>
+#include <linux/semaphore.h>
+#include <linux/rwsem.h>
+
 
 #include "share.h"
 #include "hooks.h"
 
 
-pid_t ** daemon_pid()
+pid_t * daemon_pid()
 {
-	static pid_t *		daemon_pid = NULL;
+	static pid_t 		daemon_pid = -1;
 	return &daemon_pid;
 }
 
@@ -47,8 +49,8 @@ struct semaphore * auditsec_answer_lock()
 }
 
 
-struct semaphore * auditsec_auth_lock()
+struct rw_semaphore * auditsec_pid_lock()
 {
-	static DECLARE_MUTEX(auditsec_auth_lock);
-	return &auditsec_auth_lock;
+	static DECLARE_RWSEM(auditsec_pid_lock);
+	return &auditsec_pid_lock;
 }

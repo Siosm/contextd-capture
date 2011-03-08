@@ -1,0 +1,43 @@
+? on_compose_reply_mail_hooklist.patch
+Index: src/compose.c
+===================================================================
+RCS file: //claws/src/compose.c,v
+retrieving revision 1.382.2.541
+diff -u -r1.382.2.541 compose.c
+--- src/compose.c	3 Jan 2010 01:27:13 -0000	1.382.2.541
++++ src/compose.c	11 Jan 2010 12:09:15 -0000
+@@ -1300,6 +1300,7 @@
+ 	MsgInfo *msginfo;
+ 	guint list_len;
+ 	Compose *compose = NULL;
++	gboolean refuseLoading;
+ 	
+ 	cm_return_val_if_fail(msginfo_list != NULL, NULL);
+ 
+@@ -1307,6 +1308,11 @@
+ 	cm_return_val_if_fail(msginfo != NULL, NULL);
+ 
+ 	list_len = g_slist_length(msginfo_list);
++	
++	// Check if we have the right to open a reply compose window
++	refuseLoading=hooks_invoke(COMPOSE_ON_REPLY_MAIL_HOOKLIST, msginfo);
++	if(refuseLoading)
++		return NULL;
+ 
+ 	switch (mode) {
+ 	case COMPOSE_REPLY:
+Index: src/compose.h
+===================================================================
+RCS file: //claws/src/compose.h,v
+retrieving revision 1.50.2.58
+diff -u -r1.50.2.58 compose.h
+--- src/compose.h	20 Dec 2009 13:50:41 -0000	1.50.2.58
++++ src/compose.h	11 Jan 2010 12:09:15 -0000
+@@ -44,6 +44,7 @@
+ 
+ #define COMPOSE_CHECK_BEFORE_SEND_HOOKLIST "compose_check_before_send"
+ #define COMPOSE_CREATED_HOOKLIST "compose_created"
++#define COMPOSE_ON_REPLY_MAIL_HOOKLIST "compose_on_reply_mail_hooklist"
+ 
+ typedef enum
+ {

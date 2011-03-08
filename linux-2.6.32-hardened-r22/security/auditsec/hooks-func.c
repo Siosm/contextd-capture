@@ -51,6 +51,7 @@
 #include <linux/posix-timers.h>
 #include <linux/limits.h>
 
+
 #include "hooks-func.h"
 
 
@@ -62,7 +63,7 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 		return 0;
 	} else {
 		pos = calculate_path(dentry->d_parent, path, len);
-		
+
 		if (pos != -1 ) {
 			size = strlen(dentry->d_name.name);
 
@@ -77,49 +78,31 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 			return -1;
 		}
 	}
-} 
+}
 
-int file_path(struct file *file, char *path) 
+int file_path(struct file *file, char *path)
 {
-	char * mnt_point = file->f_path.mnt->mnt_devname;
+	const char * mnt_point = file->f_path.mnt->mnt_devname;
 	int n = 0;
-	
+
 	if (strcmp("/dev/root", mnt_point)) {
-		n = strlen(mnt_point); 
+		n = strlen(mnt_point);
 		strncpy(path, mnt_point, n);
 	}
-		
+
 	n = calculate_path(file->f_path.dentry, path + n, NAME_MAX + PATH_MAX - n);
 	path[n] = '\0';
 	return n+1;
 }
 
-int dir_path(struct dentry *dentry, char *path) 
+int dir_path(struct dentry *dentry, char *path)
 {
 	int n = 0;
-	
+
 	n = calculate_path(dentry, path + n, NAME_MAX + PATH_MAX - n);
 	path[n] = '\0';
 	return n+1;
 }
-
-/*
-int print_info_audit_file(struct inode *dir, struct dentry *dentry, int mask, char *hook_name)
-{
-	//char * path_buf = vmalloc(sizeof(char) * PATH_MAX);
-	char * path_buf = NULL;
-	//if(path_buf == NULL){
-	//	printk(KERN_INFO "USA: %s: %s (vmalloc failed)", hook_name, dentry->d_name.name);
-	//	return 1;
-	//}
-	path_buf = dentry_path_(dentry);
-	//dentry_path(dentry, path_buf, PATH_MAX);
-	printk(KERN_INFO "USA: %s: %s, mask: %d", hook_name, path_buf, mask);
-	vfree(path_buf);
-
-	return 0;
-}
-*/
 
 
 /*
@@ -141,7 +124,7 @@ char * get_context(void)
 	if (rc == -ERANGE) {
 		kfree(context);
 
-		// Need a larger buffer.  Query for the right size. 
+		// Need a larger buffer.  Query for the right size.
 		rc = inode->i_op->getxattr(dentry, XATTR_NAME_SELINUX,
 					   NULL, 0);
 		if (rc < 0) {

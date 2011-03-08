@@ -1,0 +1,29 @@
+
+diff -ur claws-mail-3.7.6/src/gtk/filesel.c claws-mail-3.7.6.patched3/src/gtk/filesel.c
+--- claws-mail-3.7.6/src/gtk/filesel.c	2009-01-09 18:47:16.000000000 +0100
++++ claws-mail-3.7.6.patched3/src/gtk/filesel.c	2010-05-11 19:24:36.029981151 +0200
+@@ -226,13 +226,22 @@
+ 	}
+ 
+ 	while (slist) {
+-		list = g_list_append(list, slist->data);
++		gchar *tmp = g_strdup(slist->data);
++
++		const char* mail_path="/home/user/Download/Mail/";
++		const char* plugin_path="/usr/lib/claws-mail/plugins/";
++		if(strncmp(slist->data, mail_path, strlen(mail_path))==0 || 
++		   strncmp(slist->data, plugin_path, strlen(plugin_path))==0){
++			list = g_list_append(list, slist->data);
++		}
++		else
++			fprintf(stderr, "File '%s' is not allowed to be loaded\n", slist->data);
+ 		slist = slist->next;
++		g_free(tmp);
+ 	}
+ 	
+ 	if (slist_orig)
+ 		g_slist_free(slist_orig);
+-	
+ 	return list;
+ }
+ 

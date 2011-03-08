@@ -1,0 +1,4 @@
+content	pigacontext		chrome/content/
+overlay	chrome://browser/content/browser.xul	chrome://pigacontext/content/contextMonitor.xul
+chrome://pigacontext/content/access_forbidden.xul
+

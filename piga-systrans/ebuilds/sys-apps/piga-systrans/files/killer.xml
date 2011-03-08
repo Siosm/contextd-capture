@@ -1,0 +1,19 @@
+<PIGA_Killer>
+	<!-- Firefox -->
+	<rule app_name="firefox" context=".*" sig_num="9" msg_kill="Warez can compromise your system">
+		<host>.*warez.*</host>
+	</rule>
+	<rule app_name="firefox" context=".*" sig_num="9" msg_kill="Forbidden">
+		<host>[0-9].*</host>
+	</rule>
+	<rule app_name="firefox" context=".*" sig_num="9" msg_kill="Forbidden">
+		<host>.*\.impots\.gouv\.fr</host>
+		<path>.*</path>
+		<protocol>http</protocol>
+		
+	</rule>
+	<rule app_name="firefox" context=".*" sig_num="9" msg_kill="Milw0rm can compromise your system" >
+		<host>.*milw0rm.*</host>
+	</rule>
+</PIGA_Killer>
+
