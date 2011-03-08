@@ -1,0 +1,27 @@
+diff -urN piga-systrans-2.0/src/contextd.pro piga-systrans-2.0-new/src/contextd.pro
+--- piga-systrans-2.0/src/contextd.pro	2010-05-19 11:51:47.724057618 +0200
++++ piga-systrans-2.0-new/src/contextd.pro	2010-05-19 11:52:12.754372902 +0200
+@@ -7,7 +7,8 @@
+ CONFIG += qdbus \
+     link_pkgconfig
+ 
+-CONFIG += debug
++#CONFIG += debug
++DEFINES     += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+ 
+ PKGCONFIG = libnotify \
+     glib
+diff -urN piga-systrans-2.0/src/context-notify.pro piga-systrans-2.0-new/src/context-notify.pro
+--- piga-systrans-2.0/src/context-notify.pro	2010-05-19 11:51:47.724057618 +0200
++++ piga-systrans-2.0-new/src/context-notify.pro	2010-05-19 11:52:13.242390839 +0200
+@@ -6,7 +6,9 @@
+ CONFIG += qdbus \
+     gui \
+     link_pkgconfig 
+-CONFIG +=     debug
++
++#CONFIG +=     debug
++DEFINES     += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+ 
+ PKGCONFIG = context
+ SOURCES += context-notify_src/context-notify.cpp \

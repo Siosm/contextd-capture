@@ -1,0 +1,67 @@
+diff -ur claws-mail-3.7.6.patched_2//src/compose.c claws-mail-3.7.6.patched/src/compose.c
+--- claws-mail-3.7.6.patched_2//src/compose.c	2010-05-22 16:56:49.576595011 +0200
++++ claws-mail-3.7.6.patched/src/compose.c	2010-05-22 17:02:31.599893772 +0200
+@@ -3422,8 +3422,28 @@
+ 	gboolean badtxt = FALSE;
+ 	struct stat file_stat;
+ 	int ret;
+-
++	OnInsertHookData inserthookdata;
++	gboolean refuseLoading = FALSE;
++	
+ 	cm_return_val_if_fail(file != NULL, COMPOSE_INSERT_NO_FILE);
++	
++	inserthookdata.file=file;
++	inserthookdata.error=NULL;
++	
++	refuseLoading=hooks_invoke(COMPOSE_CHECK_INSERT_FILES_HOOKLIST, &inserthookdata);
++
++	if(refuseLoading)
++	{
++		if(inserthookdata.error)
++		{
++			alertpanel_error("%s", inserthookdata.error);
++			g_free(inserthookdata.error);
++		}
++		else
++			alertpanel_error("%s", _("You don't have the permission to insert this file."));
++
++		return FALSE;
++	}
+ 
+ 	/* get the size of the file we are about to insert */
+ 	ret = g_stat(file, &file_stat);
+Seulement dans claws-mail-3.7.6.patched/src: compose.c~
+diff -ur claws-mail-3.7.6.patched_2//src/compose.h claws-mail-3.7.6.patched/src/compose.h
+--- claws-mail-3.7.6.patched_2//src/compose.h	2010-05-22 16:56:49.546595848 +0200
++++ claws-mail-3.7.6.patched/src/compose.h	2010-05-22 16:59:28.707412507 +0200
+@@ -23,6 +23,7 @@
+ typedef struct _Compose		Compose;
+ typedef struct _AttachInfo	AttachInfo;
+ typedef struct _OnAttachHookData	OnAttachHookData;
++typedef struct _OnInsertHookData	OnInsertHookData;
+ 
+ #include <glib.h>
+ #include <gtk/gtk.h>
+@@ -46,6 +47,7 @@
+ #define COMPOSE_CHECK_BEFORE_SEND_HOOKLIST "compose_check_before_send"
+ #define COMPOSE_CREATED_HOOKLIST "compose_created"
+ #define COMPOSE_CHECK_ATTACH_FILES_HOOKLIST "compose_check_attach_files_hooklist"
++#define COMPOSE_CHECK_INSERT_FILES_HOOKLIST "compose_check_insert_files_hooklist"
+ 
+ typedef enum
+ {
+@@ -279,6 +281,12 @@
+ 	gchar* error;
+ };
+ 
++struct _OnInsertHookData
++{
++	const gchar *file;
++	gchar* error;
++};
++
+ 
+ /*#warning FIXME_GTK2 */
+ /* attache_files will be locale encode */
+Seulement dans claws-mail-3.7.6.patched/src: compose.h~

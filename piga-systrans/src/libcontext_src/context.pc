@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+ 
+Name: context
+Description: Libcontext allows you to easily communicate your program's state to contextd.
+Version: 0.1.0
+URL: https://www.sds-project.fr/trac/PIGA-SYSTRANS
+Libs: -L${libdir} -lcontext
+Cflags: -I${includedir}

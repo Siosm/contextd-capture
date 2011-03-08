@@ -1,0 +1,27 @@
+diff -urN claws-mail-context-2.0/configure.ac claws-mail-context-2.0-new/configure.ac
+--- claws-mail-context-2.0/configure.ac	2010-05-17 14:27:12.369512201 +0200
++++ claws-mail-context-2.0-new/configure.ac	2010-05-17 14:26:47.601402570 +0200
+@@ -90,6 +90,12 @@
+ AC_SUBST(MICRO_VERSION)
+ AC_SUBST(EXTRA_VERSION)
+ 
++dnl build options
++AC_ARG_ENABLE([mail-list-filtering],
++	AS_HELP_STRING([--disable-mail-list-filtering], [Disable filtering of the mails list]))
++
++AM_CONDITIONAL(FILTER_MAIL_LIST, test "x$enable_mail_list_filtering" != "xno")
++
+ AC_OUTPUT([ m4/Makefile
+ Makefile
+ config/Makefile
+diff -urN claws-mail-context-2.0/Makefile.am claws-mail-context-2.0-new/Makefile.am
+--- claws-mail-context-2.0/Makefile.am	2010-05-17 14:26:57.705267144 +0200
++++ claws-mail-context-2.0-new/Makefile.am	2010-05-17 14:26:47.601402570 +0200
+@@ -8,3 +8,7 @@
+ 	ChangeLog
+ 
+ ACLOCAL_AMFLAGS = -I m4
++
++if FILTER_MAIL_LIST
++AM_CPPFLAGS = -DBLOCK_LISTING
++endif

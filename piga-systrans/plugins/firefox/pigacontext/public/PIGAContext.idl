@@ -1,0 +1,10 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(95e5dd33-6ce1-4e03-8d55-62dc2839c9b3)]
+interface PIGAContext: nsISupports {
+  string urlChanged(in string URL);
+  string requiredContext(in string URL);
+  string currentGlobalContext();
+  string currentLocalContext();
+  string getLastError();
+};

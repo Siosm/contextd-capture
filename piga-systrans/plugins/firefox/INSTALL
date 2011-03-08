@@ -1,0 +1,20 @@
+Download the latest source of firefox
+Extract it in the folder mozilla
+
+$ patch -p0< patch-gcc4.4.patch
+$ cp mozconfig mozilla/.mozconfig
+$ svn co https://www.sds-project.fr/svn/PIGA-SYSTRANS/trunk/plugins/firefox/pigacontext pigacontext
+$ cd mozilla
+$ make -f client.mk build	<-- this step is to be repeated until it works or until it crashes with the same error again
+
+if the compilation fails, you can try running configure && make distclean and make -f client.mk build once again
+
+$ mkdir obj-i686-pc-linux-gnu/dist/xpi-stage/PIGAContext/chrome
+$ cd ../pigacontext/
+$ zip ../mozilla/obj-i686-pc-linux-gnu/dist/xpi-stage/PIGAContext/chrome/pigacontext.jar content/contextMonitor.js content/contextMonitor.xul
+$ cd ../mozilla/obj-i686-pc-linux-gnu/dist/xpi-stage/PIGAContext/
+$ zip -r PIGAContext.xpi *
+$ cp PIGAContext.xpi ~/
+
+OK, you should now have the final XPI in your home directory
+

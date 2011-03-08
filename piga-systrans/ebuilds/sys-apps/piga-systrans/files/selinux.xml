@@ -1,0 +1,21 @@
+<PIGA_SELinux_Plugin>
+	<!-- 
+		In this file, we are associating a SELinux module to a process and a context.
+		full_path -> SELinux module's full path to load for the application 'app_name' when the system is in the context 'context'
+		app_name -> the name of the application
+		context -> the context in which the application should be to match this rule
+	-->
+	
+	<!-- Firefox -->
+<!--		<module full_path="/root/ANR/selinux-modules/perso-anr/firefox.pp" app_name="firefox" context="default" />
+		<module full_path="/root/ANR/selinux-modules/perso-anr/contextd/firefox_mail.pp" app_name="firefox" context="mail" />
+		<module full_path="/root/ANR/selinux-modules/perso-anr/contextd/firefox_impots.pp" app_name="firefox" context="impots" />
+-->
+	<!-- Claws-mail -->
+<!--		<module full_path="/root/ANR/selinux-modules/perso-anr/clawsmail.pp" app_name="claws-mail" context="default" />
+		<module full_path="/root/ANR/selinux-modules/perso-anr/contextd/clawsmail_mail.pp" app_name="claws-mail" context="mail" />
+		<module full_path="/root/ANR/selinux-modules/perso-anr/contextd/clawsmail_impots.pp" app_name="claws-mail" context="impots" />
+-->
+</PIGA_SELinux_Plugin>
+
+

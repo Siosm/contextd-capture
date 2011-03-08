@@ -1,0 +1,34 @@
+diff -ur claws-mail-3.7.6/src/send_message.c claws-mail-3.7.6.patched2/src/send_message.c
+--- claws-mail-3.7.6/src/send_message.c	2009-05-19 08:23:53.000000000 +0200
++++ claws-mail-3.7.6.patched2/src/send_message.c	2010-05-18 13:35:17.227421608 +0200
+@@ -204,6 +204,7 @@
+ 	MsgFlags flags = {0, 0};
+ 	long fp_pos = 0;
+ 	gchar spec_from[BUFFSIZE];
++	gboolean refuseLoading = FALSE;
+ 
+ 	cm_return_val_if_fail(ac_prefs != NULL, -1);
+ 	cm_return_val_if_fail(ac_prefs->address != NULL, -1);
+@@ -218,6 +219,10 @@
+ 	tmp_msginfo = procheader_parse_stream(fp, flags, FALSE, FALSE);
+ 	fseek(fp, fp_pos, SEEK_SET);
+ 	
++	refuseLoading=hooks_invoke(SEND_MESSAGE_ON_CHECK_MAIL_HOOKLIST, tmp_msginfo);
++	if(refuseLoading)
++		return NULL;
++	
+ 	if (tmp_msginfo && tmp_msginfo->from) {
+ 		strncpy2(spec_from, tmp_msginfo->from, BUFFSIZE-1);
+ 		extract_address(spec_from);
+diff -ur claws-mail-3.7.6/src/send_message.h claws-mail-3.7.6.patched2/src/send_message.h
+--- claws-mail-3.7.6/src/send_message.h	2009-01-09 18:47:06.000000000 +0100
++++ claws-mail-3.7.6.patched2/src/send_message.h	2010-05-18 13:36:45.874078845 +0200
+@@ -24,6 +24,8 @@
+ 
+ #include "prefs_account.h"
+ 
++#define SEND_MESSAGE_ON_CHECK_MAIL_HOOKLIST "send_message_on_check_mail_hooklist"
++
+ #define SMTP_PORT	25
+ #ifdef USE_GNUTLS
+ #define SSMTP_PORT	465
