@@ -1,0 +1,13 @@
+diff -urN claws-mail-context-1.0_alpha/src/piga_context.c claws-mail-context-1.0_alpha-new/src/piga_context.c
+--- claws-mail-context-1.0_alpha/src/piga_context.c     2010-04-28 17:22:01.826899262 +0200
++++ claws-mail-context-1.0_alpha-new/src/piga_context.c 2010-04-28 17:22:55.412609624 +0200
+@@ -53,7 +53,7 @@
+ 
+ #ifndef BLOCK_LISTING
+ //Set to TRUE to filter the mail list. FALSE otherwise
+-gboolean filter_mail_list=FALSE;
++gboolean filter_mail_list=TRUE;
+ #else
+ gboolean filter_mail_list=TRUE;
+ #endif
+

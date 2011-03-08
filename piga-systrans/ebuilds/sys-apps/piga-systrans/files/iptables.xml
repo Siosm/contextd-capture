@@ -1,0 +1,16 @@
+<PIGA_IPTables>
+	<!-- Option flushRulesWhenChangingContext. Accepted values: true|false-->
+	<option name="flushRulesWhenChangingContext" value="true" />
+	
+	<!-- Option maxDomainsPerApplication. 
+	  Accepted values: 
+	  -1 : unlimited
+	  0 : none
+	  1 : Only one domain is allowed
+	-->
+	<option name="maxDomainsPerApplication" value="-1" />
+	
+	<!-- Option GWInterface. Which interface is connected to the internet ? Default: eth0-->
+	<option name="GWInterface" value="tun0" />
+</PIGA_IPTables>
+
