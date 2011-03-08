@@ -38,16 +38,17 @@ int main(int argc, char* argv[])
 			#ifdef DEBUG
 			switch (usai->type){
 				case AUDITSEC_FILE:
-					if(strcmp("sshd", usai->execname)){
-					//printf("AuditSec, file access: %s, pid: %d, execname: %s%s, mask: %d\n",
-					//		usai->auditsec_struct.file.fullpath_filename, usai->pid,
-					//		usai->fullpath_execname, usai->execname, usai->auditsec_struct.file.mask);
+					if(strcmp("sshd", usai->execname) != 0){
+					printf("AuditSec, file access: %s%s, pid: %d, execname: %s, mask: %d\n",
+							usai->auditsec_struct.file.fullpath,
+							usai->auditsec_struct.file.name, usai->pid,
+							usai->execname, usai->auditsec_struct.file.mask);
 					} 
 					break;
 				case AUDITSEC_DIR:
-					//printf("AuditSec, mkdir: %s, pid: %d, execname:%s%s, mode: %d\n",
-					//		usai->auditsec_struct.dir.fullpath_filename, usai->pid,
-					//		usai->fullpath_execname, usai->execname, usai->auditsec_struct.dir.mode);
+					printf("AuditSec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
+							usai->auditsec_struct.dir.fullpath, usai->pid,
+							usai->execname, usai->auditsec_struct.dir.mode);
 					break;
 				default:
 					printf("AuditSec, can't determine struct type !");

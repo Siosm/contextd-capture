@@ -12,7 +12,7 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/swap.h>
-#include <linux/spinlock.h>
+// #include <linux/spinlock.h>
 #include <linux/syscalls.h>
 #include <linux/file.h>
 #include <linux/fdtable.h>
@@ -54,6 +54,7 @@
 #include <linux/sched.h>
 #include <linux/limits.h>
 #include <linux/semaphore.h>
+#include <linux/rwsem.h>
 
 #include "hooks-func.h"
 #include "hooks.h"
@@ -239,10 +240,10 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
 
-	spin_lock(auditsec_pid_lock());
+	down_read(auditsec_pid_lock());
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
-			spin_unlock(auditsec_pid_lock());
+			up_read(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
@@ -260,9 +261,9 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			vfree(fullpath);
 			return answer;
 		}
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 	} else {
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
 				fullpath, task_pid_nr(current), current->comm, mode);
 	}
@@ -353,10 +354,10 @@ int auditsec_file_permission(struct file *file, int mask)
 	fullpath = vmalloc(PATH_MAX + 1);
 	file_path(file, fullpath);
 
-	spin_lock(auditsec_pid_lock());
+	down_read(auditsec_pid_lock());
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
-			spin_unlock(auditsec_pid_lock());
+			up_read(auditsec_pid_lock());
 			down(auditsec_hook_lock());
 
 			k_auditsec_info()->pid = task_pid_nr(current);
@@ -374,9 +375,9 @@ int auditsec_file_permission(struct file *file, int mask)
 			vfree(fullpath);
 			return answer;
 		}
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 	} else {
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
 				fullpath, task_pid_nr(current), current->comm, mask);
 	}
@@ -1225,6 +1226,8 @@ static __init int auditsec_init(void)
 	init_MUTEX(auditsec_hook_lock());
 	init_MUTEX(auditsec_question_lock());
 	init_MUTEX(auditsec_answer_lock());
+
+	init_rwsem(auditsec_pid_lock());
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());

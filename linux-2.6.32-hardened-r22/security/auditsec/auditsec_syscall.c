@@ -15,6 +15,7 @@
  *
  **/
 
+
 #include <linux/pid.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
@@ -26,13 +27,15 @@
 
 asmlinkage long sys_auditsec_reg(int state)
 {
-	if(spin_trylock(auditsec_pid_lock()) == 0)
-		return -1;
+// 	if(spin_trylock(auditsec_pid_lock()) == 0)
+// 		return -1;
+
+	down_write(auditsec_pid_lock());
 
 	if(state){
 		if(*daemon_pid() == -1){
 			*daemon_pid() = task_pid_nr(current);
-			spin_unlock(auditsec_pid_lock());
+			up_write(auditsec_pid_lock());
 			printk(KERN_INFO "AuditSec: Process %d successfully registered",
 					task_pid_nr(current));
 			return 0;
@@ -40,13 +43,13 @@ asmlinkage long sys_auditsec_reg(int state)
 	} else {
 		if(*daemon_pid() == task_pid_nr(current)){
 			*daemon_pid() = -1;
-			spin_unlock(auditsec_pid_lock());
+			up_write(auditsec_pid_lock());
 			return 0;
 		}
 	}
 	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
 			task_pid_nr(current), *daemon_pid());
-	spin_unlock(auditsec_pid_lock());
+	up_write(auditsec_pid_lock());
 
 	return -1;
 }
@@ -54,24 +57,24 @@ asmlinkage long sys_auditsec_reg(int state)
 
 asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 {
-	if(spin_trylock(auditsec_pid_lock()) == 0)
+	if(down_read_trylock(auditsec_pid_lock()) == 0)
 		return -1;
 
 	if(*daemon_pid() == -1){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered",
 				task_pid_nr(current));
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		return -1;
 	}
 
 	if(*daemon_pid() != task_pid_nr(current)){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered ; Current is %d",
 				task_pid_nr(current), *daemon_pid());
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		return -1;
 	}
 
-	spin_unlock(auditsec_pid_lock());
+	up_read(auditsec_pid_lock());
 
 	if(down_interruptible(auditsec_question_lock()) != 0)
 		return -1;
@@ -93,23 +96,23 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 
 asmlinkage long sys_auditsec_answer(int answer)
 {
-	if(spin_trylock(auditsec_pid_lock()) == 0)
+	if(down_read_trylock(auditsec_pid_lock()) == 0)
 		return -1;
 
 	if(*daemon_pid() == -1){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to answer: NOT registered",
 				task_pid_nr(current));
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		return -1;
 	}
 
 	if(*daemon_pid() != task_pid_nr(current)){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), *daemon_pid());
-		spin_unlock(auditsec_pid_lock());
+		up_read(auditsec_pid_lock());
 		return -1;
 	}
 
-	spin_unlock(auditsec_pid_lock());
+	up_read(auditsec_pid_lock());
 	*auditsec_answer() = answer;
 	up(auditsec_answer_lock());
 

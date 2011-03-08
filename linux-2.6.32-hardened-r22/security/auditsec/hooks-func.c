@@ -51,6 +51,7 @@
 #include <linux/posix-timers.h>
 #include <linux/limits.h>
 
+
 #include "hooks-func.h"
 
 
@@ -81,7 +82,7 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 
 int file_path(struct file *file, char *path)
 {
-	char * mnt_point = file->f_path.mnt->mnt_devname;
+	const char * mnt_point = file->f_path.mnt->mnt_devname;
 	int n = 0;
 
 	if (strcmp("/dev/root", mnt_point)) {
