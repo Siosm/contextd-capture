@@ -2,3 +2,8 @@ BUILD/
 build/
 *~
 doc/
+bin/
+*.o
+Makefile
+Makefile*
+moc_*.cpp
