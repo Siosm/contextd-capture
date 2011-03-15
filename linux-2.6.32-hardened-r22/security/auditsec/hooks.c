@@ -244,8 +244,11 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
 			up_read(auditsec_pid_lock());
-			if(down_timeout(auditsec_hook_lock(), 250) != 0){// 5s timeout. Is it too much ?
-				return -1;
+			if(down_timeout(auditsec_hook_lock(), 250) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+						fullpath, task_pid_nr(current), current->comm, mode);
+				vfree(fullpath);
+				return 0; // Change it to -1 when ready
 			}
 
 			k_auditsec_info()->pid = task_pid_nr(current);
@@ -360,8 +363,11 @@ int auditsec_file_permission(struct file *file, int mask)
 	if(*daemon_pid() != -1){
 		if(*daemon_pid() != task_pid_nr(current)){
 			up_read(auditsec_pid_lock());
-			if(down_timeout(auditsec_hook_lock(), 250) != 0){// 5s timeout. Is it too much ?
-				return -1;
+			if(down_timeout(auditsec_hook_lock(), 250) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+						fullpath, task_pid_nr(current), current->comm, mode);
+				vfree(fullpath);
+				return 0; // Change it to -1 when ready
 			}
 
 			k_auditsec_info()->pid = task_pid_nr(current);
