@@ -24,7 +24,7 @@
 #endif
 
 long auditsec_register(int state);
-long auditsec_wait(struct auditsec_info * user_as_i);
+long auditsec_question(struct auditsec_info * user_as_i);
 long auditsec_answer(int answer);
 
 #endif
