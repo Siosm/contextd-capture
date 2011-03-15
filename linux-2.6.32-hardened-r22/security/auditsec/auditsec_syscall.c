@@ -26,9 +26,6 @@
 
 asmlinkage long sys_auditsec_reg(int state)
 {
-// 	if(spin_trylock(auditsec_pid_lock()) == 0)
-// 		return -1;
-
 	down_write(auditsec_pid_lock());
 
 	if(state){
