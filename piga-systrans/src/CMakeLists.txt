@@ -296,7 +296,7 @@ IF(BUILD_EDITOR)
 						"${EDITOR_SRC_DIR}/actiondialog.ui"
 						"${EDITOR_SRC_DIR}/settingsdialog.ui"
 						"${EDITOR_SRC_DIR}/selectdefaultdomaindialog.ui"
-						"${EDITOR_SRC_DIR}/abstractruleinfodock.ui
+						"${EDITOR_SRC_DIR}/abstractruleinfodock.ui"
 						"${EDITOR_SRC_DIR}/messagearea.ui"
 						"${EDITOR_SRC_DIR}/captiondialog.ui"
 						)
