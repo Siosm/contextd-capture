@@ -1,0 +1,5 @@
+policy_module(${module},1.0.0)
+
+require { type ${user_t}, ${module_domain_t};}
+
+allow ${user_t} ${module_domain_t}:process { ptrace siginh rlimitinh noatsecure };

@@ -1,0 +1,18 @@
+DEPTH		= ../..
+topsrcdir	= @top_srcdir@
+srcdir		= @srcdir@
+VPATH		= @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+MODULE = PIGAContext
+
+DIRS		= public src
+
+XPI_NAME		= PIGAContext
+INSTALL_EXTENSION_ID	= PIGAContext@sds-project.fr
+XPI_PKGNAME		= PIGAContext
+
+DIST_FILES = install.rdf
+
+include $(topsrcdir)/config/rules.mk

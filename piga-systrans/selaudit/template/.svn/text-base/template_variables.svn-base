@@ -1,0 +1,8 @@
+${app_path} : /usr/bin/firefox
+
+${user_u} : user_u // unused
+${user_r} : user_r
+${user_t} : user_t
+
+${module_domain_t} : user_firefox_t
+${module_exec_t} : firefox_exec_t

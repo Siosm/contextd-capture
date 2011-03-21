@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/tagging
+END
+seltag.conf
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/tagging/seltag.conf
+END
+seltag_app.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/tagging/seltag_app.py
+END
+seltag_compare.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/tagging/seltag_compare.py
+END
+seltag_lib.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/tagging/seltag_lib.py
+END

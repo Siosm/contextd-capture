@@ -1,0 +1,21 @@
+diff -urN claws-mail-3.7.5-old/src/compose.c claws-mail-3.7.5/src/compose.c
+--- claws-mail-3.7.5-old/src/compose.c	2010-02-11 03:58:22.000000000 +0100
++++ claws-mail-3.7.5/src/compose.c	2010-02-11 03:57:51.000000000 +0100
+@@ -9300,6 +9300,17 @@
+ 	toolbar_main_set_sensitive(mainwindow_get_mainwindow());
+ }
+ 
++void compose_destroy_all (void)
++{
++	GList *list;
++	do
++	{
++		list=compose_get_compose_list();
++		if(list!=NULL)
++			compose_destroy((Compose *)list->data);
++	}while(list!=NULL);
++}
++
+ #define DRAFTED_AT_EXIT "drafted_at_exit"
+ static void compose_register_draft(MsgInfo *info)
+ {

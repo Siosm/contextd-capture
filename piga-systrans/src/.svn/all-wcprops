@@ -1,0 +1,233 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/PIGA-SYSTRANS/!svn/ver/916/branches/v2/src
+END
+transition.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/475/branches/v2/src/transition.h
+END
+trule.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/PIGA-SYSTRANS/!svn/ver/619/branches/v2/src/trule.h
+END
+misc.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/PIGA-SYSTRANS/!svn/ver/475/branches/v2/src/misc.h
+END
+abstractrule.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/PIGA-SYSTRANS/!svn/ver/843/branches/v2/src/abstractrule.h
+END
+configuration.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/PIGA-SYSTRANS/!svn/ver/852/branches/v2/src/configuration.cpp
+END
+contextd_interface.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_interface.cpp
+END
+context-notify.pro
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/PIGA-SYSTRANS/!svn/ver/778/branches/v2/src/context-notify.pro
+END
+xmlsp.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/PIGA-SYSTRANS/!svn/ver/425/branches/v2/src/xmlsp.h
+END
+loop.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/PIGA-SYSTRANS/!svn/ver/834/branches/v2/src/loop.cpp
+END
+programaction.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/475/branches/v2/src/programaction.h
+END
+variabletypes.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/PIGA-SYSTRANS/!svn/ver/778/branches/v2/src/variabletypes.cpp
+END
+rule.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/PIGA-SYSTRANS/!svn/ver/839/branches/v2/src/rule.h
+END
+program.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/PIGA-SYSTRANS/!svn/ver/760/branches/v2/src/program.h
+END
+domain.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/PIGA-SYSTRANS/!svn/ver/831/branches/v2/src/domain.h
+END
+programvariable.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/PIGA-SYSTRANS/!svn/ver/814/branches/v2/src/programvariable.cpp
+END
+mrule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/PIGA-SYSTRANS/!svn/ver/750/branches/v2/src/mrule.cpp
+END
+context-editor.pro
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/PIGA-SYSTRANS/!svn/ver/905/branches/v2/src/context-editor.pro
+END
+libcontext.pro
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/PIGA-SYSTRANS/!svn/ver/307/branches/v2/src/libcontext.pro
+END
+transition.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/PIGA-SYSTRANS/!svn/ver/323/branches/v2/src/transition.cpp
+END
+trule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/PIGA-SYSTRANS/!svn/ver/619/branches/v2/src/trule.cpp
+END
+misc.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/PIGA-SYSTRANS/!svn/ver/371/branches/v2/src/misc.cpp
+END
+abstractrule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/PIGA-SYSTRANS/!svn/ver/843/branches/v2/src/abstractrule.cpp
+END
+CMakeLists.txt
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/CMakeLists.txt
+END
+com.piga.contextd.xml
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/PIGA-SYSTRANS/!svn/ver/342/branches/v2/src/com.piga.contextd.xml
+END
+xmlsp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/xmlsp.cpp
+END
+programaction.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/PIGA-SYSTRANS/!svn/ver/439/branches/v2/src/programaction.cpp
+END
+contextd.pro
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/778/branches/v2/src/contextd.pro
+END
+rule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/PIGA-SYSTRANS/!svn/ver/834/branches/v2/src/rule.cpp
+END
+program.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/PIGA-SYSTRANS/!svn/ver/779/branches/v2/src/program.cpp
+END
+domain.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/PIGA-SYSTRANS/!svn/ver/831/branches/v2/src/domain.cpp
+END
+configuration.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/852/branches/v2/src/configuration.h
+END
+xml_common.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/831/branches/v2/src/xml_common.h
+END
+contextd_interface.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/PIGA-SYSTRANS/!svn/ver/342/branches/v2/src/contextd_interface.h
+END
+loop.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/PIGA-SYSTRANS/!svn/ver/839/branches/v2/src/loop.h
+END
+context-common.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/PIGA-SYSTRANS/!svn/ver/546/branches/v2/src/context-common.h
+END
+variabletypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/778/branches/v2/src/variabletypes.h
+END
+programvariable.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/PIGA-SYSTRANS/!svn/ver/780/branches/v2/src/programvariable.h
+END
+mrule.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/PIGA-SYSTRANS/!svn/ver/744/branches/v2/src/mrule.h
+END

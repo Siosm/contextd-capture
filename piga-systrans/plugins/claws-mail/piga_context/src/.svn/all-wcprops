@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context/src
+END
+piga_context.c
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context/src/piga_context.c
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/376/branches/v2/plugins/claws-mail/piga_context/src/Makefile.am
+END
+gettext.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/src/gettext.h
+END
+.cvsignore
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/src/.cvsignore
+END

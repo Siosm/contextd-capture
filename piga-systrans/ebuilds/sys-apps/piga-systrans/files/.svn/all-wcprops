@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/902/branches/v2/ebuilds/sys-apps/piga-systrans/files
+END
+killer.xml
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/516/branches/v2/ebuilds/sys-apps/piga-systrans/files/killer.xml
+END
+iptables.xml
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/PIGA-SYSTRANS/!svn/ver/720/branches/v2/ebuilds/sys-apps/piga-systrans/files/iptables.xml
+END
+piga-systrans-nodebug.patch
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/sys-apps/piga-systrans/files/piga-systrans-nodebug.patch
+END
+selinux.xml
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/sys-apps/piga-systrans/files/selinux.xml
+END
+context-notify.xml
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/PIGA-SYSTRANS/!svn/ver/900/branches/v2/ebuilds/sys-apps/piga-systrans/files/context-notify.xml
+END
+piga.contextd.conf
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/sys-apps/piga-systrans/files/piga.contextd.conf
+END
+transitions.xml
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/PIGA-SYSTRANS/!svn/ver/640/branches/v2/ebuilds/sys-apps/piga-systrans/files/transitions.xml
+END
+piga.context-notify.conf
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/PIGA-SYSTRANS/!svn/ver/417/branches/v2/ebuilds/sys-apps/piga-systrans/files/piga.context-notify.conf
+END

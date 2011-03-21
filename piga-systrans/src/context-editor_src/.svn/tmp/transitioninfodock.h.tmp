@@ -1,0 +1,60 @@
+#ifndef TRANSITIONINFODOCK_H
+#define TRANSITIONINFODOCK_H
+
+#include <QDockWidget>
+#include <QVector>
+#include "abstractrule.h"
+#include "domain.h"
+#include "loop.h"
+#include "program.h"
+#include "rule.h"
+#include "trule.h"
+
+namespace Ui {
+	class TransitionInfoDock;
+}
+
+class TransitionInfoDock : public QDockWidget
+{
+	Q_OBJECT
+
+public:
+	explicit TransitionInfoDock(QWidget *parent = 0);
+	~TransitionInfoDock();
+
+	bool setProgram(Program prog);
+	bool setSourceDomain(Domain dom);
+	bool setTargetDomain(Domain dom);
+	bool setAllProperties(Program prog, Domain src, Domain dest);
+
+	Program program() const;
+	Domain sourceDomain() const;
+	Domain targetDomain() const;
+
+	bool isValid() const;
+
+protected:
+	void changeEvent(QEvent *e);
+
+private:
+	Ui::TransitionInfoDock *ui;
+	Program _program;
+	Domain _source;
+	Domain _target;
+	QMap<int, AbstractRule *> _rules;
+
+	void fetchLoops(int &i);
+	void fetchRules(int &i);
+
+	void addAbstractRuleToList(AbstractRule *rule, TRule &trule, int i, QString ruleType);
+
+	void updateRulesList();
+
+private slots:
+	void onDeleteClicked();
+	void onEditClicked();
+	void onListSelectionChanged();
+	void onRulesChanged();
+};
+
+#endif // TRANSITIONINFODOCK_H

@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>274</width>
+    <height>255</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Context Editor</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="GraphicsView" name="graphicsView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>5</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>274</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>&amp;Export...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/export</normaloff>:/icons/export</iconset>
+     </property>
+     <addaction name="actionExportAll"/>
+     <addaction name="actionExportApplications"/>
+    </widget>
+    <addaction name="actionNewRules"/>
+    <addaction name="actionOpenRules"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionNewApplication"/>
+    <addaction name="actionOpenApplication"/>
+    <addaction name="separator"/>
+    <addaction name="menuExport"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menu_Display">
+    <property name="title">
+     <string>&amp;Display</string>
+    </property>
+    <addaction name="actionBrowser"/>
+    <addaction name="actionMessages"/>
+    <addaction name="separator"/>
+    <addaction name="action_Show_all_items"/>
+    <addaction name="separator"/>
+    <addaction name="actionZoomin"/>
+    <addaction name="actionZoomout"/>
+    <addaction name="actionNormalsize"/>
+    <addaction name="actionBestfit"/>
+    <addaction name="separator"/>
+    <addaction name="actionCaption"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionExportgraphasPNG"/>
+    <addaction name="actionExportmessagestotext"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menu_Display"/>
+   <addaction name="menuTools"/>
+  </widget>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/save-as</normaloff>:/icons/save-as</iconset>
+   </property>
+   <property name="text">
+    <string>Save rules &amp;as...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/exit</normaloff>:/icons/exit</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/undo</normaloff>:/icons/undo</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/redo</normaloff>:/icons/redo</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenRules">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/open</normaloff>:/icons/open</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open rules</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save rules</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
+   </property>
+   <property name="text">
+    <string>Export...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenApplication">
+   <property name="text">
+    <string>&amp;Import programs</string>
+   </property>
+  </action>
+  <action name="actionExportAll">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/file-package</normaloff>:/icons/file-package</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;All data</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/settings</normaloff>:/icons/settings</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Settings</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Cu&amp;t</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+  </action>
+  <action name="actionExportApplications">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/file-program</normaloff>:/icons/file-program</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Programs</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionNewRules">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/new</normaloff>:/icons/new</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;New rules</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionNewApplication">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/new-program16</normaloff>:/icons/new-program16</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;program</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSaveApplications">
+   <property name="text">
+    <string>Save p&amp;rograms</string>
+   </property>
+  </action>
+  <action name="actionZoomin">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/zoom-in</normaloff>:/icons/zoom-in</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom &amp;in</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionZoomout">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/zoom-out</normaloff>:/icons/zoom-out</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom &amp;out</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionNormalsize">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/zoom-original</normaloff>:/icons/zoom-original</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Normal size</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionBestfit">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/zoom-fit-best</normaloff>:/icons/zoom-fit-best</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Best fit</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionBrowser">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Browser</string>
+   </property>
+  </action>
+  <action name="action_Show_all_items">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/eye</normaloff>:/icons/eye</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Show all items</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionPNG">
+   <property name="text">
+    <string>PNG</string>
+   </property>
+  </action>
+  <action name="actionSVG">
+   <property name="text">
+    <string>SVG</string>
+   </property>
+  </action>
+  <action name="actionLOLCAT">
+   <property name="text">
+    <string>LOLCAT</string>
+   </property>
+  </action>
+  <action name="actionROFLCOPTER">
+   <property name="text">
+    <string>ROFLCOPTER</string>
+   </property>
+  </action>
+  <action name="actionExportviewasPNG">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/view</normaloff>:/icons/view</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Export view as PNG</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionExportgraphasPNG">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/image</normaloff>:/icons/image</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Export graph as PNG</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionMessages">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Messages</string>
+   </property>
+  </action>
+  <action name="actionExportmessagestotext">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/icons/export</normaloff>:/icons/export</iconset>
+   </property>
+   <property name="text">
+    <string>Export &amp;messages to text</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionCaption">
+   <property name="text">
+    <string>&amp;Caption</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>GraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>context-editor_src/graphicsview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="Icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

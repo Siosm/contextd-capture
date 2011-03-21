@@ -1,0 +1,308 @@
+INCLUDE(CheckIncludeFile)
+INCLUDE(CheckLibraryExists)
+INCLUDE(CheckFunctionExists)
+INCLUDE(FindPkgConfig)
+INCLUDE(FeatureSummary)
+
+SET(SYSTRANS_BIN_PATH "${CMAKE_INSTALL_PREFIX}/bin")
+SET(SYSTRANS_LIB_PATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(SYSTRANS_INCLUDE_PATH "${CMAKE_INSTALL_PREFIX}/include")
+SET(SYSTRANS_PKGCFG_PATH "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+
+OPTION(BUILD_LIB "Build libcontext" ON)
+OPTION(BUILD_DAEMON "Build contextd" ON)
+OPTION(BUILD_NOTIFY "Build context-notify" ON)
+OPTION(BUILD_EDITOR "Build context-editor" ON)
+
+OPTION(CONTEXTD_ENABLE_SELINUX "Build contextd with SELinux support (mandatory for PIGA-IPS support)" ON)
+OPTION(CONTEXTD_PLUGIN_NOTIFY "Build Contextd using the notify plugin" ON)
+OPTION(CONTEXTD_PLUGIN_LOGGER "Build Contextd using the logger plugin" ON)
+OPTION(CONTEXTD_PLUGIN_KILLER "Build Contextd using the killer plugin" ON)
+OPTION(CONTEXTD_PLUGIN_IPTABLES "Build Contextd using the iptables plugin" ON)
+OPTION(CONTEXTD_PLUGIN_SELINUX "Build Contextd using the selinux plugin" ON)
+OPTION(CONTEXTD_PLUGIN_XORG "Build Contextd using the xorg plugin" ON)
+
+#Perform some checks
+CHECK_INCLUDE_FILE("selinux.h" HAVE_SELINUX)
+IF(NOT HAVE_SELINUX)
+	SET(CONTEXTD_ENABLE_SELINUX OFF)
+	SET(CONTEXTD_PLUGIN_SELINUX OFF)
+ENDIF(NOT HAVE_SELINUX)
+
+CHECK_INCLUDE_FILE("libnotify/notify.h" HAVE_LIBNOTIFY)
+IF(NOT HAVE_LIBNOTIFY)
+	SET(CONTEXTD_PLUGIN_NOTIFY OFF)
+ENDIF(NOT HAVE_LIBNOTIFY)
+
+# Set some default values
+IF(NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE "Release")
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+INCLUDE(${QT_USE_FILE})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+IF(NOT DEBUG)
+	ADD_DEFINITIONS(-DNDEBUG -O2 -DQT_NO_DEBUG)
+ELSE(NOT DEBUG)
+	ADD_DEFINITIONS(-g)
+ENDIF(NOT DEBUG)
+
+IF(BUILD_LIB)
+	SET(QT_DONT_USE_QTGUI TRUE)
+	SET(LIBCONTEXT_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libcontext_src")
+
+	PKG_SEARCH_MODULE(dbus_glib dbus-glib-1)
+	PKG_SEARCH_MODULE(qdbus QtDBus)
+	INCLUDE_DIRECTORIES(${dbus_glib_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${LIBCONTEXT_SRC_DIR})
+	INCLUDE_DIRECTORIES(${QT_INCLUDES})
+	LINK_DIRECTORIES(${dbus_glib_LIBRARY_DIRS})
+	
+	FILE(GLOB_RECURSE libcontext_source "${LIBCONTEXT_SRC_DIR}/*.cpp")
+	SET(libcontext_moc	"${LIBCONTEXT_SRC_DIR}/contextd_communicator.h"
+						"${LIBCONTEXT_SRC_DIR}/dbuscallback.h")
+
+	QT4_WRAP_CPP(libcontext_source ${libcontext_moc})
+
+	ADD_LIBRARY(context SHARED ${libcontext_source})
+	TARGET_LINK_LIBRARIES(context ${dbus_glib_LIBRARIES})
+	TARGET_LINK_LIBRARIES(context ${QT_LIBRARIES})
+	TARGET_LINK_LIBRARIES(context ${qdbus_LIBRARIES})
+	SET_TARGET_PROPERTIES(context PROPERTIES COMPILE_FLAGS "-pthread" SOVERSION 0.2.0)
+	
+	INSTALL(TARGETS context DESTINATION ${SYSTRANS_LIB_PATH})
+	INSTALL(FILES "${LIBCONTEXT_SRC_DIR}/libcontext.h" DESTINATION ${SYSTRANS_INCLUDE_PATH})
+	INSTALL(FILES "${LIBCONTEXT_SRC_DIR}/context.pc" DESTINATION ${SYSTRANS_PKGCFG_PATH})
+ENDIF(BUILD_LIB)
+
+
+IF(BUILD_NOTIFY)
+	SET(QT_USE_QTGUI TRUE)
+	SET(NOTIFY_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/context-notify_src")
+
+	#PKG_SEARCH_MODULE(context context)
+	PKG_SEARCH_MODULE(qdbus QtDBus)
+	#INCLUDE_DIRECTORIES(${context_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${NOTIFY_SRC_DIR})
+	INCLUDE_DIRECTORIES(${QT_INCLUDES})
+	INCLUDE_DIRECTORIES(${qdbus_INCLUDE_DIRS})
+	#LINK_DIRECTORIES(${context_LIBRARY_DIRS})
+
+	SET(notify_source	"${NOTIFY_SRC_DIR}/context-notify.cpp"
+						"${NOTIFY_SRC_DIR}/changecontextdialog.cpp"
+						"${NOTIFY_SRC_DIR}/contextlist.cpp"
+						"${NOTIFY_SRC_DIR}/contextListener.cpp"
+						"${NOTIFY_SRC_DIR}/notifyprompt.cpp"
+						"${NOTIFY_SRC_DIR}/updatedomain.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/configuration.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/domain.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/misc.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/mrule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/program.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/rule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/transition.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/trule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/xmlsp.cpp")
+
+	SET(notify_moc		"${NOTIFY_SRC_DIR}/changecontextdialog.h"
+						"${NOTIFY_SRC_DIR}/contextListener.h"
+						"${NOTIFY_SRC_DIR}/notifyprompt.h"
+						"${NOTIFY_SRC_DIR}/updatedomain.h")
+
+	QT4_WRAP_CPP(notify_source ${notify_moc})
+
+	SET(notify_uis    	"${NOTIFY_SRC_DIR}/changecontextdialog.ui"
+						"${NOTIFY_SRC_DIR}/notifyosd.ui"
+						"${NOTIFY_SRC_DIR}/notifyprompt.ui")
+
+	QT4_WRAP_UI(notify_source ${notify_uis})
+	INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+	SET(notify_resources "${NOTIFY_SRC_DIR}/qressources.qrc")
+	QT4_ADD_RESOURCES(notify_source ${notify_resources})
+
+	SET(notify_translations "${NOTIFY_SRC_DIR}/context-notify_fr.ts")
+	QT4_ADD_TRANSLATION(notify_source ${notify_translations})
+
+	ADD_EXECUTABLE(context-notify ${notify_source})
+	TARGET_LINK_LIBRARIES(context-notify context)
+	TARGET_LINK_LIBRARIES(context-notify ${QT_LIBRARIES})
+	TARGET_LINK_LIBRARIES(context-notify ${qdbus_LIBRARIES})
+
+	INSTALL(TARGETS context-notify DESTINATION ${SYSTRANS_BIN_PATH})
+ENDIF(BUILD_NOTIFY)
+
+
+
+IF(BUILD_EDITOR)
+	SET(QT_USE_QTGUI TRUE)
+	SET(EDITOR_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/context-editor_src")
+
+	PKG_SEARCH_MODULE(context context)
+	PKG_SEARCH_MODULE(qdbus QtDBus)
+	INCLUDE_DIRECTORIES(${context_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${EDITOR_SRC_DIR})
+	INCLUDE_DIRECTORIES(${QT_INCLUDES})
+	INCLUDE_DIRECTORIES(${qdbus_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${context_LIBRARY_DIRS})
+
+	SET(editor_source	"${EDITOR_SRC_DIR}/main.cpp"
+						"${EDITOR_SRC_DIR}/mainwindow.cpp"
+						"${EDITOR_SRC_DIR}/transitiondialog.cpp"
+						"${EDITOR_SRC_DIR}/truletreewidget.cpp"
+						"${EDITOR_SRC_DIR}/trulenewdialog.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/configuration.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/domain.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/misc.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/mrule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/program.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/rule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/transition.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/trule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/xmlsp.cpp")
+
+	SET(editor_moc		"${EDITOR_SRC_DIR}/mainwindow.h"
+						"${EDITOR_SRC_DIR}/transitiondialog.h"
+						"${EDITOR_SRC_DIR}/truletreewidget.h"
+						"${EDITOR_SRC_DIR}/trulenewdialog.h")
+
+	QT4_WRAP_CPP(editor_source ${editor_moc})
+
+	SET(editor_uis    	"${EDITOR_SRC_DIR}/mainwindow.ui"
+						"${EDITOR_SRC_DIR}/transitiondialog.ui"
+						"${EDITOR_SRC_DIR}/truletreewidget.ui"
+						"${EDITOR_SRC_DIR}/trulenewdialog.ui")
+
+	QT4_WRAP_UI(editor_source ${editor_uis})
+	INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+	ADD_EXECUTABLE(context-editor ${editor_source})
+	TARGET_LINK_LIBRARIES(context-editor ${context_LIBRARIES})
+	TARGET_LINK_LIBRARIES(context-editor ${QT_LIBRARIES})
+	TARGET_LINK_LIBRARIES(context-editor ${qdbus_LIBRARIES})
+
+	INSTALL(TARGETS context-editor DESTINATION ${SYSTRANS_BIN_PATH})
+ENDIF(BUILD_EDITOR)
+
+
+IF(BUILD_DAEMON)
+	SET(QT_DONT_USE_QTGUI TRUE)
+	SET(QT_USE_QTNETWORK TRUE)
+	SET(DAEMON_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/contextd_src")
+	SET(PLUGINS_SRC_DIR "${DAEMON_SRC_DIR}/plugins")
+
+	PKG_SEARCH_MODULE(libnotify libnotify)
+	PKG_SEARCH_MODULE(glib glib-2.0)
+	PKG_SEARCH_MODULE(qdbus QtDBus)
+	PKG_SEARCH_MODULE(qtnetwork QtNetwork)
+	INCLUDE_DIRECTORIES(${libnotify_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${glib_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${qdbus_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${qtnetwork_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(${DAEMON_SRC_DIR})
+	INCLUDE_DIRECTORIES(${QT_INCLUDES})
+	LINK_DIRECTORIES(${DAEMON_SRC_DIR})
+	LINK_DIRECTORIES(${PLUGINS_SRC_DIR})
+
+	SET(daemon_source	"${DAEMON_SRC_DIR}/contextclient.cpp"
+						"${DAEMON_SRC_DIR}/contextd.cpp"
+						"${DAEMON_SRC_DIR}/dbus-context.cpp"
+						"${DAEMON_SRC_DIR}/eventdispatcher.cpp"
+						"${DAEMON_SRC_DIR}/pigahandler.cpp"
+						"${DAEMON_SRC_DIR}/promptuser.cpp"
+						"${DAEMON_SRC_DIR}/xmlcontext2map.cpp"
+						"${PLUGINS_SRC_DIR}/abstractcontextdplugin.cpp"
+						"${PLUGINS_SRC_DIR}/contextdpluginnotifyevent.cpp"
+						"${PLUGINS_SRC_DIR}/contextdpluginreloadevent.cpp"
+						"${PLUGINS_SRC_DIR}/contextdpluginrestartevent.cpp"
+						"${PLUGINS_SRC_DIR}/contextdplugintransitiondemandevent.cpp"
+						"${PLUGINS_SRC_DIR}/domainholder/domainholder.cpp"
+						"${PLUGINS_SRC_DIR}/iptable-blocker/rulelist.cpp"
+						"${PLUGINS_SRC_DIR}/iptable-blocker/contextdpluginiptableblocker.cpp"
+						"${PLUGINS_SRC_DIR}/killer/contextdpluginkiller.cpp"
+						"${PLUGINS_SRC_DIR}/killer/killingrule.cpp"
+						"${PLUGINS_SRC_DIR}/logger/contextdpluginlogger.cpp"
+						"${PLUGINS_SRC_DIR}/notify/contextdpluginnotify.cpp"
+						"${PLUGINS_SRC_DIR}/notify/contextdpluginnotify-impl.c"
+						"${PLUGINS_SRC_DIR}/selinux/contextdpluginselinux.cpp"
+						"${PLUGINS_SRC_DIR}/selinux/selinux_module.cpp"
+						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/configuration.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/contextd_adaptator.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/domain.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/misc.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/mrule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/program.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/rule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/transition.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/trule.cpp"
+						"${CMAKE_CURRENT_SOURCE_DIR}/xmlsp.cpp")
+
+	SET(daemon_moc		"${DAEMON_SRC_DIR}/dbus-context.h"
+						"${DAEMON_SRC_DIR}/eventdispatcher.h"
+						"${DAEMON_SRC_DIR}/pigahandler.h"
+						"${PLUGINS_SRC_DIR}/domainholder/domainholder.h"
+						"${PLUGINS_SRC_DIR}/iptable-blocker/rulelist.h"
+						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.h"
+						"${CMAKE_CURRENT_SOURCE_DIR}/contextd_adaptator.h")
+
+	IF(NOT CONTEXTD_PLUGIN_NOTIFY)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_NOTIFY")
+	ENDIF()
+
+	IF(NOT CONTEXTD_PLUGIN_LOGGER)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_LOGGER")
+	ENDIF()
+
+	IF(NOT CONTEXTD_PLUGIN_KILLER)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_KILLER")
+	ENDIF()
+
+	IF(NOT CONTEXTD_PLUGIN_IPTABLES)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_IPTABLES")
+	ENDIF()
+
+	IF(NOT CONTEXTD_PLUGIN_SELINUX)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_SELINUX")
+	ENDIF()
+
+	IF(NOT CONTEXTD_PLUGIN_XORG)
+		ADD_DEFINITIONS("-DPLUGIN_DISABLE_XORG")
+	ENDIF()
+
+	QT4_WRAP_CPP(daemon_source ${daemon_moc})
+
+	ADD_EXECUTABLE(contextd ${daemon_source})
+	TARGET_LINK_LIBRARIES(contextd ${libnotify_LIBRARIES})
+	TARGET_LINK_LIBRARIES(contextd ${glib_LIBRARIES})
+	TARGET_LINK_LIBRARIES(contextd ${QT_LIBRARIES})
+	TARGET_LINK_LIBRARIES(contextd ${qdbus_LIBRARIES})
+	TARGET_LINK_LIBRARIES(contextd ${qtnetwork_LIBRARIES})
+	INSTALL(TARGETS contextd DESTINATION ${SYSTRANS_BIN_PATH})
+	IF (CONTEXTD_ENABLE_SELINUX)
+		SET_TARGET_PROPERTIES(contextd PROPERTIES COMPILE_FLAGS "-DHAS_SELINUX")
+	ENDIF (CONTEXTD_ENABLE_SELINUX)
+
+ENDIF(BUILD_DAEMON)
+
+
+MESSAGE("")
+MESSAGE("Building libcontext:     ${BUILD_LIB} (-DBUILD_LIB=ON/OFF, default ON)")
+MESSAGE("Building contextd:       ${BUILD_DAEMON} (-DBUILD_DAEMON=ON/OFF, default ON)")
+MESSAGE("    with SELinux:        ${CONTEXTD_ENABLE_SELINUX} (-CONTEXTD_ENABLE_SELINUX=ON/OFF, default OFF)")
+MESSAGE("Building context-notify: ${BUILD_NOTIFY} (-DBUILD_NOTIFY=ON/OFF, default ON)")
+MESSAGE("Building context-editor: ${BUILD_EDITOR} (-DBUILD_EDITOR=ON/OFF, default ON)")
+MESSAGE("")
+MESSAGE("Contextd Plugins:")
+MESSAGE("	Plugin notify:     ${CONTEXTD_PLUGIN_NOTIFY} (-DCONTEXTD_PLUGIN_NOTIFY=ON/OFF, default ON)")
+MESSAGE("	Plugin logger:     ${CONTEXTD_PLUGIN_LOGGER} (-DCONTEXTD_PLUGIN_LOGGER=ON/OFF, default ON)")
+MESSAGE("	Plugin killer:     ${CONTEXTD_PLUGIN_KILLER} (-DCONTEXTD_PLUGIN_KILLER=ON/OFF, default ON)")
+MESSAGE("	Plugin iptables:   ${CONTEXTD_PLUGIN_IPTABLES} (-DCONTEXTD_PLUGIN_IPTABLES=ON/OFF, default ON)")
+MESSAGE("	Plugin selinux:    ${CONTEXTD_PLUGIN_SELINUX} (-DCONTEXTD_PLUGIN_SELINUX=ON/OFF, default ON)")
+MESSAGE("	Plugin xorg:       ${CONTEXTD_PLUGIN_XORG} (-DCONTEXTD_PLUGIN_XORG=ON/OFF, default ON)")
+MESSAGE("")
+MESSAGE("Install prefix:           ${CMAKE_INSTALL_PREFIX} (-DCMAKE_INSTALL_PREFIX=/your/path)")
+MESSAGE("Build Type:               ${CMAKE_BUILD_TYPE} (-DCMAKE_BUILD_TYPE=(Release|Debug)")
+MESSAGE("")
+MESSAGE("Run make to build the application (make install to install it).")

@@ -1,0 +1,126 @@
+policy_module(firefox,1.1.4)
+
+require { type ooffice_home_t,user_home_dir_t,user_lxde_config_t,user_home_t,user_t,dbusd_exec_t,system_dbusd_t,system_dbusd_var_run_t,xserver_t,security_t,user_mozilla_t,mozilla_exec_t,user_mozilla_t,devpts_t,tmp_t,user_devpts_t,user_tmp_t,user_mozilla_home_t,xserver_tmp_t,fs_t,xdm_t,xserver_port_t,lib_t;	}
+
+
+role user_r types user_mozilla_t;
+domain_type(user_mozilla_t)
+domain_entry_file(user_mozilla_t, mozilla_exec_t)
+type_transition user_t mozilla_exec_t:process user_mozilla_t;
+allow user_t mozilla_exec_t:file { getattr read open execute };
+allow user_t user_mozilla_t:process { noatsecure rlimitinh siginh transition };
+
+type user_mozilla_key_t, file_type, non_security_file_type;
+allow user_mozilla_t user_mozilla_key_t:file { getattr read open setattr write };
+
+allow user_mozilla_t user_devpts_t:chr_file { getattr read open write };
+type user_mozilla_plugins_t, file_type, non_security_file_type;
+type user_mozilla_profiles_t, file_type, non_security_file_type;
+
+type user_mozilla_conf_t, file_type, non_security_file_type;
+type user_mozilla_cookie_t, file_type, non_security_file_type;
+type user_mozilla_cache_t, file_type, non_security_file_type;
+type user_mozilla_bookmark_t, file_type, non_security_file_type;
+type user_mozilla_chrome_t, file_type, non_security_file_type;
+type user_mozilla_lock_t, file_type, non_security_file_type;
+
+type user_mozilla_history_t, file_type, non_security_file_type;
+type user_mozilla_search_t, file_type, non_security_file_type;
+type user_mozilla_secret_t, file_type, non_security_file_type;
+type user_mozilla_security_t, file_type, non_security_file_type;
+type user_mozilla_xul_t, file_type, non_security_file_type;
+
+allow user_mozilla_t { user_mozilla_history_t user_mozilla_search_t user_mozilla_secret_t user_mozilla_security_t user_mozilla_xul_t }:dir { open search read getattr };
+allow user_mozilla_t { user_mozilla_history_t user_mozilla_search_t user_mozilla_secret_t user_mozilla_security_t user_mozilla_xul_t }:file { getattr open read lock };
+
+allow user_mozilla_t user_mozilla_history_t:file {  getattr read open write lock };
+
+allow user_mozilla_t self:process ptrace;
+
+type user_mozilla_tmp_t;
+files_tmp_file(user_mozilla_tmp_t)
+type_transition user_mozilla_t tmp_t:{ dir file sock_file } user_mozilla_tmp_t;
+#type_transition user_mozilla_t tmp_t:{ sock_file } user_mozilla_tmp_t;
+allow user_mozilla_t tmp_t:dir { open read getattr lock search ioctl add_name remove_name write };
+#allow user_mozilla_t tmp_t:file { create open getattr setattr read open write append rename link unlink ioctl lock };
+allow user_mozilla_t user_mozilla_tmp_t:sock_file  { create getattr setattr read write append rename link unlink ioctl lock };
+#allow user_mozilla_t user_tmp_t:dir { read getattr lock search ioctl add_name remove_name write };
+allow user_mozilla_t user_mozilla_tmp_t:file { create open getattr setattr read open write append rename link unlink ioctl lock };
+#allow user_mozilla_t user_tmp_t:sock_file { create getattr setattr read open write append rename link unlink ioctl lock };
+
+allow user_mozilla_t xserver_tmp_t:dir { open search read };
+allow user_mozilla_t xserver_tmp_t:sock_file { getattr write read open };
+
+allow user_mozilla_bookmark_t fs_t:filesystem associate;
+allow user_mozilla_t user_mozilla_bookmark_t:dir { open add_name getattr read search write };
+#allow user_mozilla_t user_mozilla_bookmark_t:file { create getattr read open write };
+allow user_mozilla_t user_mozilla_bookmark_t:file { getattr read open };
+allow user_mozilla_t user_mozilla_bookmark_t:dir remove_name;
+
+allow user_mozilla_t user_mozilla_lock_t:file { create getattr read open write lock };
+
+allow user_mozilla_t user_mozilla_home_t:dir { open add_name };
+#allow user_mozilla_t user_mozilla_home_t:file { setattr write };
+
+#PATCH : disallow cache read/write
+#allow user_mozilla_t user_mozilla_cache_t:dir { getattr read remove_name rename search write add_name };
+#allow user_mozilla_t user_mozilla_cache_t:file { getattr read open unlink write create };
+
+allow user_mozilla_t user_mozilla_chrome_t:dir { getattr search open read };
+allow user_mozilla_t user_mozilla_chrome_t:file { getattr read open };
+
+allow user_mozilla_t user_mozilla_conf_t:file { getattr read open unlink };
+
+#PATCH : disallow cookie read/write
+#allow user_mozilla_t user_mozilla_cookie_t:file { getattr read open unlink write lock };
+
+allow user_mozilla_t user_mozilla_plugins_t:dir { getattr read search open };
+allow user_mozilla_t user_mozilla_plugins_t:file { getattr read open };
+#allow user_mozilla_t user_mozilla_plugins_t:file { append unlink };
+
+allow user_mozilla_t user_mozilla_profiles_t:file { getattr read open };
+
+
+allow user_mozilla_t devpts_t:dir { open search };
+allow user_mozilla_t mozilla_exec_t:file execmod;
+allow user_t mozilla_exec_t:lnk_file { read getattr };
+allow user_mozilla_t mozilla_exec_t:lnk_file { read getattr };
+
+allow user_mozilla_t user_devpts_t:chr_file ioctl;
+
+allow user_mozilla_t user_mozilla_home_t:dir { open getattr read search setattr write };
+allow user_mozilla_t user_mozilla_home_t:file { getattr read open lock };
+neverallow user_mozilla_t user_mozilla_home_t:file create;
+
+#============= user_mozilla_t ==============
+allow user_mozilla_t xdm_t:unix_stream_socket connectto;
+allow user_mozilla_t xserver_port_t:tcp_socket name_connect;
+allow user_mozilla_t lib_t:file execmod;
+#============= xdm_t ==============
+allow xdm_t user_mozilla_t:process signal;
+
+
+#============= mozilla_t ==============
+allow user_mozilla_t security_t:filesystem getattr;
+allow user_mozilla_t user_mozilla_profiles_t:file open;
+
+#============= xserver_t ==============
+allow xserver_t user_mozilla_t:dir { open search };
+#============= mozilla_t ==============
+allow user_mozilla_t self:process execmem;
+
+allow user_mozilla_t system_dbusd_var_run_t:dir search;
+allow user_mozilla_t system_dbusd_var_run_t:sock_file *;
+allow user_mozilla_t system_dbusd_t:unix_stream_socket *;
+
+#============= xserver_t ==============
+allow xserver_t user_mozilla_t:file read;
+
+#allow mozilla_t dbusd_exec_t:file execute;
+#allow mozilla_t dbusd_exec_t:file { read open };
+#allow mozilla_t dbusd_exec_t:file execute_no_trans;
+
+####
+allow user_mozilla_t user_home_dir_t:dir  read ;
+allow user_mozilla_t user_home_t:dir search;
+

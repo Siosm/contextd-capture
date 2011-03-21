@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po
+END
+stamp-po
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/stamp-po
+END
+fr.po
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/fr.po
+END
+piga_context.pot
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/piga_context.pot
+END
+remove-potcdate.sin
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/remove-potcdate.sin
+END
+Makefile.in.in
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/Makefile.in.in
+END
+Makevars
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/Makevars
+END
+POTFILES.in
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/POTFILES.in
+END
+.cvsignore
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/po/.cvsignore
+END

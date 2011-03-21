@@ -1,0 +1,122 @@
+#ifndef ABSTRACTRULE_H
+#define ABSTRACTRULE_H
+
+#include <QVector>
+#include <QMutex>
+#include "mrule.h"
+#include "trule.h"
+#include "transition.h"
+
+///Define a set of transitions. It is the object representation of the <rule> tag in transitions.xml
+class AbstractRule
+{
+public:
+	AbstractRule();
+	AbstractRule(Program program, QString display_name=QString());
+
+protected:
+	///The program associated with this rule
+	Program _program;
+
+	///A display name for the rule
+	QString _display_name;
+
+private:
+	static const int InvalidID = 0;
+	static QMutex idCounterMut;
+	static int idCounter;
+	int ruleId;
+
+	///Default prompt param
+	bool prompt;
+
+	///Default notify param
+	bool notify;
+
+	///List of mrules (conditions)
+	QVector<MRule> mrules;
+
+	///List of the transition rules (trules)
+	QVector<TRule> trules;
+
+	//The target domain when matching a transition
+	virtual Domain targetDomain(Domain current, TRule t) const = 0;
+
+public:
+	static QString ruleType;
+
+	int id() const;
+
+	QString appName() const;
+	Program program() const;
+	bool setProgram(Program prog);
+
+	QString displayName() const;
+	void setDisplayName(QString display_name);
+
+	bool promptUser() const;
+	void setPromptUser(bool value);
+
+	bool notifyUser() const;
+	void setNotifyUser(bool value);
+
+	QVector<MRule> mRules() const;
+	bool addMRule(const MRule mrule);
+	void clearMRules();
+
+	QVector<TRule> tRules() const;
+	bool addTRule(const TRule trule);
+	void clearTRules();
+
+	/*! \brief Try to match the state of a current application to the
+	* \param app_name The name of your application.
+	* \return  Returns CONTEXT_TRUE if the application has been successfuly registered*/
+	Transition matches(Program program, Domain current_domain, QMap<QString, QString> values) const;
+};
+
+inline QString AbstractRule::appName() const
+{
+	return _program.name();
+}
+
+inline Program AbstractRule::program() const
+{
+	return _program;
+}
+
+inline QString AbstractRule::displayName() const
+{
+	return _display_name;
+}
+
+inline QVector<MRule> AbstractRule::mRules() const
+{
+	return mrules;
+}
+
+inline QVector<TRule> AbstractRule::tRules() const
+{
+	return trules;
+}
+
+inline bool AbstractRule::promptUser() const
+{
+	return prompt;
+}
+
+inline void AbstractRule::setPromptUser(bool value)
+{
+	prompt=value;
+}
+
+inline bool AbstractRule::notifyUser() const
+{
+	return notify;
+}
+
+inline void AbstractRule::setNotifyUser(bool value)
+{
+	notify=value;
+}
+
+#endif // ABSTRACTRULE_H

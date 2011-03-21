@@ -1,0 +1,10 @@
+#################################
+############         ############
+############ WARNING ############
+############         ############
+#################################
+# If you update this file, 
+# please remember to add the types in the te file
+#
+
+${app_path}        --      system_u:object_r:${module_exec_t}

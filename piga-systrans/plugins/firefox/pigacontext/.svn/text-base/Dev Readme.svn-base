@@ -1,0 +1,17 @@
+How to create an XPCom :
+http://mozilla.queze.net/maow/
+
+IDL : Informations about types are given here : 
+http://www.mozilla.org/scriptable/xpidl/idl-authors-guide/rules.html
+
+
+Basic Steps Ubuntu :
+- Install the package xulrunner-dev
+- Modify public/PIGAContext.idl to match the interface you would like to get (see the link above about IDLs)
+- Recompile the idl : 
+	- $ /usr/lib/xulrunner-1.9.0.11/xpidl -m typelib -w -I/usr/share/idl/xulrunner-1.9.0.11/stable/ PIGAContext.idl
+	- $ /usr/lib/xulrunner-1.9.0.11/xpidl -m header -w -I/usr/share/idl/xulrunner-1.9.0.11/stable/ PIGAContext.idl
+	  $ mv PIGAContext.h ../src/
+
+
+

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/557/branches/v2/src/contextd_src/plugins/selinux
+END
+contextdpluginselinux.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/PIGA-SYSTRANS/!svn/ver/557/branches/v2/src/contextd_src/plugins/selinux/contextdpluginselinux.cpp
+END
+selinux_module.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/plugins/selinux/selinux_module.h
+END
+contextdpluginselinux.h
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/PIGA-SYSTRANS/!svn/ver/400/branches/v2/src/contextd_src/plugins/selinux/contextdpluginselinux.h
+END
+selinux_module.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/plugins/selinux/selinux_module.cpp
+END

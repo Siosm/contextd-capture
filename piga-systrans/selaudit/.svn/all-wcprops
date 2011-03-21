@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit
+END
+The_SELinux_Notebook_Volume_1_The_Foundations.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/The_SELinux_Notebook_Volume_1_The_Foundations.pdf
+END
+pigi.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/pigi.py
+END
+selaudit_user.sh
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/selaudit_user.sh
+END
+selinux.bnf
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/selinux.bnf
+END
+bnf.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/bnf.py
+END
+sepolgen.bnf.txt
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/sepolgen.bnf.txt
+END
+perso.te
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/perso.te
+END
+obj_perm_sets.spt
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/obj_perm_sets.spt
+END
+selaudit.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/selaudit.py
+END
+parser.out
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/parser.out
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/.gitignore
+END
+The_SELinux_Notebook_Volume_2_Sample_Policy_Source.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/The_SELinux_Notebook_Volume_2_Sample_Policy_Source.pdf
+END
+firefox.te
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/firefox.te
+END
+poulpe.te
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/poulpe.te
+END
+SELinuxParser_parsetab.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/SELinuxParser_parsetab.py
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/Makefile
+END
+selinux.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/selinux.py
+END

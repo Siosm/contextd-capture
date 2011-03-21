@@ -1,0 +1,599 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/PIGA-SYSTRANS/!svn/ver/916/branches/v2/src/context-editor_src
+END
+graphicssvgitem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/775/branches/v2/src/context-editor_src/graphicssvgitem.cpp
+END
+gvgraph.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/785/branches/v2/src/context-editor_src/gvgraph.h
+END
+graphicsarrowprogram.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/graphicsarrowprogram.cpp
+END
+mruletreewidget.ui
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/816/branches/v2/src/context-editor_src/mruletreewidget.ui
+END
+mruledialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/883/branches/v2/src/context-editor_src/mruledialog.cpp
+END
+sortedrulestreewidget.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/835/branches/v2/src/context-editor_src/sortedrulestreewidget.h
+END
+warning.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/914/branches/v2/src/context-editor_src/warning.cpp
+END
+appdialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/appdialog.h
+END
+abstractruledialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/838/branches/v2/src/context-editor_src/abstractruledialog.ui
+END
+appexportdialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/appexportdialog.h
+END
+domainloopstreewidget.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/domainloopstreewidget.cpp
+END
+messagearea.ui
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/843/branches/v2/src/context-editor_src/messagearea.ui
+END
+captiondialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/captiondialog.ui
+END
+settingsdialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/880/branches/v2/src/context-editor_src/settingsdialog.ui
+END
+graphicsarrow.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsarrow.cpp
+END
+transitioninfodock.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/848/branches/v2/src/context-editor_src/transitioninfodock.h
+END
+mruletreewidget.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/812/branches/v2/src/context-editor_src/mruletreewidget.h
+END
+messagearea.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/870/branches/v2/src/context-editor_src/messagearea.cpp
+END
+captiondialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/captiondialog.cpp
+END
+browserdock.ui
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/849/branches/v2/src/context-editor_src/browserdock.ui
+END
+domaindialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/831/branches/v2/src/context-editor_src/domaindialog.ui
+END
+abstractruletreewidget.h
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/abstractruletreewidget.h
+END
+typeddelegate.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/812/branches/v2/src/context-editor_src/typeddelegate.h
+END
+settingsdialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/settingsdialog.h
+END
+selectdefaultdomaindialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/PIGA-SYSTRANS/!svn/ver/807/branches/v2/src/context-editor_src/selectdefaultdomaindialog.ui
+END
+editordock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/844/branches/v2/src/context-editor_src/editordock.cpp
+END
+graphicsdomain.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/913/branches/v2/src/context-editor_src/graphicsdomain.cpp
+END
+browserdock.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/844/branches/v2/src/context-editor_src/browserdock.h
+END
+sortedrulestreewidget.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/sortedrulestreewidget.cpp
+END
+mruledialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/818/branches/v2/src/context-editor_src/mruledialog.ui
+END
+selectdefaultdomaindialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/PIGA-SYSTRANS/!svn/ver/811/branches/v2/src/context-editor_src/selectdefaultdomaindialog.h
+END
+configurationstack.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/878/branches/v2/src/context-editor_src/configurationstack.h
+END
+domainloopstreewidget.ui
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/819/branches/v2/src/context-editor_src/domainloopstreewidget.ui
+END
+transitioninfodock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/878/branches/v2/src/context-editor_src/transitioninfodock.cpp
+END
+abstractruleinfodock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/abstractruleinfodock.cpp
+END
+mruledialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/818/branches/v2/src/context-editor_src/mruledialog.h
+END
+mainwindow.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/883/branches/v2/src/context-editor_src/mainwindow.cpp
+END
+domainloopstreewidget.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/835/branches/v2/src/context-editor_src/domainloopstreewidget.h
+END
+abstractruletreewidget.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/abstractruletreewidget.cpp
+END
+abstractruledialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/816/branches/v2/src/context-editor_src/abstractruledialog.h
+END
+domaininfodock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/domaininfodock.cpp
+END
+graphicspopup.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/graphicspopup.cpp
+END
+domainselectionwidget.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/838/branches/v2/src/context-editor_src/domainselectionwidget.h
+END
+ruledialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/813/branches/v2/src/context-editor_src/ruledialog.h
+END
+domaindialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/807/branches/v2/src/context-editor_src/domaindialog.h
+END
+graphicsdomain.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsdomain.h
+END
+configurationstack.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/configurationstack.cpp
+END
+appexportdialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/762/branches/v2/src/context-editor_src/appexportdialog.ui
+END
+actiondialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/actiondialog.h
+END
+abstractruleinfodock.ui
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/856/branches/v2/src/context-editor_src/abstractruleinfodock.ui
+END
+colors.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/colors.h
+END
+mainwindow.ui
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/mainwindow.ui
+END
+typedlineedit.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/811/branches/v2/src/context-editor_src/typedlineedit.h
+END
+abstractruledialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/abstractruledialog.cpp
+END
+domainselectionwidget.ui
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/816/branches/v2/src/context-editor_src/domainselectionwidget.ui
+END
+sessionrestoredialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/811/branches/v2/src/context-editor_src/sessionrestoredialog.h
+END
+editorconfig.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/editorconfig.cpp
+END
+abstractruleinfodock.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/870/branches/v2/src/context-editor_src/abstractruleinfodock.h
+END
+Icons.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/849/branches/v2/src/context-editor_src/Icons.qrc
+END
+domaininfodock.ui
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/835/branches/v2/src/context-editor_src/domaininfodock.ui
+END
+domainselectionwidget.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/838/branches/v2/src/context-editor_src/domainselectionwidget.cpp
+END
+mainwindow.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/mainwindow.h
+END
+main.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/912/branches/v2/src/context-editor_src/main.cpp
+END
+ruledialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/838/branches/v2/src/context-editor_src/ruledialog.cpp
+END
+domaindialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/869/branches/v2/src/context-editor_src/domaindialog.cpp
+END
+actiondialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/762/branches/v2/src/context-editor_src/actiondialog.ui
+END
+domaininfodock.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/844/branches/v2/src/context-editor_src/domaininfodock.h
+END
+graphicspopup.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicspopup.h
+END
+sortedrulestreewidget.ui
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/819/branches/v2/src/context-editor_src/sortedrulestreewidget.ui
+END
+actiondialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/862/branches/v2/src/context-editor_src/actiondialog.cpp
+END
+gvgraph.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/916/branches/v2/src/context-editor_src/gvgraph.cpp
+END
+loopdialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/813/branches/v2/src/context-editor_src/loopdialog.h
+END
+appdialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/868/branches/v2/src/context-editor_src/appdialog.cpp
+END
+graphicsview.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsview.h
+END
+colors.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/colors.cpp
+END
+appinfodock.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/appinfodock.h
+END
+appexportdialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/868/branches/v2/src/context-editor_src/appexportdialog.cpp
+END
+transitioninfodock.ui
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/835/branches/v2/src/context-editor_src/transitioninfodock.ui
+END
+typedlineedit.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/873/branches/v2/src/context-editor_src/typedlineedit.cpp
+END
+graphicssvgitem.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicssvgitem.h
+END
+sessionrestoredialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/868/branches/v2/src/context-editor_src/sessionrestoredialog.cpp
+END
+mruletreewidget.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/845/branches/v2/src/context-editor_src/mruletreewidget.cpp
+END
+graphicsarrowprogram.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsarrowprogram.h
+END
+abstractruletreewidget.ui
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/819/branches/v2/src/context-editor_src/abstractruletreewidget.ui
+END
+warning.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/warning.h
+END
+graphicsarrow.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsarrow.h
+END
+typeddelegate.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/778/branches/v2/src/context-editor_src/typeddelegate.cpp
+END
+settingsdialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/settingsdialog.cpp
+END
+editorconfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/editorconfig.h
+END
+messagearea.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/870/branches/v2/src/context-editor_src/messagearea.h
+END
+captiondialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/881/branches/v2/src/context-editor_src/captiondialog.h
+END
+browserdock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/876/branches/v2/src/context-editor_src/browserdock.cpp
+END
+appinfodock.ui
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/835/branches/v2/src/context-editor_src/appinfodock.ui
+END
+loopdialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/838/branches/v2/src/context-editor_src/loopdialog.cpp
+END
+graphicsview.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/882/branches/v2/src/context-editor_src/graphicsview.cpp
+END
+appdialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/762/branches/v2/src/context-editor_src/appdialog.ui
+END
+selectdefaultdomaindialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/PIGA-SYSTRANS/!svn/ver/811/branches/v2/src/context-editor_src/selectdefaultdomaindialog.cpp
+END
+editordock.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/844/branches/v2/src/context-editor_src/editordock.h
+END
+appinfodock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/872/branches/v2/src/context-editor_src/appinfodock.cpp
+END

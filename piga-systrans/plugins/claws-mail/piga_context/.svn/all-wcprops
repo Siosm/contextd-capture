@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context
+END
+config.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/config.h.in
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/376/branches/v2/plugins/claws-mail/piga_context/configure.ac
+END
+ABOUT-NLS
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/ABOUT-NLS
+END
+AUTHORS
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/392/branches/v2/plugins/claws-mail/piga_context/AUTHORS
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/INSTALL
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/ChangeLog
+END
+commitHelper
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/commitHelper
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/COPYING
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/390/branches/v2/plugins/claws-mail/piga_context/Makefile.am
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/autogen.sh
+END
+NEWS
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/NEWS
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/README
+END
+.cvsignore
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/.cvsignore
+END

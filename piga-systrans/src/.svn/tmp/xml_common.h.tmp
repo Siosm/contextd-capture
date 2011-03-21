@@ -1,0 +1,31 @@
+#ifndef XML_COMMON_H
+#define XML_COMMON_H
+
+#define APP_CONTEXT_NOTIFY "context-notify"
+
+#define RULE_TAG "rule"
+#define RULE_MATCHING_TAG "matching"
+#define RULE_MRULE_TAG "mrule"
+#define RULE_TRANSITIONS_TAG "transitions"
+#define RULE_TRANSIT_TAG "transit"
+#define RULE_APP_NAME_TAG "app_name"
+#define RULE_TRANSIT_TO_TAG "to_domain"
+#define RULE_TRANSIT_FROM_TAG "from_domain"
+#define RULE_COMMENT_TAG "comment"
+#define RULE_PROMPT_TAG "prompt"
+#define RULE_NOTIFY_TAG "notify"
+
+#define CONTEXT_TAG "context"
+#define DOMAIN_TAG "domain"
+#define PROGRAM_TAG "program"
+#define NAME_TAG "name"
+#define DISPLAY_NAME_TAG "display_name"
+#define ICON_TAG "icon"
+#define FULLPATH_TAG "full_path"
+#define PROPERTIES_TAG "properties"
+#define DEFAULT_TAG "default"
+
+#define RULE_TRUE "true"
+#define RULE_FALSE "false"
+
+#endif // XML_COMMON_H

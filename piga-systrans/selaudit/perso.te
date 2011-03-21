@@ -1,0 +1,100 @@
+policy_module(perso,1.0.0)
+
+allow staff_t staff_devpts_t:chr_file relabelfrom;
+allow staff_t sysadm_devpts_t:chr_file relabelto;
+allow sshd_t sysadm_devpts_t:chr_file setattr;
+allow staff_t self:capability setuid;
+
+
+allow mount_t urandom_device_t:chr_file read;
+
+allow getty_t urandom_device_t:chr_file read;
+allow getty_t self:netlink_route_socket create;
+allow staff_t self:capability { sys_admin sys_resource };
+allow newrole_t self:capability { sys_admin sys_resource };
+allow run_init_t self:capability { sys_admin sys_resource };
+
+allow sshd_t self:process setkeycreate;
+allow sshd_t staff_t:key create;
+
+allow user_javaplugin_t user_t:process sigchld;
+allow user_javaplugin_t user_javaplugin_t:process ptrace;
+
+#============= initrc_t ==============
+allow initrc_t bin_t:file entrypoint;
+
+
+#============= xdm_t ==============
+allow xdm_t domain:process signal;
+## DANGEROUS : CAN READ /dev/mem
+dev_read_raw_memory(xdm_t);
+dev_write_raw_memory(xdm_t);
+
+allow xdm_t self:netlink_selinux_socket { create bind };
+allow xdm_t mouse_device_t:chr_file { write read ioctl };
+
+allow xdm_t hald_t:process signal;
+allow xdm_t kernel_t:process signal;
+allow xdm_t mouse_device_t:chr_file read;
+
+allow xdm_t hwdata_t:file read;
+allow xdm_t self:process getpgid;
+allow xdm_t sysfs_t:file write;
+allow xdm_t hwdata_t:file getattr;
+allow xdm_t self:netlink_selinux_socket read;
+
+allow xdm_t system_dbusd_var_run_t:dir search;
+allow xdm_xserver_t kernel_t:process signal;
+allow xdm_t user_home_t:file unlink;
+allow xdm_xserver_t urandom_device_t:chr_file read;
+#type xdm_xserver_tmpfs_t;
+files_tmp_file(xdm_xserver_tmpfs_t)
+
+#type_transition xdm_xserver_t tmpfs_t:file xdm_xserver_tmpfs_t;
+
+type_transition xdm_xserver_t tmpfs_t:{ dir file sock_file } xdm_xserver_tmpfs_t;
+
+allow xdm_xserver_t xdm_xserver_tmpfs_t:file { read write };
+allow xdm_t system_dbusd_var_run_t:sock_file write;
+#allow xdm_t self:capability sys_admin;
+allow xdm_xserver_t system_dbusd_var_run_t:dir search;
+allow initrc_t event_device_t:chr_file { append unlink  read write ioctl getattr setattr create };
+allow udev_t initrc_t:unix_dgram_socket sendto;
+allow xdm_xserver_t system_dbusd_var_run_t:sock_file write;
+allow xdm_xserver_t system_dbusd_t:unix_stream_socket connectto;
+allow xdm_t system_dbusd_t:unix_stream_socket connectto;
+allow system_dbusd_t tty_device_t:chr_file ioctl;
+
+allow xdm_t var_run_t:sock_file unlink;
+allow xdm_t var_run_t:sock_file create;
+allow xdm_t var_run_t:sock_file setattr;
+allow xdm_xserver_t hwdata_t:file read;
+allow xdm_xserver_t hwdata_t:file getattr;
+allow xdm_t self:capability sys_admin;
+allow initrc_t self:capability sys_admin;
+
+allow consoletype_t urandom_device_t:chr_file read;
+allow system_dbusd_t var_lib_t:dir write;
+allow system_dbusd_t var_lib_t:file { append getattr read };
+allow system_dbusd_t var_lib_t:dir { add_name remove_name };
+
+
+
+allow dhcpc_t lib_t:file execute_no_trans;
+allow dhcpc_t var_lib_t:dir { read write setattr search getattr remove_name add_name };
+allow dhcpc_t var_lib_t:file { append unlink  read write ioctl getattr setattr create };
+
+allow init_t file_t:chr_file { read write ioctl getattr setattr };
+allow init_t file_t:dir { read write setattr search getattr };
+allow initrc_t file_t:chr_file { read write ioctl getattr };
+allow initrc_t file_t:dir { read write setattr search getattr };
+allow initrc_t removable_device_t:blk_file { ioctl getattr write read };
+
+
+allow crond_t self:process setrlimit;
+
+
+allow user_mozilla_t ooffice_home_t:dir getattr;
+allow user_clawsmail_t ooffice_home_t:dir getattr;
+allow xdm_xserver_t domain:process signal;
+

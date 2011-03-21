@@ -1,0 +1,97 @@
+#include "rule.h"
+
+Rule::Rule()
+{
+
+}
+
+Rule::Rule(Program program, Domain transit_to, QString comment) :
+		_program(program),
+		_transit_to(transit_to),
+		_comment(comment)
+{
+
+}
+
+bool Rule::setProgram(Program prog)
+{
+	if (Program()!=prog) {
+		_program=prog;
+		return true;
+	} else {
+		qWarning("Tried to set an invalid program");
+		return false;
+	}
+}
+
+bool Rule::setTransitTo(Domain dest)
+{
+	if (dest != Domain()) {
+		_transit_to=dest;
+		return true;
+	} else {
+		qWarning("Tried to set an invalid destination domain");
+		return false;
+	}
+}
+
+void Rule::setComment(QString comment)
+{
+	_comment=comment;
+}
+
+bool Rule::addMRule(const MRule mrule)
+{
+	mrules.push_back(mrule);
+
+	return true;
+}
+
+void Rule::clearMRules()
+{
+	mrules.clear();
+}
+
+bool Rule::addTRule(const TRule trule)
+{
+	trules.push_back(trule);
+
+	return true;
+}
+
+void Rule::clearTRules()
+{
+	trules.clear();
+}
+
+Transition Rule::matches(Program program, Domain current_domain, QMap<QString, QString> values) const
+{
+	//If the program is not the same, just abort
+	if(program.appName()!=this->program().appName())
+		return Transition();
+
+	//First, try to match the mrules
+	bool abort=false;
+	for(int m=0; m<mrules.size() && !abort; m++)
+	{
+		if(mrules[m].matches(values))
+		{
+			//We have matched a rule, let's match a transition !
+			for(int t=0; t<trules.size(); t++)
+			{
+				if(trules[t].matches(current_domain.name()))
+				{
+					Transition trans(program, current_domain, transitTo(), trules[t].prompt(), trules[t].notify());
+					return trans;
+				}
+			}
+
+			//We haven't matched any trule. This means we have matched some conditions but not any incoming Domain
+			//let's die and return an empty transition
+			abort=true;
+		}
+	}
+
+	return Transition();
+}
+

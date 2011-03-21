@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/PIGA-SYSTRANS/!svn/ver/774/branches/v2/src/contextd_src
+END
+transitionrules.h
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/transitionrules.h
+END
+config-daemon.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/config-daemon.h
+END
+contextnotify.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/680/branches/v2/src/contextd_src/contextnotify.cpp
+END
+pigahandler.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/579/branches/v2/src/contextd_src/pigahandler.cpp
+END
+dbus-context.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/PIGA-SYSTRANS/!svn/ver/473/branches/v2/src/contextd_src/dbus-context.cpp
+END
+contextnotify.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/604/branches/v2/src/contextd_src/contextnotify.h
+END
+pigahandler.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/PIGA-SYSTRANS/!svn/ver/327/branches/v2/src/contextd_src/pigahandler.h
+END
+contextclient.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/725/branches/v2/src/contextd_src/contextclient.cpp
+END
+dbus-context.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/343/branches/v2/src/contextd_src/dbus-context.h
+END
+xmlcontext2map.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/xmlcontext2map.cpp
+END
+contextd_adaptator.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/405/branches/v2/src/contextd_src/contextd_adaptator.cpp
+END
+eventdispatcher.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/602/branches/v2/src/contextd_src/eventdispatcher.cpp
+END
+contextd.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/PIGA-SYSTRANS/!svn/ver/473/branches/v2/src/contextd_src/contextd.cpp
+END
+contextclient.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/633/branches/v2/src/contextd_src/contextclient.h
+END
+xmlcontext2map.h
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/xmlcontext2map.h
+END
+contextd_adaptator.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/405/branches/v2/src/contextd_src/contextd_adaptator.h
+END
+eventdispatcher.h
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/contextd_src/eventdispatcher.h
+END

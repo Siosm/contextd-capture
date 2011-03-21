@@ -1,0 +1,82 @@
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
+
+#include "xmlsp.h"
+#include "rule.h"
+#include "loop.h"
+#include "domain.h"
+#include "program.h"
+#include <QMap>
+#include <QVector>
+#include <QList>
+#include <QString>
+#include <QMutex>
+
+///The class that holds all the information stored into transitions.xml
+class Configuration : private XMLSP::Parser
+{
+private:
+	//We associate the program name to its related rules (the vector)
+	//that finally leads to a map associating a parameter name to its regexp
+	QMap<QString, QVector<Rule> > rules;
+
+	//We associate the program name to its related loops (the vector)
+	//that finally leads to a map associating a parameter name to its regexp
+	QMap<QString, QVector<Loop> > loops;
+
+	//Domains
+	QMap<QString, Domain > domains;
+	Domain default_domain;
+
+	//Programs
+	QMap<QString, Program > programs;
+	QList<QString> noKillPrograms;
+
+	//XML Parsing
+	bool on_tag_open(const std::string& tag_name, XMLSP::StringMap& attributes);
+	bool on_cdata(const std::string& cdata);
+	bool on_tag_close(const std::string& tag_name);
+	void on_error(int errnr, int line, int col, const std::string& message);
+
+	// Program parsing
+	void programParsing();
+
+	//Read the configuration from file
+	bool readConf();
+
+	//We forbid the creation of multiple configuration objects
+	Configuration();
+
+public:
+	//Get the only instance of the class
+	static const Configuration& instance();
+	static Configuration& instance_nonconst();
+
+	//Domains
+	Domain getDomainByName(QString name) const;
+	const Transition getFirstMatchingTransition(Program app, Domain current_domain, QMap<QString, QString> values) const;
+	Domain defaultDomain() const;
+	QList<Domain> domainList() const;
+	
+	//Programs
+	bool isProgramAllowed(QString name, QString full_path) const;
+	Program getProgramByName(QString name) const;
+	QList<Program> programList() const;
+	QList<QString> noKillProgramList() const;
+	bool isProgramKillable(const QString& full_path) const;
+
+	//Reload
+	bool updateRules();
+
+	//Rules and Loops
+	QVector<Loop*> loopsForProgram(QString name);
+	QVector<Rule*> rulesForProgram(QString name);
+
+	void addLoop(Loop loop);
+	void deleteLoop(Loop *loop);
+
+	void addRule(Rule rule);
+	void deleteRule(Rule *rule);
+};
+
+#endif // CONFIGURATION_H

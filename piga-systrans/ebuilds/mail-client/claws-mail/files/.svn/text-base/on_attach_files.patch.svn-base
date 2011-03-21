@@ -1,0 +1,77 @@
+diff -urN claws-mail-3.7.5/src/compose.c claws-mail-3.7.5-new/src/compose.c
+--- claws-mail-3.7.5/src/compose.c	2010-05-28 15:03:32.832328091 +0200
++++ claws-mail-3.7.5-new/src/compose.c	2010-05-28 15:09:46.603782850 +0200
+@@ -3510,6 +3510,7 @@
+ 				  const gchar *content_type)
+ {
+ 	AttachInfo *ainfo;
++	OnAttachHookData attachhookdata;
+ 	GtkTreeIter iter;
+ 	FILE *fp;
+ 	off_t size;
+@@ -3518,6 +3519,7 @@
+ 	GtkListStore *store;
+ 	gchar *name;
+ 	gboolean has_binary = FALSE;
++	gboolean refuseLoading = FALSE;
+ 
+ 	if (!is_file_exist(file)) {
+ 		gchar *file_from_uri = g_filename_from_uri(file, NULL, NULL);
+@@ -3611,6 +3613,24 @@
+ 
+ 	ainfo->size = (goffset)size;
+ 	size_text = to_human_readable((goffset)size);
++		
++	attachhookdata.ainfo=ainfo;
++	attachhookdata.error=NULL;
++	
++	refuseLoading=hooks_invoke(COMPOSE_CHECK_ATTACH_FILES_HOOKLIST, &attachhookdata);
++
++	if(refuseLoading)
++	{
++		if(attachhookdata.error)
++		{
++			alertpanel_error("%s", attachhookdata.error);
++			g_free(attachhookdata.error);
++		}
++		else
++			alertpanel_error("%s", _("You don't have the permission to attach this file."));
++
++		return FALSE;
++	}
+ 
+ 	store = GTK_LIST_STORE(gtk_tree_view_get_model
+ 			(GTK_TREE_VIEW(compose->attach_clist)));
+diff -urN claws-mail-3.7.5/src/compose.h claws-mail-3.7.5-new/src/compose.h
+--- claws-mail-3.7.5/src/compose.h	2010-05-28 15:03:32.832328091 +0200
++++ claws-mail-3.7.5-new/src/compose.h	2010-05-28 15:11:10.261642834 +0200
+@@ -22,6 +22,7 @@
+ 
+ typedef struct _Compose		Compose;
+ typedef struct _AttachInfo	AttachInfo;
++typedef struct _OnAttachHookData	OnAttachHookData;
+ 
+ #include <glib.h>
+ #include <gtk/gtk.h>
+@@ -46,6 +47,7 @@
+ #define COMPOSE_CREATED_HOOKLIST "compose_created"
+ #define COMPOSE_ON_REPLY_MAIL_HOOKLIST "compose_on_reply_mail_hooklist"
+ #define COMPOSE_ON_SEND_MAIL_VIEW_HOOKLIST "compose_on_send_mail_view_hooklist"
++#define COMPOSE_CHECK_ATTACH_FILES_HOOKLIST "compose_check_attach_files_hooklist"
+ 
+ typedef enum
+ {
+@@ -270,6 +272,13 @@
+ 	COMPOSE_DRAFT_FOR_EXIT
+ } ComposeDraftAction;
+ 
++struct _OnAttachHookData
++{
++	AttachInfo *ainfo;
++	gchar* error;
++};
++
++
+ /*#warning FIXME_GTK2 */
+ /* attache_files will be locale encode */
+ Compose *compose_new			(PrefsAccount	*account,

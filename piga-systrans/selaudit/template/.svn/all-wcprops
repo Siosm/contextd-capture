@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template
+END
+module.if
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/module.if
+END
+template_variables
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/template_variables
+END
+temp_transition.fc
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/temp_transition.fc
+END
+temp_transition.te
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/temp_transition.te
+END
+module.fc
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/module.fc
+END
+module.te
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/module.te
+END
+temp_transition.if
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/temp_transition.if
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/PIGA-SYSTRANS/!svn/ver/855/branches/v2/selaudit/template/Makefile
+END

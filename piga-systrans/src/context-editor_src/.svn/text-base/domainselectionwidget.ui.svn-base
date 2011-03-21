@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DomainSelectionWidget</class>
+ <widget class="QWidget" name="DomainSelectionWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>326</width>
+    <height>210</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="1">
+    <widget class="QPushButton" name="regexpAddButton">
+     <property name="toolTip">
+      <string>Add an expression</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <spacer name="verticalSpacer_1">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="regexpRemoveButton">
+     <property name="toolTip">
+      <string>Remove selected expressions</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="clearCheckboxButton">
+     <property name="toolTip">
+      <string>Reset Notify and Prompt for selected domains</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/clear</normaloff>:/icons/clear</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="5">
+    <widget class="QTreeWidget" name="domainsList">
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Name/Expression</string>
+      </property>
+      <property name="toolTip">
+       <string>Domain name or regular expression to match</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Notify</string>
+      </property>
+      <property name="toolTip">
+       <string>Notify the user for this domain?</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Prompt</string>
+      </property>
+      <property name="toolTip">
+       <string>Prompt user confirmation for this domain?</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>domainsList</tabstop>
+  <tabstop>regexpAddButton</tabstop>
+  <tabstop>clearCheckboxButton</tabstop>
+  <tabstop>regexpRemoveButton</tabstop>
+ </tabstops>
+ <resources>
+  <include location="Icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

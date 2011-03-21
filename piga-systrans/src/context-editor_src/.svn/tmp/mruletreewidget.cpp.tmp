@@ -1,0 +1,158 @@
+#include "mrulenewdialog.h"
+#include "mruletreewidget.h"
+#include "ui_mruletreewidget.h"
+
+MRuleTreeWidget::MRuleTreeWidget(QWidget *parent) :
+	QWidget(parent),
+	ui(new Ui::MRuleTreeWidget)
+{
+	ui->setupUi(this);
+
+	connect(ui->ruleAddButton, SIGNAL(clicked()), this, SLOT(onRuleAddClicked()));
+	connect(ui->ruleEditButton, SIGNAL(clicked()), this, SLOT(onRuleEditClicked()));
+	connect(ui->ruleRemoveButton, SIGNAL(clicked()), this, SLOT(onRuleRemoveClicked()));
+	connect(ui->rulesTreeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onRuleViewSelectionChanged()));
+
+	ui->ruleAddButton->setEnabled(false);
+	onRuleViewSelectionChanged();
+}
+
+MRuleTreeWidget::~MRuleTreeWidget()
+{
+    delete ui;
+}
+
+void MRuleTreeWidget::changeEvent(QEvent *e)
+{
+    QWidget::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+int MRuleTreeWidget::ruleCount() const
+{
+	return ui->rulesTreeWidget->topLevelItemCount();
+}
+
+void MRuleTreeWidget::addRule(QMap<QString,QString> map)
+{
+	QTreeWidgetItem *top = new QTreeWidgetItem(ui->rulesTreeWidget, QStringList("Rule"));
+	QMap<QString,QString>::const_iterator it;
+	for (it=map.begin(); it!=map.end(); ++it) {
+		QStringList itemStrList;
+		itemStrList.append(it.key());
+		itemStrList.append(it.value());
+		QTreeWidgetItem *item = new QTreeWidgetItem(top, itemStrList);
+		item->setData(0, Qt::UserRole, true);
+	}
+
+	emit ruleCountChanged(ruleCount());
+}
+
+void MRuleTreeWidget::onProgramChanged(Program &p)
+{
+	prog = p;
+	ui->ruleAddButton->setEnabled(true);
+
+	//Update the flags of every rule in the tree view
+	for (int i=0, count=ui->rulesTreeWidget->topLevelItemCount(); i<count; ++i) {
+		QTreeWidgetItem *item = ui->rulesTreeWidget->topLevelItem(i);
+
+		//Check each variable:value couple to see if the variable still exists
+		for (int j=0, childCount=item->childCount(); j<childCount; ++j) {
+			QTreeWidgetItem *child = item->child(j);
+
+			ProgramVariable var=prog.getVariableByName(child->text(0));
+			if (var!=ProgramVariable()) {
+				child->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+				child->setData(0, Qt::UserRole, true);
+			} else {
+				child->setFlags(Qt::ItemIsSelectable);
+				child->setData(0, Qt::UserRole, false);
+			}
+		}
+
+	}
+}
+
+void MRuleTreeWidget::onRuleViewSelectionChanged()
+{
+	int size = ui->rulesTreeWidget->selectedItems().size();
+	ui->ruleRemoveButton->setEnabled(size > 0);
+	ui->ruleEditButton->setEnabled(size > 0);
+}
+
+void MRuleTreeWidget::onRuleAddClicked()
+{
+	MRuleNewDialog dialog(prog);
+
+	dialog.show();
+	dialog.exec();
+
+	if (dialog.result() == QDialog::Accepted)
+		addRule(dialog.ruleProperties());
+}
+
+void MRuleTreeWidget::onRuleEditClicked()
+{
+	//Fetching the widget containing all our rule properties
+	QList<QTreeWidgetItem*> list = ui->rulesTreeWidget->selectedItems();
+	QTreeWidgetItem *top = list.at(0);
+	while (top->parent())
+		top=top->parent();
+	list = top->takeChildren();
+
+	//Putting those that are valid for the current program in a map
+	QMap<QString,QString> map, result, rejected;
+	for (int i=0, listsize=list.size(); i<listsize; ++i) {
+		if (list.at(i)->data(0, Qt::UserRole).toBool() == true)
+			map[list.at(i)->text(0)] = list.at(i)->text(1);
+		else
+			rejected[list.at(i)->text(0)] = list.at(i)->text(1);
+	}
+
+	//Calling the edit dialog
+	MRuleNewDialog dialog(prog, map);
+	dialog.show();
+	dialog.exec();
+
+	if (dialog.result() == QDialog::Accepted) {
+		result = dialog.ruleProperties();
+
+	} else {
+		result = map;
+	}
+
+	//Repopulating the TreeWidgetItem with the properties
+	QMap<QString,QString>::const_iterator it;
+	for (it=result.begin(); it!=result.end(); ++it) {
+		QStringList itemStrList;
+		itemStrList.append(it.key());
+		itemStrList.append(it.value());
+		new QTreeWidgetItem(top, itemStrList);
+	}
+	for (it=rejected.begin(); it!=rejected.end(); ++it) {
+		QStringList itemStrList;
+		itemStrList.append(it.key());
+		itemStrList.append(it.value());
+		new QTreeWidgetItem(top, itemStrList);
+	}
+
+	//Let onProgramChanged set the data flag and grey out invalid rows
+	onProgramChanged(prog);
+	top->sortChildren(0, Qt::AscendingOrder);
+}
+
+void MRuleTreeWidget::onRuleRemoveClicked()
+{
+	QTreeWidgetItem *top = ui->rulesTreeWidget->selectedItems().at(0);
+	while (top->parent())
+		top=top->parent();
+	delete top;
+	emit ruleCountChanged(ruleCount());
+}

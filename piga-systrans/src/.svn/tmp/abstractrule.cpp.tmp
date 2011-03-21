@@ -1,0 +1,96 @@
+#include "abstractrule.h"
+
+int AbstractRule::idCounter = AbstractRule::InvalidID;
+QMutex AbstractRule::idCounterMut;
+QString AbstractRule::ruleType = "Abstract Rule";
+
+AbstractRule::AbstractRule() : ruleId(AbstractRule::InvalidID)
+{
+
+}
+
+AbstractRule::AbstractRule(Program program, QString display_name) :
+		_program(program),
+		_display_name(display_name)
+{
+	idCounterMut.lock();
+	ruleId=++idCounter;
+	idCounterMut.unlock();
+}
+
+int AbstractRule::id() const
+{
+	return ruleId;
+}
+
+bool AbstractRule::setProgram(Program prog)
+{
+	if (Program()!=prog) {
+		_program=prog;
+		return true;
+	} else {
+		qWarning("Tried to set an invalid program");
+		return false;
+	}
+}
+
+void AbstractRule::setDisplayName(QString display_name)
+{
+	_display_name=display_name;
+}
+
+bool AbstractRule::addMRule(const MRule mrule)
+{
+	mrules.push_back(mrule);
+
+	return true;
+}
+
+void AbstractRule::clearMRules()
+{
+	mrules.clear();
+}
+
+bool AbstractRule::addTRule(const TRule trule)
+{
+	trules.push_back(trule);
+
+	return true;
+}
+
+void AbstractRule::clearTRules()
+{
+	trules.clear();
+}
+
+Transition AbstractRule::matches(Program program, Domain current_domain, QMap<QString, QString> values) const
+{
+	//If the program is not the same, just abort
+	if(program.name()!=this->program().name())
+		return Transition();
+
+	//First, try to match the mrules
+	bool abort=false;
+	for(int m=0; m<mrules.size() && !abort; m++)
+	{
+		if(mrules[m].matches(values))
+		{
+			//We have matched a rule, let's match a transition !
+			for(int t=0; t<trules.size(); t++)
+			{
+				if(trules[t].matches(current_domain.name()))
+				{
+					Transition trans(program, current_domain, targetDomain(current_domain, trules[t]), trules[t].prompt(), trules[t].notify());
+					return trans;
+				}
+			}
+
+			//We haven't matched any trule. This means we have matched some conditions but not any incoming Domain
+			//let's die and return an empty transition
+			abort=true;
+		}
+	}
+
+	return Transition();
+}
+

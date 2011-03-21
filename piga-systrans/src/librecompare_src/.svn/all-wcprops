@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/PIGA-SYSTRANS/!svn/ver/911/branches/v2/src/librecompare_src
+END
+byteset.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/893/branches/v2/src/librecompare_src/byteset.cpp
+END
+regexp.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/PIGA-SYSTRANS/!svn/ver/908/branches/v2/src/librecompare_src/regexp.h
+END
+automatamaps.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/907/branches/v2/src/librecompare_src/automatamaps.h
+END
+byteset.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/PIGA-SYSTRANS/!svn/ver/893/branches/v2/src/librecompare_src/byteset.h
+END
+state.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/PIGA-SYSTRANS/!svn/ver/890/branches/v2/src/librecompare_src/state.h
+END
+automaton.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/911/branches/v2/src/librecompare_src/automaton.cpp
+END
+statecontainer.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/905/branches/v2/src/librecompare_src/statecontainer.h
+END
+regexp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/911/branches/v2/src/librecompare_src/regexp.cpp
+END
+automatamaps.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/907/branches/v2/src/librecompare_src/automatamaps.cpp
+END
+automaton.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/907/branches/v2/src/librecompare_src/automaton.h
+END

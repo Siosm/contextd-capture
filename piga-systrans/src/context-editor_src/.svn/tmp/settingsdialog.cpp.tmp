@@ -1,0 +1,93 @@
+#include <QPushButton>
+#include "settingsdialog.h"
+#include "editorconfig.h"
+#include "ui_settingsdialog.h"
+
+SettingsDialog::SettingsDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::SettingsDialog)
+{
+	ui->setupUi(this);
+
+	//Initialise widgets
+	ui->autosaveFrequency->setRange(EditorConfig::AutosaveFrequencyMin, EditorConfig::AutosaveFrequencyMax);
+	ui->arrowProgramMode->addItem("Icons alongside arrow", EditorConfig::HorizontalIcons);
+	ui->arrowProgramMode->addItem("Popup on arrow hover", EditorConfig::Popup);
+	ui->hideMode->addItem("Lower opacity", EditorConfig::LowerOpacity);
+	ui->hideMode->addItem("Remove from view", EditorConfig::RemoveFromView);
+
+	//Set values
+	setWidgetValues();
+
+	//Connect to handlers
+	connect(&EditorConfig::instance(), SIGNAL(updated()), this, SLOT(setWidgetValues()));
+	connect(ui->autosaveFrequency, SIGNAL(valueChanged(int)), this, SLOT(onAutosaveFrequencyChanged(int)));
+	connect(ui->reopenLastFile, SIGNAL(clicked(bool)), this, SLOT(onReopenLastFileChanged(bool)));
+	connect(ui->arrowProgramMode, SIGNAL(currentIndexChanged(int)), this, SLOT(onArrowProgramModeChanged(int)));
+	connect(ui->hideMode, SIGNAL(currentIndexChanged(int)), this, SLOT(onHideModeChanged(int)));
+	connect(ui->displayInvalidRules, SIGNAL(clicked(bool)), this, SLOT(onDisplayInvalidRulesChange(bool)));
+
+	connect(ui->buttonBox->button(QDialogButtonBox::RestoreDefaults), SIGNAL(clicked()), this, SLOT(onRestoreDefaults()));
+}
+
+SettingsDialog::~SettingsDialog()
+{
+	delete ui;
+}
+
+void SettingsDialog::changeEvent(QEvent *e)
+{
+	QDialog::changeEvent(e);
+	switch (e->type()) {
+	case QEvent::LanguageChange:
+		ui->retranslateUi(this);
+		break;
+	default:
+		break;
+	}
+}
+
+void SettingsDialog::setWidgetValues()
+{
+	ui->autosaveFrequency->setValue(EditorConfig::autosaveFrequency());
+	ui->reopenLastFile->setChecked(EditorConfig::reopenLastFile());
+	ui->arrowProgramMode->setCurrentIndex(EditorConfig::arrowProgramMode());
+	ui->hideMode->setCurrentIndex(EditorConfig::hideMode());
+	ui->displayInvalidRules->setChecked(EditorConfig::displayInvalidRules());
+}
+
+void SettingsDialog::onAutosaveFrequencyChanged(int value)
+{
+	EditorConfig::setAutosaveFrequency(value);
+	//TODO autosave scheduler update
+}
+
+void SettingsDialog::onReopenLastFileChanged(bool checked)
+{
+	EditorConfig::setReopenLastFile(checked);
+}
+
+void SettingsDialog::onArrowProgramModeChanged(int index)
+{
+	EditorConfig::setArrowProgramMode(ui->arrowProgramMode->itemData(index, Qt::UserRole).toInt());
+	emit redrawView();
+}
+
+void SettingsDialog::onHideModeChanged(int index)
+{
+	EditorConfig::setHideMode(ui->hideMode->itemData(index, Qt::UserRole).toInt());
+	emit redrawView();
+}
+
+void SettingsDialog::onDisplayInvalidRulesChange(bool checked)
+{
+	EditorConfig::setDisplayInvalidRules(checked);
+	emit redrawDocks();
+	emit redrawView();
+}
+
+void SettingsDialog::onRestoreDefaults()
+{
+	EditorConfig::restoreDefaults();
+	setWidgetValues();
+}

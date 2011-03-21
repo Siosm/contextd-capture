@@ -1,0 +1,270 @@
+#include <QFontMetricsF>
+#include <QFontInfo>
+#include <string.h>
+#include <stdio.h>
+#include <graphviz/gvc.h>
+
+#include "gvgraph.h"
+
+/* QString-compatible versions of libgraph functions */
+static inline Agraph_t* _agopen(QString name, int kind)
+{
+	return agopen(const_cast<char *>(qPrintable(name)), kind);
+}
+
+static inline QString _agget(void *object, QString attr, QString alt=QString())
+{
+	QString str=agget(object, const_cast<char *>(qPrintable(attr)));
+
+	if(str==QString())
+		return alt;
+	else
+		return str;
+}
+
+static inline int _agset(void *object, QString attr, QString value)
+{
+	return agsafeset(object, const_cast<char *>(qPrintable(attr)), const_cast<char *>(qPrintable(value)), const_cast<char *>(qPrintable(value)));
+}
+
+static inline Agsym_t *_agnodeattr(Agraph_t *object, QString attr, QString value)
+{
+	return agnodeattr(object, const_cast<char *>(qPrintable(attr)), const_cast<char *>(qPrintable(value)));
+}
+
+static inline Agsym_t *_agedgeattr(Agraph_t *object, QString attr, QString value)
+{
+	return agedgeattr(object, const_cast<char *>(qPrintable(attr)), const_cast<char *>(qPrintable(value)));
+}
+
+static inline Agnode_t *_agnode(Agraph_t *graph, QString name)
+{
+	return agnode(graph, const_cast<char *>(qPrintable(name)));
+}
+
+static inline int _gvLayout(GVC_t *gvc, graph_t *g, QString engine)
+{
+	return gvLayout(gvc, g, const_cast<char *>(qPrintable(engine)));
+}
+
+
+
+const qreal GVGraph::DotDefaultDPI=72.0;
+const int GVGraph::EdgeLabelMargin=8;
+const int GVGraph::EdgeLabelSpacing=6;
+
+GVGraph::GVGraph(QString name, QFont font, qreal node_size, qreal edge_item_size) :
+		_context(gvContext()),
+		_graph(_agopen(name, AGDIGRAPHSTRICT))
+{
+	//Set graph attributes
+	_agset(_graph, "overlap", "prism");
+	_agset(_graph, "splines", "true");
+	_agset(_graph, "pad", QString("%L1").arg(0.2));
+	_agset(_graph, "dpi", QString("%L1").arg(96.0));
+	_agset(_graph, "nodesep", QString("%L1").arg(0.4));
+
+	//Set node attributes
+	_agnodeattr(_graph, "fixedsize", "true");
+	_agnodeattr(_graph, "label", "");
+	_agnodeattr(_graph, "regular", "true");
+	_agnodeattr(_graph, "width", QString("%L1").arg(node_size/_agget(_graph, "dpi", QString("%L1").arg(96.0)).toDouble()).replace('.', ","));
+
+	//Set edge attributes
+	_edge_label_item_size=edge_item_size;
+	_edge_font.setPixelSize(edge_item_size);
+	_agedgeattr(_graph, "fontname", _edge_font.family());
+	_agedgeattr(_graph, "fontsize", QString("%L1").arg(QFontInfo(_edge_font).pointSizeF()));
+
+	setFont(font);
+}
+
+GVGraph::~GVGraph()
+{
+	gvFreeLayout(_context, _graph);
+	agclose(_graph);
+	gvFreeContext(_context);
+}
+
+void GVGraph::addNode(const QString& name)
+{
+	if(_nodes.contains(name))
+		removeNode(name);
+
+	_nodes.insert(name, _agnode(_graph, name));
+}
+
+void GVGraph::addNodes(const QStringList& names)
+{
+	for(int i=0; i<names.size(); ++i)
+		addNode(names.at(i));
+}
+
+void GVGraph::removeNode(const QString& name)
+{
+	if(_nodes.contains(name))
+	{
+		agdelete(_graph, _nodes[name]);
+		_nodes.remove(name);
+
+		QList<QPair<QString, QString> >keys=_edges.keys();
+		for(int i=0; i<keys.size(); ++i)
+			if(keys.at(i).first==name || keys.at(i).second==name)
+				removeEdge(keys.at(i));
+	}
+}
+
+void GVGraph::clearNodes()
+{
+	QList<QString> keys=_nodes.keys();
+
+	for(int i=0; i<keys.size(); ++i)
+		removeNode(keys.at(i));
+}
+
+void GVGraph::setRootNode(const QString& name)
+{
+	if(_nodes.contains(name))
+		_agset(_graph, "root", name);
+}
+
+void GVGraph::addEdge(const QString &source, const QString &target, int label_item_count)
+{
+	if(_nodes.contains(source) && _nodes.contains(target))
+	{
+		QPair<QString, QString> key(source, target);
+		if(!_edges.contains(key))
+		{
+			Agedge_t *edge=agedge(_graph, _nodes[source], _nodes[target]);
+			_agset(edge, "label", labelForEdge(label_item_count));
+			_edges.insert(key, QPair<Agedge_t *, int>(edge, label_item_count));
+		}
+	}
+}
+
+void GVGraph::removeEdge(const QString &source, const QString &target)
+{
+	removeEdge(QPair<QString, QString>(source, target));
+}
+
+void GVGraph::removeEdge(const QPair<QString, QString>& key)
+{
+	if(_edges.contains(key))
+	{
+		agdelete(_graph, _edges[key].first);
+		_edges.remove(key);
+	}
+}
+
+void GVGraph::setFont(QFont font)
+{
+	_font=font;
+	_edge_font.setFamily(font.family());
+
+	_agset(_graph, "fontname", font.family());
+	_agset(_graph, "fontsize", QString("%L1").arg(font.pointSizeF()));
+
+	_agnodeattr(_graph, "fontname", font.family());
+	_agnodeattr(_graph, "fontsize", QString("%L1").arg(font.pointSizeF()));
+}
+
+void GVGraph::applyLayout()
+{
+	gvFreeLayout(_context, _graph);
+	_gvLayout(_context, _graph, "dot");
+}
+
+QString GVGraph::labelForEdge(int label_item_count) const
+{
+	QFontMetricsF metrics(_edge_font);
+
+	int count=qRound((EdgeLabelMargin + (_edge_label_item_size + EdgeLabelSpacing) * label_item_count) / metrics.width(' '));
+	return QString(count, 'X')+'\0';
+}
+
+QList<GVNode> GVGraph::nodes() const
+{
+	QList<GVNode> list;
+	qreal dpi=_agget(_graph, "dpi", QString("%L1").arg(96.0)).toDouble();
+
+	for(QMap<QString, Agnode_t*>::const_iterator it=_nodes.begin(); it!=_nodes.end();++it)
+	{
+		Agnode_t *node=it.value();
+		GVNode object;
+
+		//Set the name of the node
+		object.name=node->name;
+
+		//Fetch the X coordinate, apply the DPI conversion rate (actual DPI / 72, value used by dot)
+		qreal x=node->u.coord.x*(dpi/DotDefaultDPI);
+
+		//Translate the Y coordinate from bottom-left to top-left corner
+		qreal y=(_graph->u.bb.UR.y - node->u.coord.y)*(dpi/DotDefaultDPI);
+		object.centerPos=QPoint(x, y);
+
+		//Transform the width and height from inches to pixels
+		object.height=node->u.height*dpi;
+		object.width=node->u.width*dpi;
+
+		list << object;
+	}
+
+	return list;
+}
+
+QList<GVEdge> GVGraph::edges() const
+{
+	QList<GVEdge> list;
+
+	qreal dpi=_agget(_graph, "dpi", QString("%L1").arg(96.0)).toDouble();
+
+	for(QMap<QPair<QString, QString>, QPair<Agedge_t*, int> >::const_iterator it=_edges.begin(); it!=_edges.end();++it)
+	{
+		Agedge_t *edge=it.value().first;
+		GVEdge object;
+
+		//Fill the source and target node names
+		object.source=edge->tail->name;
+		object.target=edge->head->name;
+
+		//Calculate the path from the spline (only one as the graph is strict)
+		if((edge->u.spl->list!=0) && (edge->u.spl->list->size%3 == 1))
+		{
+			if(edge->u.spl->list->sflag)
+			{
+				object.path.moveTo(edge->u.spl->list->sp.x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->sp.y)*(dpi/DotDefaultDPI));
+				object.path.lineTo(edge->u.spl->list->list[0].x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->list[0].y)*(dpi/DotDefaultDPI));
+			}
+			else
+				object.path.moveTo(edge->u.spl->list->list[0].x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->list[0].y)*(dpi/DotDefaultDPI));
+			for(int i=1; i<edge->u.spl->list->size; i+=3)
+				object.path.cubicTo(edge->u.spl->list->list[i].x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->list[i].y)*(dpi/DotDefaultDPI),
+									edge->u.spl->list->list[i+1].x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->list[i+1].y)*(dpi/DotDefaultDPI),
+									edge->u.spl->list->list[i+2].x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->list[i+2].y)*(dpi/DotDefaultDPI));
+			if(edge->u.spl->list->eflag)
+				object.path.lineTo(edge->u.spl->list->ep.x*(dpi/DotDefaultDPI), (_graph->u.bb.UR.y - edge->u.spl->list->ep.y)*(dpi/DotDefaultDPI));
+		}
+
+		//Calculate the label position and width
+#ifndef __LEGACY_GRAPHVIZ__
+		object.labelPos=QPoint((edge->u.label->pos.x - edge->u.label->dimen.x/2)*(dpi/DotDefaultDPI),
+							   (_graph->u.bb.UR.y - edge->u.label->pos.y - edge->u.label->dimen.y/2)*(dpi/DotDefaultDPI));
+
+#else
+		object.labelPos=QPoint((edge->u.label->p.x - edge->u.label->dimen.x/2)*(dpi/DotDefaultDPI),
+							   (_graph->u.bb.UR.y - edge->u.label->p.y - edge->u.label->dimen.y/2)*(dpi/DotDefaultDPI));
+#endif
+
+		list << object;
+	}
+
+	return list;
+}
+
+
+QRectF GVGraph::boundingRect() const
+{
+	qreal dpi=_agget(_graph, "dpi", QString("%L1").arg(96.0)).toDouble();
+	return QRectF(_graph->u.bb.LL.x*(dpi/DotDefaultDPI), _graph->u.bb.LL.y*(dpi/DotDefaultDPI),
+				  _graph->u.bb.UR.x*(dpi/DotDefaultDPI), _graph->u.bb.UR.y*(dpi/DotDefaultDPI));
+}

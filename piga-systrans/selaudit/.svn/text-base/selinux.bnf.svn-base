@@ -1,0 +1,77 @@
+<statements>	:=	statement
+				|	statements statement
+				|	empty
+
+<statement>	:=	policy_module
+			|	module
+			|	policy
+
+<empty>	:=
+
+<policy>	:=	policy_stmt
+
+<policy_module>	:=	POLICY_MODULE LPAREN identifier COMMA number RPAREN
+
+<module> := MODULE identifier number SEMI
+
+<policy_stmt>	:=	rule_def
+				|	type_rule_def
+				|	interface_call
+
+<rule_def>	:=	rule_allow_def
+			|	rule_deny_def
+			|	rule_audit_def
+			|	rule_noaudit_def
+
+<rule_allow_def>	:=	ALLOW names names COLON names names SEMI
+
+<rule_deny_def>		:=	NEVERALLOW names names COLON names names SEMI
+
+<rule_audit_def>	:=	AUDITALLOW names names COLON names names SEMI
+
+<rule_noaudit_def>	:=	DONTAUDIT names names COLON names names SEMI
+
+<type_rule_def>	:=	type_rule_transition_def
+				|	type_rule_change_def
+				|	type_rule_member_def
+
+<type_rule_transition_def>	:=	TYPE_TRANSITION names names COLON names identifier SEMI
+
+<type_rule_change_def>	:=	TYPE_CHANGE names names COLON names identifier SEMI
+
+<type_rule_member_def>	:=	TYPE_MEMBER names names COLON names identifier SEMI
+
+<interface_call>	:=	identifier LPAREN interface_call_param_list RPAREN
+					|	identifier LPAREN RPAREN
+					|	identifier LPAREN interface_call_param_list RPAREN SEMI
+
+<names>	:=	identifier
+		|	nested_id_set
+		|	asterisk
+		|	TILDE identifier
+		|	TILDE nested_id_set
+		|	identifier MINUS identifier
+
+<nested_id_set>	:=	LBRACE nested_id_list RBRACE
+
+<nested_id_list>	:=	nested_id_element
+					|	nested_id_list nested_id_element
+
+<nested_id_element>	:=	identifier
+					|	MINUS identifier
+					|	nested_id_set
+
+<interface_call_param_list>	:=	interface_call_param
+							|	interface_call_param_list COMMA interface_call_param
+
+<interface_call_param>	:=	identifier
+						|	identifier MINUS identifier
+						|	nested_id_set
+						|	TRUE
+						|	FALSE
+
+<number>	:=	NUMBER
+
+<identifier>	:=	IDENTIFIER
+
+<asterisk>	:=	ASTERISK

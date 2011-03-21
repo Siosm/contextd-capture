@@ -1,0 +1,266 @@
+#include "configuration.h"
+#include "xml_common.h"
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include "rule.h"
+
+//#include "contextclient.h"
+//#include "eventdispatcher.h"
+
+//static variables
+QMap<QString, QVector<Rule> > Configuration::rules;
+QMap<QString, Domain > Configuration::domains;
+QMap<QString, Program > Configuration::programs;
+QReadWriteLock Configuration::readwritelock;
+
+//global XML parsing variables
+MRule mrule;
+Rule tmp_rule;
+bool rule_opened=false;
+std::string tag_data;
+
+bool Configuration::on_tag_open(const std::string& tag_name, XMLSP::StringMap& attributes)
+{
+ 	if(tag_name==CONTEXT_TAG || tag_name==DOMAIN_TAG)
+	{
+		QString name=QString::fromUtf8(attributes[NAME_TAG].c_str());
+		QString display_name=QString::fromUtf8(attributes[DISPLAY_NAME_TAG].c_str());
+		QString icon_path=QString::fromUtf8(attributes[ICON_TAG].c_str());
+
+		//Add the context to the context list
+		if(name!=QString())
+		{
+			domains[name]=Domain(name, display_name, icon_path);
+			if(attributes[DEFAULT_TAG]==RULE_TRUE)
+				default_domain=domains[name];
+		}
+	}
+	else if(tag_name==PROGRAM_TAG)
+	{
+		QString name=QString::fromUtf8(attributes[NAME_TAG].c_str());
+		QString display_name=QString::fromUtf8(attributes[DISPLAY_NAME_TAG].c_str());
+		QString icon_path=QString::fromUtf8(attributes[ICON_TAG].c_str());
+		QString full_path=QString::fromUtf8(attributes[FULLPATH_TAG].c_str());
+		QStringList properties=QString::fromUtf8(attributes[PROPERTIES_TAG].c_str()).split(" ");
+
+		//Add the context to the context list
+		if(name!=QString())
+			programs[name]=Program(name, display_name, icon_path, full_path, properties);
+	}
+	else if(tag_name==RULE_TAG)
+	{
+		//Create the transition
+		QString app_name=QString::fromUtf8(attributes[RULE_APP_NAME_TAG].c_str());
+		QString str_transitTo=QString::fromUtf8(attributes[RULE_TRANSIT_TO_TAG].c_str());
+		QString str_comment=QString::fromUtf8(attributes[RULE_COMMENT_TAG].c_str());
+
+		//If the target context exists, we can continue
+		Domain transitTo=domains[str_transitTo];
+		if(transitTo!=Domain())
+		{
+			Program program=programs[app_name];
+			if(program!=Program())
+			{
+				tmp_rule=Rule(program, transitTo, str_comment);
+
+				//Prompt
+				if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+					tmp_rule.setPromptUser(true);
+				else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+					tmp_rule.setPromptUser(false);
+				//else if(attributes[RULE_PROMPT_TAG]!="")
+					//EventDispatcher::instance().sendError((attributes[RULE_APP_NAME_TAG] + " : '" + attributes[RULE_PROMPT_TAG] + "' is an invalid prompt value. Valid prompt values are '" RULE_TRUE "' and '" RULE_FALSE "'.\n").c_str());
+
+				//Notify
+				if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+					tmp_rule.setNotifyUser(true);
+				else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+					tmp_rule.setNotifyUser(false);
+				//else if(attributes[RULE_NOTIFY_TAG]!="")
+					//EventDispatcher::instance().sendError((attributes[RULE_APP_NAME_TAG] + " : '" + attributes[RULE_NOTIFY_TAG] + "' is an invalid notify value. Valid notify values are '" RULE_TRUE "' and '" RULE_FALSE "'.\n").c_str());
+			}
+			else
+			{
+				std::cerr << qPrintable(QString("TransitionRules : The program %1 doesn't exist !").arg(app_name)) << std::endl;
+			}
+		}
+		else
+		{
+
+			std::cerr << qPrintable(QString("TransitionRules : The context %1 doesn't exist !").arg(str_transitTo)) << std::endl;
+		}
+
+	}
+	else if(tag_name==RULE_MRULE_TAG)
+	{
+		rule_opened=true;
+	}
+	else if(tag_name==RULE_TRANSIT_TAG)
+	{
+		QString str_from_domain=QString::fromUtf8(attributes[RULE_TRANSIT_FROM_TAG].c_str());
+
+		//Add the context to the context list
+		if(str_from_domain!=QString())
+		{
+			TRule trule(&tmp_rule, str_from_domain);
+
+			//Prompt
+			if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+				trule.setPrompt(true);
+			else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+				trule.setPrompt(false);
+			//else if(attributes[RULE_PROMPT_TAG]!="")
+				//EventDispatcher::instance().sendError((attributes[RULE_APP_NAME_TAG] + " : '" + attributes[RULE_PROMPT_TAG] + "' is an invalid prompt value. Valid prompt values are '" RULE_TRUE "' and '" RULE_FALSE "'.\n").c_str());
+
+			//Notify
+			if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+				trule.setNotify(true);
+			else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+				trule.setNotify(false);
+			//else if(attributes[RULE_NOTIFY_TAG]!="")
+				//EventDispatcher::instance().sendError((attributes[RULE_APP_NAME_TAG] + " : '" + attributes[RULE_NOTIFY_TAG] + "' is an invalid notify value. Valid notify values are '" RULE_TRUE "' and '" RULE_FALSE "'.\n").c_str());
+
+			//Add the transition rule to the tmp rule
+			tmp_rule.addTRule(trule);
+		}
+	}
+
+	return true;
+}
+
+bool Configuration::on_cdata(const std::string& cdata)
+{
+	tag_data=cdata;
+	return true;
+}
+
+bool Configuration::on_tag_close(const std::string& tag_name)
+{
+	if(tag_name==RULE_TAG)
+	{
+		rules[tmp_rule.appName()].push_back(tmp_rule);
+	}
+	if(tag_name==RULE_MRULE_TAG)
+	{
+		tmp_rule.addMRule(mrule);
+		mrule=MRule();
+		rule_opened=false;
+	}
+	else if(rule_opened)
+	{
+		//printf("tag close: %s -> %s\n", tag_name.c_str(), tag_data.c_str());
+		mrule.addRule(QString::fromUtf8(tag_name.c_str()), QString::fromUtf8(tag_data.c_str()));
+		tag_data="";
+	}
+
+	return true;
+}
+
+void Configuration::on_error(int errnr, int line, int col, const std::string& message)
+{
+	qWarning("transitions.xml: Error %i at the line %i and column %i: %s", errnr, line, col, message.c_str());
+}
+
+bool Configuration::readConf()
+{
+	bool res=false;
+
+	readwritelock.lockForWrite();
+
+	const char* path="/etc/context.d/transitions.xml";
+	std::ifstream is(path);
+	if(is.is_open())
+	{
+		std::ostringstream iss;
+		iss << is.rdbuf();
+
+		rules.clear();
+
+		if(!parse(iss.str()))
+		{
+			std::cerr << "Error while loading the rules : parse(iss.str()) returned false !" << std::endl;
+		}
+		else
+			res=true;
+	}
+	else
+	    std::cerr << "Error while loading the rules : The file '" << path << "' cannot be openned !" << std::endl;
+
+	readwritelock.unlock();
+
+	return res;
+}
+
+Configuration::Configuration() : /*QObject(), */XMLSP::Parser()
+{
+	//Read the configuration.
+	//It will only be read once as Configuration::Configuration() is private and only instance() can call it
+	readConf();
+}
+
+Configuration& Configuration::instance()
+{
+	static Configuration tr;
+
+	return tr;
+}
+
+bool Configuration::updateRules()
+{
+	Configuration t;
+	return t.readConf();
+}
+
+Domain Configuration::getDomainByName(QString name)
+{
+	QReadLocker locker(&readwritelock);
+
+	return domains[name];
+}
+
+Domain Configuration::defaultDomain()
+{
+	QReadLocker locker(&readwritelock);
+
+	return default_domain;
+}
+
+const Transition Configuration::getFirstMatchingTransition(Program app, Domain current_domain, QMap<QString, QString> values)
+{
+	QWriteLocker locker(&readwritelock);
+
+	QVector<Rule> app_rules=rules[app.appName()];
+	for(int i=0;i<app_rules.size();i++)
+	{
+		Transition t=app_rules[i].matches(app, current_domain, values);
+		if(t.isValid())
+			return t;
+	}
+
+	return Transition();
+}
+
+QList<Domain> Configuration::domainList()
+{
+	return domains.values();
+}
+
+bool Configuration::isProgramAllowed(QString name, QString full_path)
+{
+	if(!programs.contains(name))
+		return false;
+	else
+		return programs[name].fullPath()==full_path;
+}
+
+Program Configuration::getProgramByName(QString name)
+{
+	return programs[name];
+}
+
+QList<Program> Configuration::programList()
+{
+	return programs.values();
+}

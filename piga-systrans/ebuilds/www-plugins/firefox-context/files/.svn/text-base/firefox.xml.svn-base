@@ -1,0 +1,21 @@
+<program name="firefox" display_name="Firefox" icon="/usr/share/pixmaps/firefox.png" full_path="/usr/lib/mozilla-firefox/firefox">
+	<description>Firefox is a small, fast and very easy to use browser that offers many advantages over other web browsers, such as the tabbed browsing.</description>
+	<actions>
+		<action name="open_url" display_name="Open an URL" description="" />
+		<action name="open_path" display_name="Open a path" description="" />
+	</actions>
+	
+	<variables>
+		<!--Full-->
+		<variable name="url_type" description="The type of the URL." action="open_url" type="string_list" list=";full;" />
+		<variable name="url" description="The full URL that is currently being opened (eg. 'http://www.google.com/')" action="open_url" type="regexp" validation="(.+:(//)?.*)?" />
+		<variable name="protocol" description="The protocol, extracted from the url." action="open_url" type="string_list" list=";http;https;ftp;file;" />
+		<variable name="host" description="The domain name, extracted from the url (eg. 'www.google.com')." action="open_url" type="regexp"/>
+		<variable name="port" description="The port, extracted from the url." action="open_url" type="int" range="1:65535" />
+		<variable name="path" description="The path, extracted from the url." action="open_url" type="regexp" validation="/.*" />
+		
+		<!-- Path -->
+		<variable name="url_type" description="The type of the URL." action="open_path" type="string_list" list=";path;" />
+		<variable name="url" description="The full URL that is currently being opened." action="open_path" type="regexp" validation="(.+:(//)?.*)?" />
+	</variables>
+</program>

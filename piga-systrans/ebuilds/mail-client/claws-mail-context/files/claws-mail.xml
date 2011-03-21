@@ -1,0 +1,41 @@
+<program name="claws-mail" display_name="Claws Mail" icon="/usr/share/icons/hicolor/48x48/apps/claws-mail.png" full_path="/usr/bin/claws-mail">
+	<description>Fast and lightweight, Claws Mail is a powerful and full-featured mail client. It is extensible using loadable plugins.</description>
+		<actions>
+		<action name="session" display_name="Session" description="" />
+		<action name="open_mail" display_name="Open Mail" description="" />
+		<action name="attach_file" display_name="Attach File" description="" />
+		<action name="insert_file" display_name="Insert File" description="" />
+		<action name="claws_open_close" display_name="Open/Close Claws Mail" description="" />
+	</actions>
+	
+	<variables>
+		<!--Read/list/send mail-->
+		<variable name="action" description="The action made by the user." action="open_mail" type="string_list" list=";read;list;send;"/>
+		<variable name="from" description="The email adress of the sender." action="open_mail" type="regexp" validation=".+@.+\..+" />
+		<variable name="to" description="The email adresses of the the recipients." action="open_mail" type="regexp" />
+		<variable name="subject" description="The subject of the email." action="open_mail" type="regexp" />
+		<variable name="date" description="The date of the mail. The format is 'Tue, 10 Nov 2009 10:24:51 +0100 (CET)'." action="open_mail" type="regexp"/>
+		<variable name="inreplyto" description="The reply ID. Format is '92ab2980695d61d735ef8dad82da1c73.squirrel@webmail.ensi-bourges.fr'." action="open_mail" type="regexp"/>
+        
+		<!-- Attach File-->
+		<variable name="action" description="The action of the user." action="attach_file" type="string_list" list=";attach_file;" />
+		<variable name="file" description="The filepath of the attached file." action="attach_file" type="regexp" />
+		<variable name="content_type" description="The mime type of the attached file." action="attach_file" type="regexp" validation=".+/.+" />
+		<variable name="name" description="The name of the file." action="attach_file" type="regexp" />
+		<variable name="file_size" description="Size of the mail, in bytes." action="attach_file" type="int" range="0:" />
+		
+		<!-- Insert File-->
+		<variable name="action" description="The action of the user." action="insert_file" type="string_list" list=";insert_file;"/>
+		<variable name="file" description="The filepath of the attached file." action="insert_file" type="regexp" />
+	
+		<!-- Session -->
+		<variable name="action" description="The action of the user." action="session" type="string_list" list=";connect;close;" />
+		<variable name="host" description="Domain name of the server." action="session" type="regexp" />
+		<variable name="port" description="Port of the server." action="session" type="int" range="1:65535" />
+		<variable name="session_type" description="The type of the session." action="session" type="string_list" list=";imap;news;smtp;pop3;unknown;" />
+		
+		<!-- Claws-mail open/close -->
+		<variable name="action" description="The action of the user." action="claws_open_close" type="string_list" list=";claws_open;claws_close;" />
+		<variable name="pid" description="The pid of claws-mail." action="claws_open_close" type="int" range="1:32768" />
+	</variables>
+</program>

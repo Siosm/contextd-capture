@@ -1,0 +1,71 @@
+Index: src/sourcewindow.c
+===================================================================
+RCS file: //claws/src/sourcewindow.c,v
+retrieving revision 1.9.2.25
+diff -u -r1.9.2.25 sourcewindow.c
+--- src/sourcewindow.c	23 Feb 2009 16:55:45 -0000	1.9.2.25
++++ src/sourcewindow.c	11 Jan 2010 12:41:05 -0000
+@@ -31,6 +31,8 @@
+ #include "gtkutils.h"
+ #include "prefs_common.h"
+ 
++static GList *sourcewindow_list = NULL;
++
+ static void source_window_size_alloc_cb	(GtkWidget	*widget,
+ 					 GtkAllocation	*allocation);
+ static gint source_window_delete_cb	(GtkWidget	*widget,
+@@ -107,6 +109,8 @@
+ 	sourcewin->text = text;
+ 
+ 	source_window_init();
++	
++	sourcewindow_list = g_list_append(sourcewindow_list, sourcewin);
+ 
+ 	return sourcewin;
+ }
+@@ -123,6 +127,9 @@
+ 		sourcewin->deferred_destroy = TRUE;
+ 		return;
+ 	}
++	
++	sourcewindow_list = g_list_remove(sourcewindow_list, sourcewin);
++	
+ 	gtk_widget_destroy(sourcewin->window);
+ 	g_free(sourcewin);
+ }
+@@ -224,3 +231,20 @@
+ 
+ 	return FALSE;
+ }
++
++GList *sourcewindow_get_list(void)
++{
++	return sourcewindow_list;
++}
++
++void sourcewindow_destroy_all(void)
++{
++	GList *list;
++	
++	do
++	{
++		list=sourcewindow_get_list();
++		if(list!=NULL)
++			source_window_destroy((SourceWindow *)list->data);
++	}while(list!=NULL);	
++}
+Index: src/sourcewindow.h
+===================================================================
+RCS file: //claws/src/sourcewindow.h,v
+retrieving revision 1.1.1.1.16.9
+diff -u -r1.1.1.1.16.9 sourcewindow.h
+--- src/sourcewindow.h	9 Jan 2009 17:47:06 -0000	1.1.1.1.16.9
++++ src/sourcewindow.h	11 Jan 2010 12:41:05 -0000
+@@ -41,5 +41,7 @@
+ void source_window_show			(SourceWindow	*sourcewin);
+ void source_window_show_msg		(SourceWindow	*sourcewin,
+ 					 MsgInfo	*msginfo);
++GList *sourcewindow_get_list(void);
++void sourcewindow_destroy_all (void);
+ 
+ #endif /* __SOURCEWINDOW_H__ */

@@ -1,0 +1,305 @@
+#include "configuration.h"
+#include "loopdialog.h"
+#include "ruledialog.h"
+#include "transitioninfodock.h"
+#include "ui_transitioninfodock.h"
+
+TransitionInfoDock::TransitionInfoDock(QWidget *parent) :
+    QDockWidget(parent),
+    ui(new Ui::TransitionInfoDock)
+{
+    ui->setupUi(this);
+
+	//Connect buttons
+	connect(ui->abstractRuleEditButton, SIGNAL(clicked()), this, SLOT(onEditClicked()));
+	connect(ui->abstractRuleList, SIGNAL(itemSelectionChanged()), this, SLOT(onListSelectionChanged()));
+	onListSelectionChanged();
+
+	//Resizing and sorting of the tree widget
+	ui->abstractRuleList->sortByColumn(0, Qt::AscendingOrder);
+	ui->abstractRuleList->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+	ui->abstractRuleList->header()->setResizeMode(1, QHeaderView::ResizeToContents);
+	ui->abstractRuleList->header()->setResizeMode(2, QHeaderView::ResizeToContents);
+	ui->abstractRuleList->header()->setResizeMode(3, QHeaderView::ResizeToContents);
+
+}
+
+TransitionInfoDock::~TransitionInfoDock()
+{
+    delete ui;
+}
+
+void TransitionInfoDock::changeEvent(QEvent *e)
+{
+    QDockWidget::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+bool TransitionInfoDock::setProgram(Program prog)
+{
+	if (prog != Program()) {
+		_program = prog;
+		if (isValid())
+			updateRulesList();
+	} else {
+		qWarning("Tried to set an invalid program in the Transition Info dock");
+		return false;
+	}
+}
+
+bool TransitionInfoDock::setSourceDomain(Domain dom)
+{
+	if (dom != Domain()) {
+		_source = dom;
+		if (isValid())
+			updateRulesList();
+		return true;
+	} else {
+		qWarning("Tried to set an invalid source domain in the Transition Info dock");
+		return false;
+	}
+}
+
+bool TransitionInfoDock::setTargetDomain(Domain dom)
+{
+	if (dom != Domain()) {
+		_target = dom;
+		if (isValid())
+			updateRulesList();
+		return true;
+	} else {
+		qWarning("Tried to set an invalid target domain in the Transition Info dock");
+		return false;
+	}
+}
+
+bool  TransitionInfoDock::setAllProperties(Program prog, Domain src, Domain dest)
+{
+	if ((prog!=Program()) && (src!=Domain()) && (dest!=Domain())) {
+		_program = prog;
+		_source = src;
+		_target = dest;
+
+		updateRulesList();
+		return true;
+	} else {
+		qWarning("Tried to set an invalid target domain property in the Transition Info dock");
+		return false;
+	}
+}
+
+Program TransitionInfoDock::program() const
+{
+	return _program;
+}
+
+Domain TransitionInfoDock::sourceDomain() const
+{
+	return _source;
+}
+
+Domain TransitionInfoDock::targetDomain() const
+{
+	return _target;
+}
+
+bool TransitionInfoDock::isValid() const
+{
+	return (_program!=Program()) && (_source!=Domain()) && (_target!=Domain());
+}
+
+void TransitionInfoDock::fetchLoops(int &i)
+{
+	//Fetch current loops and add them to the tree widget
+	Configuration& inst = Configuration::instance_nonconst();
+	QVector<Loop*> loops = inst.loopsForProgram(_program.appName());
+
+	QVector<Loop*>::const_iterator it;
+	for (it=loops.begin(); it!=loops.end(); ++it, ++i) {
+		Loop *loop = *it;
+
+		//Look for the trule that has the good domain
+		QVector<TRule> trules = loop->tRules();
+		bool found=false;
+
+		while (!trules.empty() && !found) {
+			TRule trule = trules.last();
+			trules.pop_back();
+
+			if (trule.fromDomain() == _target.name()) {
+				addAbstractRuleToList(loop, trule, i, Loop::ruleType);
+				_rules[i] = loop;
+			}
+		}
+	}
+}
+
+void TransitionInfoDock::fetchRules(int &i)
+{
+
+	//Fetch current rules and add them to the tree widget
+	Configuration inst = Configuration::instance();
+	QVector<Rule*> rules = inst.rulesForProgram(_program.appName());
+
+	QVector<Rule*>::const_iterator it;
+	for (it=rules.begin(); it!=rules.end(); ++it, ++i) {
+		Rule *rule = *it;
+
+		//If the target domain is correct, search for the source domain
+		if (rule->transitTo()==_target) {
+			QVector<TRule> trules = rule->tRules();
+			bool found=false;
+
+			while (!trules.empty() && !found) {
+				TRule trule = trules.last();
+				trules.pop_back();
+
+				if (trule.fromDomain() == _target.name()) {
+					addAbstractRuleToList(rule, trule, i, Rule::ruleType);
+					_rules[i] = rule;
+				}
+			}
+		}
+	}
+}
+
+void TransitionInfoDock::addAbstractRuleToList(AbstractRule *rule, TRule &trule, int i, QString ruleType)
+{
+	//Create and fill the new tree item with the rule information;
+	QStringList itemStrList(rule->displayName());
+	itemStrList.append(ruleType);
+	QTreeWidgetItem *item = new QTreeWidgetItem(ui->abstractRuleList, itemStrList);
+	item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+	item->setCheckState(2, trule.notify() ? Qt::Checked : Qt::Unchecked);
+	item->setCheckState(3, trule.prompt() ? Qt::Checked : Qt::Unchecked);
+	item->setData(0, Qt::UserRole, i);
+
+	//Add the matching rules of the rule as child widgets
+	QVector<MRule> mrules = rule->mRules();
+	if (mrules.size() > 1) {
+		//Several rules, each one is a different item
+		while (!mrules.empty()) {
+			MRule mrule = mrules.last();
+			mrules.pop_back();
+
+			QMap<QString, QString> map = mrule.conditions();
+			QMap<QString, QString>::const_iterator it;
+
+			for (it=map.begin(); it!=map.end(); ++it) {
+				QStringList childStrList(it.key());
+				childStrList.append(it.value());
+				new QTreeWidgetItem(item, childStrList);
+			}
+		}
+	} else {
+		//Only one rule, put it's conditions as direct children
+		QMap<QString, QString> map = mrules.first().conditions();
+		QMap<QString, QString>::const_iterator it;
+
+		for (it=map.begin(); it!=map.end(); ++it) {
+			QStringList childStrList(it.key());
+			childStrList.append(it.value());
+			new QTreeWidgetItem(item, childStrList);
+		}
+	}
+}
+
+void TransitionInfoDock::updateRulesList()
+{
+	//Clear old loops and rules in the map and tree widget, update the label
+	ui->transitionInfoLabel->setText("<b>Rules for " + _program.displayName() + " from " + _source.displayName() + " to " + _target.displayName() + "</b>");
+	_rules.clear();
+	ui->abstractRuleList->clear();
+	int i=0;
+
+	//Check if there are any loops
+	if (_source == _target) {
+		fetchLoops(i);
+	}
+
+	//Add the rules
+	fetchRules(i);
+}
+
+void TransitionInfoDock::onDeleteClicked()
+{
+	QTreeWidgetItem *item = ui->abstractRuleList->selectedItems().first();
+	while (item->parent())
+		item=item->parent();
+
+	int i = item->data(0, Qt::UserRole).toInt();
+	QString type = item->text(1);
+
+	if (type == Loop::ruleType) {
+		Loop *loop = dynamic_cast<Loop *>(_rules[i]);
+		Configuration::instance().deleteLoop(loop);
+	} else if (type == Rule::ruleType) {
+		Rule *rule = dynamic_cast<Rule *>(_rules[i]);
+		Configuration::instance().deleteRule(rule);
+	}
+}
+
+void TransitionInfoDock::onEditClicked()
+{
+	QTreeWidgetItem *item = ui->abstractRuleList->selectedItems().first();
+	while (item->parent())
+		item=item->parent();
+
+	int i = item->data(0, Qt::UserRole).toInt();
+	QString type = item->text(1);
+
+	if (type == Loop::ruleType) {
+		Loop *loop = dynamic_cast<Loop *>(_rules[i]);
+		LoopDialog dialog(*loop);
+
+		dialog.show();
+		dialog.exec();
+		if (dialog.result() == AbstractRuleDialog::Edited) {
+			qDebug("Loop has been edited");
+		} else if (dialog.result() == AbstractRuleDialog::Created) {
+			qDebug("Loop has been created");
+		} else if (dialog.result() == AbstractRuleDialog::Deleted) {
+
+
+
+
+
+
+
+			Configuration::instance().deleteLoop(loop);
+		} else {
+			qDebug("The dialog has been closed");
+		}
+	} else if (type == Rule::ruleType) {
+		Rule *rule = dynamic_cast<Rule *>(_rules[i]);
+		RuleDialog dialog(*rule);
+
+		dialog.show();
+		dialog.exec();
+		if (dialog.result() == AbstractRuleDialog::Edited) {
+			qDebug("Transition rule has been edited");
+		} else if (dialog.result() == AbstractRuleDialog::Created) {
+			qDebug("Transition rule has been created");
+		} else if (dialog.result() == AbstractRuleDialog::Deleted) {
+			qDebug("Transition rule has been deleted");
+		} else {
+			qDebug("The dialog has been closed");
+		}
+	}
+}
+
+void TransitionInfoDock::onListSelectionChanged()
+{
+	ui->abstractRuleEditButton->setEnabled(ui->abstractRuleList->selectedItems().size() > 0);
+}
+
+void TransitionInfoDock::onRulesChanged()
+{
+	updateRulesList();
+}

@@ -1,0 +1,31 @@
+#ifndef LOOP_H
+#define LOOP_H
+
+/**
+ * \file loop.h
+ * \author Martin Peres (martin dot peres at ensi-bourges dot fr)
+ * \date 2010-06-07
+ */
+
+#include "abstractrule.h"
+
+/// An abstract rule whose target domain is always the source domain
+class Loop : public AbstractRule
+{
+public:
+	Loop();
+
+	/*!
+	 * \brief Construct a Loop.
+	 * \param program The program associated to this loop
+	 * \param comment Anything, meant to be displayed
+	 */
+	Loop(Program program, QString comment=QString());
+	
+	/// Return the name of the type of abstract rule
+	virtual QString ruleType() const;
+
+private:
+	Domain targetDomain(Domain current, TRule t) const;
+};
+#endif // LOOP_H

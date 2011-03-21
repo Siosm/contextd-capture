@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/PIGA-SYSTRANS/!svn/ver/717/branches/v2/ebuilds/mail-client/claws-mail/files
+END
+on_attach_files.patch
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/on_attach_files.patch
+END
+on_insert_files.patch
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/on_insert_files.patch
+END
+source_window_destroy_all.patch
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/source_window_destroy_all.patch
+END
+mail_pre_open_hook.patch
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/mail_pre_open_hook.patch
+END
+on_compose_reply_mail_hooklist.patch
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/on_compose_reply_mail_hooklist.patch
+END
+claws-mail-3.7.5-fix-libetpan-check.patch
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/claws-mail-3.7.5-fix-libetpan-check.patch
+END
+session_hooklist.patch
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/PIGA-SYSTRANS/!svn/ver/704/branches/v2/ebuilds/mail-client/claws-mail/files/session_hooklist.patch
+END
+mail_pre_list_hooklist.patch
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/mail_pre_list_hooklist.patch
+END
+on_reply_list_patch.patch
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/on_reply_list_patch.patch
+END
+claws-mail-chroot-into-download.patch
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/claws-mail-chroot-into-download.patch
+END
+restrict_filesel.patch
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/restrict_filesel.patch
+END
+on_send_message_check_mail_hooklist.patch
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail/files/on_send_message_check_mail_hooklist.patch
+END
+imap_session_hooklist.patch
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/PIGA-SYSTRANS/!svn/ver/705/branches/v2/ebuilds/mail-client/claws-mail/files/imap_session_hooklist.patch
+END
+claws-mail-deny-load-unload-plugins.diff
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/PIGA-SYSTRANS/!svn/ver/713/branches/v2/ebuilds/mail-client/claws-mail/files/claws-mail-deny-load-unload-plugins.diff
+END
+add_compose_destroy_all.patch
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/add_compose_destroy_all.patch
+END
+plugins-rebuild.sh
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/ebuilds/mail-client/claws-mail/files/plugins-rebuild.sh
+END

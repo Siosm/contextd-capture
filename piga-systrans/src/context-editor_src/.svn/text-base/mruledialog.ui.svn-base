@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MRuleDialog</class>
+ <widget class="QDialog" name="MRuleDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>326</width>
+    <height>414</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Matching Rule Dialog</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="0" colspan="3">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="propAddButton">
+     <property name="toolTip">
+      <string>Add a condition to the rule</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="3">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0" rowspan="2" colspan="2">
+    <widget class="QTreeWidget" name="propList">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <column>
+      <property name="text">
+       <string>Variable</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Value</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="9" column="2">
+    <widget class="QPushButton" name="propRemoveButton">
+     <property name="toolTip">
+      <string>Remove selected condition</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="Icons.qrc">
+       <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="2">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="11" column="0" colspan="3">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <layout class="QFormLayout" name="ruleFormLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="toolTip">
+        <string>Display name for the matching rule</string>
+       </property>
+       <property name="text">
+        <string>Display Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="displayNameLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="toolTip">
+        <string>Action for which the rule should be matched (optional).&lt;br /&gt;&lt;b&gt;Be careful:&lt;/b&gt; when you change this value, conditions will be reset.</string>
+       </property>
+       <property name="text">
+        <string>Action</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="actionBox"/>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="0" rowspan="2" colspan="2">
+    <layout class="QFormLayout" name="varFormLayout">
+     <item row="1" column="1">
+      <widget class="QComboBox" name="variableBox"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="toolTip">
+        <string>The name of the variable for which you want to add a condition</string>
+       </property>
+       <property name="text">
+        <string>Variable</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="valueInvalidType">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="TypedLineEdit" name="valueLineEdit"/>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="valueCheckBox">
+         <property name="text">
+          <string>True</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="valueSpinBox"/>
+       </item>
+       <item>
+        <widget class="QComboBox" name="valueComboBox"/>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="toolTip">
+        <string>The value of the variable for the new condition</string>
+       </property>
+       <property name="text">
+        <string>Value</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="7" column="0" colspan="3">
+    <widget class="QLabel" name="valueDescLabel">
+     <property name="text">
+      <string>&lt;i&gt;Value Description Label&lt;/i&gt;</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QLabel" name="actionDescLabel">
+     <property name="text">
+      <string>&lt;i&gt;Action Description Label&lt;/i&gt;</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TypedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>context-editor_src/typedlineedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>displayNameLineEdit</tabstop>
+  <tabstop>actionBox</tabstop>
+  <tabstop>variableBox</tabstop>
+  <tabstop>valueLineEdit</tabstop>
+  <tabstop>valueCheckBox</tabstop>
+  <tabstop>valueSpinBox</tabstop>
+  <tabstop>valueComboBox</tabstop>
+  <tabstop>propAddButton</tabstop>
+  <tabstop>propList</tabstop>
+  <tabstop>propRemoveButton</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="Icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MRuleDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MRuleDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

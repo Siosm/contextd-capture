@@ -1,0 +1,11 @@
+<program name="context-notify" display_name="Context Notify" icon="/usr/share/icons/pigaos/context-notify.png" full_path="/usr/bin/context-notify">
+	<description>Context Notify is a small utility used for switching between domains in PIGA-Systrans and for notifying domain changes.</description>
+		<actions>
+		<action name="change_domain" display_name="Change domain" description="" />
+	</actions>
+	
+	<variables>
+		<!--change domain-->
+		<variable name="domain" description="The domain in which the user would like to go." action="change_domain" type="regexp" />
+	</variables>
+</program>

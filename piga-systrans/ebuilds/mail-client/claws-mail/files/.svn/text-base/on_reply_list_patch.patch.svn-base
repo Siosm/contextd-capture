@@ -1,0 +1,58 @@
+diff -urN claws-mail-3.7.5/src/compose.c claws-mail-3.7.5-new/src/compose.c
+--- claws-mail-3.7.5/src/compose.c	2010-05-27 13:01:50.272584543 +0200
++++ claws-mail-3.7.5-new/src/compose.c	2010-05-27 13:06:19.354605409 +0200
+@@ -1300,7 +1300,7 @@
+ 	MsgInfo *msginfo;
+ 	guint list_len;
+ 	Compose *compose = NULL;
+-	gboolean refuseLoading;
++	gboolean refuseLoading = FALSE;	
+ 	
+ 	cm_return_val_if_fail(msginfo_list != NULL, NULL);
+ 
+@@ -2116,10 +2116,17 @@
+ 	MsgInfo *replyinfo = NULL, *fwdinfo = NULL;
+ 	gboolean autowrap = prefs_common.autowrap;
+ 	gboolean autoindent = prefs_common.auto_indent;
++	gboolean refuseLoading = FALSE;
+ 
+ 	cm_return_val_if_fail(msginfo != NULL, NULL);
+ 	cm_return_val_if_fail(msginfo->folder != NULL, NULL);
+ 
++
++	refuseLoading=hooks_invoke(COMPOSE_ON_SEND_MAIL_VIEW_HOOKLIST, msginfo);
++	if(!refuseLoading)
++		return NULL;
++
++
+ 	if (compose_put_existing_to_front(msginfo)) {
+ 		return NULL;
+ 	}
+@@ -8265,13 +8272,14 @@
+ 	GtkTextBuffer *buffer;
+ 	GtkClipboard *clipboard;
+ 
+-	compose_list = g_list_remove(compose_list, compose);
+-
+ 	if (compose->updating) {
+ 		debug_print("danger, not destroying anything now\n");
+ 		compose->deferred_destroy = TRUE;
+ 		return;
+ 	}
++	
++	compose_list = g_list_remove(compose_list, compose);
++	
+ 	/* NOTE: address_completion_end() does nothing with the window
+ 	 * however this may change. */
+ 	address_completion_end(compose->window);
+diff -ur claws-mail-3.7.6.patched_2//src/compose.h claws-mail-3.7.6.patched/src/compose.h
+--- claws-mail-3.7.6.patched_2//src/compose.h	2010-05-22 17:13:45.646492413 +0200
++++ claws-mail-3.7.6.patched/src/compose.h	2010-05-22 17:15:06.757317802 +0200
+@@ -49,6 +49,7 @@
+ #define COMPOSE_CHECK_ATTACH_FILES_HOOKLIST "compose_check_attach_files_hooklist"
+ #define COMPOSE_CHECK_INSERT_FILES_HOOKLIST "compose_check_insert_files_hooklist"
+ #define COMPOSE_ON_REPLY_MAIL_HOOKLIST "compose_on_reply_mail_hooklist"
++#define COMPOSE_ON_SEND_MAIL_VIEW_HOOKLIST "compose_on_send_mail_view_hooklist"
+ 
+ typedef enum
+ {

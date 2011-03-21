@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian
+END
+control
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/control
+END
+files
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/files
+END
+compat
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/compat
+END
+changelog
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/changelog
+END
+copyright
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/copyright
+END
+docs
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/docs
+END
+rules
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/rules
+END
+manpages
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/manpages
+END
+README.Debian
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/claws-mail/piga_context/debian/README.Debian
+END

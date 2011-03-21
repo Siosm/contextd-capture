@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/753/branches/v2/ebuilds/mail-client/claws-mail-context/files
+END
+piga-filter-mail.patch
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail-context/files/piga-filter-mail.patch
+END
+compil_option_patch.patch
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/PIGA-SYSTRANS/!svn/ver/388/branches/v2/ebuilds/mail-client/claws-mail-context/files/compil_option_patch.patch
+END
+claws-mail.xml
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/PIGA-SYSTRANS/!svn/ver/753/branches/v2/ebuilds/mail-client/claws-mail-context/files/claws-mail.xml
+END

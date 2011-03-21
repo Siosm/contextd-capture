@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/PIGA-SYSTRANS/!svn/ver/445/branches/v2/plugins/firefox
+END
+compile_plugin.sh
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/PIGA-SYSTRANS/!svn/ver/383/branches/v2/plugins/firefox/compile_plugin.sh
+END
+compile_firefox.sh
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/383/branches/v2/plugins/firefox/compile_firefox.sh
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/PIGA-SYSTRANS/!svn/ver/320/branches/v2/plugins/firefox/INSTALL
+END
+build_firefox.sh
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/PIGA-SYSTRANS/!svn/ver/321/branches/v2/plugins/firefox/build_firefox.sh
+END
+mozconfig
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/PIGA-SYSTRANS/!svn/ver/320/branches/v2/plugins/firefox/mozconfig
+END
+patch-gcc4.4.patch
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/firefox/patch-gcc4.4.patch
+END

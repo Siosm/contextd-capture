@@ -1,0 +1,86 @@
+Index: src/imap.c
+===================================================================
+RCS file: //claws/src/imap.c,v
+retrieving revision 1.179.2.251
+diff -u -r1.179.2.251 imap.c
+--- src/imap.c	22 Apr 2010 15:23:48 -0000	1.179.2.251
++++ src/imap.c	20 Jun 2010 21:17:05 -0000
+@@ -1039,6 +1039,7 @@
+ 	gushort port;
+ 	int r;
+ 	int authenticated = FALSE;
++	gboolean refuseConnecting = FALSE;
+ 	
+ #ifdef USE_GNUTLS
+ 	/* FIXME: IMAP over SSL only... */ 
+@@ -1065,6 +1066,35 @@
+ 		: IMAP4_PORT;
+ #endif
+ 
++	session = g_new0(IMAPSession, 1);
++	session_init(SESSION(session), account, FALSE);
++	SESSION(session)->type = SESSION_IMAP;
++	SESSION(session)->server = g_strdup(account->recv_server);
++	SESSION(session)->port = port;
++ 	SESSION(session)->sock = NULL;
++	
++	SESSION(session)->destroy = imap_session_destroy;
++
++	session->capability = NULL;
++	
++	session->authenticated = authenticated;
++	session->mbox = NULL;
++	session->exists = 0;
++	session->recent = 0;
++	session->expunge = 0;
++	session->cmd_count = 0;
++	session->folder = folder;
++	IMAP_FOLDER(session->folder)->last_seen_separator = 0;
++	
++	// hook_on_session_connect
++	refuseConnecting=hooks_invoke(SESSION_ON_OPEN_HOOKLIST, session);
++	if(refuseConnecting)
++	{
++		SESSION(session)->sock = NULL;
++		session_destroy(SESSION(session));
++		return NULL;
++	}
++
+ 	imap_init(folder);
+ 	statuswindow_print_all(_("Connecting to IMAP4 server: %s..."), folder->account->recv_server);
+ #ifndef G_OS_WIN32
+@@ -1113,30 +1143,13 @@
+ 		} else {
+ 			log_error(LOG_PROTOCOL, _("Can't connect to IMAP4 server: %s:%d\n"),
+ 					 account->recv_server, port);
+-		} 
++		}
++		
++		SESSION(session)->sock = NULL;
++		session_destroy(SESSION(session));
+ 		
+ 		return NULL;
+ 	}
+-	
+-	session = g_new0(IMAPSession, 1);
+-	session_init(SESSION(session), account, FALSE);
+-	SESSION(session)->type             = SESSION_IMAP;
+-	SESSION(session)->server           = g_strdup(account->recv_server);
+-	SESSION(session)->port		   = port;
+- 	SESSION(session)->sock             = NULL;
+-	
+-	SESSION(session)->destroy          = imap_session_destroy;
+-
+-	session->capability = NULL;
+-	
+-	session->authenticated = authenticated;
+-	session->mbox = NULL;
+-	session->exists = 0;
+-	session->recent = 0;
+-	session->expunge = 0;
+-	session->cmd_count = 0;
+-	session->folder = folder;
+-	IMAP_FOLDER(session->folder)->last_seen_separator = 0;
+ 
+ #ifdef USE_GNUTLS
+ 	if (account->ssl_imap == SSL_STARTTLS) {

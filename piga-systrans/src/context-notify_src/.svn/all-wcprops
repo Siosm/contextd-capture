@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/PIGA-SYSTRANS/!svn/ver/631/branches/v2/src/context-notify_src
+END
+contextListener.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/PIGA-SYSTRANS/!svn/ver/604/branches/v2/src/context-notify_src/contextListener.h
+END
+domainlist.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/domainlist.cpp
+END
+changecontextdialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/changecontextdialog.ui
+END
+notifyprompt.ui
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/631/branches/v2/src/context-notify_src/notifyprompt.ui
+END
+domainlist.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/domainlist.h
+END
+notify.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/602/branches/v2/src/context-notify_src/notify.c
+END
+updatedomain.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/602/branches/v2/src/context-notify_src/updatedomain.cpp
+END
+changecontextdialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/changecontextdialog.cpp
+END
+notifyprompt.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/PIGA-SYSTRANS/!svn/ver/631/branches/v2/src/context-notify_src/notifyprompt.cpp
+END
+context-notify_fr.qm
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/604/branches/v2/src/context-notify_src/context-notify_fr.qm
+END
+notify.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/602/branches/v2/src/context-notify_src/notify.h
+END
+updatedomain.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/310/branches/v2/src/context-notify_src/updatedomain.h
+END
+changecontextdialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/changecontextdialog.h
+END
+notifyprompt.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/PIGA-SYSTRANS/!svn/ver/601/branches/v2/src/context-notify_src/notifyprompt.h
+END
+context-notify_en.ts
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/context-notify_src/context-notify_en.ts
+END
+qressources.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/context-notify_src/qressources.qrc
+END
+context-notify_fr.ts
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/604/branches/v2/src/context-notify_src/context-notify_fr.ts
+END
+contextListener.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/PIGA-SYSTRANS/!svn/ver/604/branches/v2/src/context-notify_src/contextListener.cpp
+END
+context-notify.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/src/context-notify_src/context-notify.cpp
+END

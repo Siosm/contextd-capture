@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/445/branches/v2/plugins/firefox/pigacontext/src
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/firefox/pigacontext/src/Makefile.in
+END
+PIGAContext_Impl.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/PIGA-SYSTRANS/!svn/ver/445/branches/v2/plugins/firefox/pigacontext/src/PIGAContext_Impl.cpp
+END
+PIGAContext_module.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/PIGA-SYSTRANS/!svn/ver/299/branches/v2/plugins/firefox/pigacontext/src/PIGAContext_module.cpp
+END
+PIGAContext_Impl.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/PIGA-SYSTRANS/!svn/ver/383/branches/v2/plugins/firefox/pigacontext/src/PIGAContext_Impl.h
+END

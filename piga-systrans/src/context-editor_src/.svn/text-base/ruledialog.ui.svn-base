@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TransitionDialog</class>
+ <widget class="QDialog" name="TransitionDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>369</width>
+    <height>549</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Transition Rule Dialog</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="infoGroupBox">
+     <property name="title">
+      <string>Transition Information</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QFormLayout" name="formLayout">
+        <property name="fieldGrowthPolicy">
+         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="toolTip">
+           <string>The name used in the editor for this rule</string>
+          </property>
+          <property name="text">
+           <string>Display name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>The application that can trigger this transition</string>
+          </property>
+          <property name="text">
+           <string>Application</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="appComboBox"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="toolTip">
+           <string>The domain to transit to</string>
+          </property>
+          <property name="text">
+           <string>Target Domain</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="domainComboBox"/>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QCheckBox" name="notifyCheckBox">
+            <property name="toolTip">
+             <string>Notify the user about the transition?</string>
+            </property>
+            <property name="text">
+             <string>Notify Transition</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="promptCheckBox">
+            <property name="toolTip">
+             <string>Prompt user confirmation for this transition?</string>
+            </property>
+            <property name="text">
+             <string>Prompt User for Confirmation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="displayNameEdit"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QGroupBox" name="regexpGroupBox">
+     <property name="toolTip">
+      <string>Regular expressions for additional source domains</string>
+     </property>
+     <property name="title">
+      <string>Regular Expressions for Source Domains</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3"/>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QGroupBox" name="rulesGroupBox">
+     <property name="toolTip">
+      <string>Rules to match for the transition to occur</string>
+     </property>
+     <property name="title">
+      <string>Rules to Match</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5"/>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="sourceGroupBox">
+     <property name="toolTip">
+      <string>Domains from which the transition can be triggered</string>
+     </property>
+     <property name="title">
+      <string>Existing Source Domains</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="2" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="sourceClearCheckboxButton">
+        <property name="toolTip">
+         <string>Reset Notify and Prompt for selected domains</string>
+        </property>
+        <property name="text">
+         <string>&amp;Reset Notify and Prompt</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../usr/share/icons/gnome/24x24/actions/gtk-clear.png</normaloff>../../../../../../../usr/share/icons/gnome/24x24/actions/gtk-clear.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" rowspan="2" colspan="2">
+       <widget class="QTreeWidget" name="sourceDomainsList">
+        <column>
+         <property name="text">
+          <string>Domain</string>
+         </property>
+         <property name="toolTip">
+          <string>Name of the domain</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Notify</string>
+         </property>
+         <property name="toolTip">
+          <string>Notify the user for this domain?</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Prompt</string>
+         </property>
+         <property name="toolTip">
+          <string>Prompt user confirmation for this domain?</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>TransitionDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>355</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>431</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>TransitionDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>232</x>
+     <y>430</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context/m4
+END
+ltsugar.m4
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/392/branches/v2/plugins/claws-mail/piga_context/m4/ltsugar.m4
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/635/branches/v2/plugins/claws-mail/piga_context/m4/Makefile.in
+END
+libtool.m4
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/635/branches/v2/plugins/claws-mail/piga_context/m4/libtool.m4
+END
+ltversion.m4
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context/m4/ltversion.m4
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/PIGA-SYSTRANS/!svn/ver/392/branches/v2/plugins/claws-mail/piga_context/m4/Makefile.am
+END
+lt~obsolete.m4
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/PIGA-SYSTRANS/!svn/ver/635/branches/v2/plugins/claws-mail/piga_context/m4/lt~obsolete.m4
+END
+ltoptions.m4
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/635/branches/v2/plugins/claws-mail/piga_context/m4/ltoptions.m4
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/PIGA-SYSTRANS/!svn/ver/726/branches/v2/plugins/claws-mail/piga_context/m4/Makefile
+END

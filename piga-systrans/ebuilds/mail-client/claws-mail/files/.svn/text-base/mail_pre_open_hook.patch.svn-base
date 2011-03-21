@@ -1,0 +1,199 @@
+Index: src/messageview.c
+===================================================================
+RCS file: //claws/src/messageview.c,v
+retrieving revision 1.94.2.207
+diff -u -r1.94.2.207 messageview.c
+--- src/messageview.c	5 Dec 2009 08:12:05 -0000	1.94.2.207
++++ src/messageview.c	11 Jan 2010 12:18:22 -0000
+@@ -1141,7 +1141,23 @@
+ 	gchar *file;
+ 	MimeInfo *mimeinfo, *encinfo, *brokeninfo;
+ 	gchar *subject = NULL;
++	PreOpenHookData hookdata;
++	gboolean refuseLoading;
+ 	cm_return_val_if_fail(msginfo != NULL, -1);
++	
++	hookdata.msginfo=msginfo;
++	hookdata.error=NULL;
++	refuseLoading=hooks_invoke(MAIL_PRE_OPEN_HOOKLIST, &hookdata);
++	if(refuseLoading)
++	{
++		TextView * textview=messageview_get_current_textview(messageview);
++		textview_show_error(textview, hookdata.error);
++
++		if(hookdata.error)
++			g_free(hookdata.error);
++			
++		return 0;
++	}
+ 
+ 	if (msginfo != messageview->msginfo)
+ 		messageview->show_full_text = FALSE;
+@@ -1191,7 +1207,7 @@
+ 
+ 	if (!file) {
+ 		g_warning("can't get message file path.\n");
+-		textview_show_error(messageview->mimeview->textview);
++		textview_show_error(messageview->mimeview->textview, NULL);
+ 		return -1;
+ 	}
+ 	
+@@ -1210,7 +1226,7 @@
+ 	}
+ 
+ 	if (!mimeinfo) {
+-		textview_show_error(messageview->mimeview->textview);
++		textview_show_error(messageview->mimeview->textview, NULL);
+ 		return -1;
+ 	}
+ 
+Index: src/messageview.h
+===================================================================
+RCS file: //claws/src/messageview.h,v
+retrieving revision 1.19.2.24
+diff -u -r1.19.2.24 messageview.h
+--- src/messageview.h	12 May 2009 20:47:48 -0000	1.19.2.24
++++ src/messageview.h	11 Jan 2010 12:18:22 -0000
+@@ -28,6 +28,7 @@
+ #include <gtk/gtk.h>
+ 
+ typedef struct _MessageView	MessageView;
++typedef struct _PreOpenHookData		PreOpenHookData;
+ 
+ #include "mainwindow.h"
+ #include "headerview.h"
+@@ -38,6 +39,7 @@
+ #include "procmime.h"
+ #include "toolbar.h"
+ 
++#define MAIL_PRE_OPEN_HOOKLIST "mail_pre_open_hooklist"
+ #define MESSAGE_VIEW_SHOW_DONE_HOOKLIST "message_view_show_done_hooklist"
+ 
+ 
+@@ -83,6 +85,12 @@
+ 	GtkUIManager *ui_manager;
+ };
+ 
++struct _PreOpenHookData
++{
++	MsgInfo* msginfo;
++	gchar* error;
++};
++
+ MessageView *messageview_create			(MainWindow	*mainwin);
+ MessageView *messageview_create_with_new_window	(MainWindow	*mainwin);
+ 
+Index: src/summaryview.c
+===================================================================
+RCS file: //claws/src/summaryview.c,v
+retrieving revision 1.395.2.416
+diff -u -r1.395.2.416 summaryview.c
+--- src/summaryview.c	1 Dec 2009 17:33:59 -0000	1.395.2.416
++++ src/summaryview.c	11 Jan 2010 12:18:27 -0000
+@@ -3516,11 +3516,30 @@
+ 	GtkCMCTree *ctree = GTK_CMCTREE(summaryview->ctree);
+ 	MsgInfo *msginfo;
+ 	SourceWindow *srcwin;
++	PreOpenHookData hookdata;
++	gboolean refuseLoading;
+ 
+ 	if (!summaryview->selected) return;
++	
++	msginfo = gtk_cmctree_node_get_row_data(ctree, summaryview->selected);
++	
++	hookdata.msginfo=msginfo;
++	hookdata.error=NULL;
++	refuseLoading=hooks_invoke(MAIL_PRE_OPEN_HOOKLIST, &hookdata);
++	if(refuseLoading)
++	{
++		if(hookdata.error)
++		{
++			alertpanel_error("%s", hookdata.error);
++			g_free(hookdata.error);
++		}
++		else
++			alertpanel_error("%s", _("You don't have the permission to access the source code of this mail."));
++		
++		return;
++	}
+ 
+ 	srcwin = source_window_create();
+-	msginfo = gtk_cmctree_node_get_row_data(ctree, summaryview->selected);
+ 	source_window_show_msg(srcwin, msginfo);
+ 	source_window_show(srcwin);
+ #ifdef MAEMO
+Index: src/summaryview.h
+===================================================================
+RCS file: //claws/src/summaryview.h,v
+retrieving revision 1.68.2.53
+diff -u -r1.68.2.53 summaryview.h
+--- src/summaryview.h	1 Dec 2009 17:33:59 -0000	1.68.2.53
++++ src/summaryview.h	11 Jan 2010 12:18:27 -0000
+@@ -27,7 +27,7 @@
+ #include <gdk/gdk.h>
+ #include <gtk/gtk.h>
+ 
+-typedef struct _SummaryView		SummaryView;
++typedef struct _SummaryView			SummaryView;
+ typedef struct _SummaryColumnState	SummaryColumnState;
+ 
+ #define MAIL_MANUAL_FILTERING_HOOKLIST "mail_manual_filtering_hooklist"
+Index: src/textview.c
+===================================================================
+RCS file: //claws/src/textview.c,v
+retrieving revision 1.96.2.220
+diff -u -r1.96.2.220 textview.c
+--- src/textview.c	28 Jul 2009 18:42:52 -0000	1.96.2.220
++++ src/textview.c	11 Jan 2010 12:18:29 -0000
+@@ -837,7 +837,7 @@
+         recursive_add_parts(textview, mimeinfo->node);
+ }
+ 
+-void textview_show_error(TextView *textview)
++void textview_show_error(TextView *textview, const gchar* message)
+ {
+ 	GtkTextView *text;
+ 	GtkTextBuffer *buffer;
+@@ -850,13 +850,19 @@
+ 	buffer = gtk_text_view_get_buffer(text);
+ 	gtk_text_buffer_get_start_iter(buffer, &iter);
+ 
+-	TEXTVIEW_INSERT(_("\n"
+-		      "  This message can't be displayed.\n"
+-		      "  This is probably due to a network error.\n"
+-		      "\n"
+-		      "  Use "));
+-	TEXTVIEW_INSERT_LINK(_("'View Log'"), "sc://view_log", NULL);
+-	TEXTVIEW_INSERT(_(" in the Tools menu for more information."));
++	if(!message)
++	{
++		TEXTVIEW_INSERT(_("\n"
++				    "  This message can't be displayed.\n"
++				    "  This is probably due to a network error.\n"
++				    "\n"
++				    "  Use "));
++		TEXTVIEW_INSERT_LINK(_("'View Log'"), "sc://view_log", NULL);
++		TEXTVIEW_INSERT(_(" in the Tools menu for more information."));
++	}else{
++		TEXTVIEW_INSERT(message);   
++	}
++        
+ 	textview_show_icon(textview, GTK_STOCK_DIALOG_ERROR);
+ }
+ 
+Index: src/textview.h
+===================================================================
+RCS file: //claws/src/textview.h,v
+retrieving revision 1.12.2.26
+diff -u -r1.12.2.26 textview.h
+--- src/textview.h	9 Jan 2009 17:47:08 -0000	1.12.2.26
++++ src/textview.h	11 Jan 2010 12:18:29 -0000
+@@ -91,7 +91,7 @@
+ void textview_show_part		(TextView	*textview,
+ 				 MimeInfo	*mimeinfo,
+ 				 FILE		*fp);
+-void textview_show_error	(TextView	*textview);
++void textview_show_error	(TextView	*textview, const gchar* message);
+ void textview_show_mime_part	(TextView	*textview,
+ 				 MimeInfo	*partinfo);
+ void textview_clear		(TextView	*textview);

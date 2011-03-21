@@ -1,0 +1,10 @@
+*.pyc
+*.pyo
+*.o
+*.so
+moc_*.cxx
+ui_*.h
+/build
+/policies
+/temp
+*~

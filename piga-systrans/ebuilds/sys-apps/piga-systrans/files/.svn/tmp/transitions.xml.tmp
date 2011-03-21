@@ -1,0 +1,203 @@
+<PIGA_Transitions>
+	<!--Contexts-->
+		<context name="impots" display_name="Impôts" icon="/usr/share/icons/pigaos/Money_Coin_Icon.png" />
+		<context name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/web.png"/>
+		<context name="mail" display_name="E-Mail" icon="/usr/share/icons/pigaos/evolution.png" />
+		<context name="web" display_name="Web" icon="/usr/share/icons/pigaos/web.png" />
+		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>
+
+		
+	<!--Programs-->
+		<program name="firefox" display_name="Firefox" icon="" full_path="/usr/lib/mozilla-firefox/firefox" variables="host path protocol"/>
+		<program name="claws-mail" display_name="Claws Mail" icon="" full_path="/usr/bin/claws-mail" variables="host from to"/>
+		<program name="context-notify" display_name="Context Notify" icon="" full_path="/usr/bin/context-notify" variables="context"/>
+		
+		<!--Claws mail-->
+
+<<<<<<< .mine
+			<!--getmail/sendmail-->
+			<rule app_name="claws-mail" to_domain="default" notify="false" prompt="false" display_name="get and fetch mail"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+=======
+			<!-- loop getmail/sendmail-->
+ 			<loop app_name="claws-mail" notify="false" prompt="false" comment="get and fetch mail"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+>>>>>>> .r420
+				<matching>
+					<!-- get mail -->
+					<mrule><host>imap.gmail.com</host><port>993</port></mrule>
+					<!-- send mail-->
+					<mrule><host>smtp.gmail.com</host><port>465</port></mrule>
+				</matching>
+				<domains>
+					<loop_domain name="default" notify="false" prompt="false"/>
+					<loop_domain name="mail"/>
+					<loop_domain name="web" />
+					<loop_domain name="impots" />
+				</domains>
+			</loop>
+
+
+
+			<!--Impots-->
+			<rule app_name="claws-mail" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+				<matching>
+					<mrule>
+						<from>.*\@dgfip\.finances\.gouv\.fr</from>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
+						<transit from_domain="mail" prompt="true" /> 
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			
+			<!--Ecommerce-->
+			<rule app_name="claws-mail" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
+				<matching>
+					<mrule>
+						<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr)</from>
+					</mrule>
+					<mrule>
+						<from>(.*\@.*\.ldlc\.fr)</from>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="ecommerce" notify="false" prompt="false"/>
+						<transit from_domain="mail" /> 
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			
+			<!-- Fetch mail -->
+			<rule app_name="claws-mail" to_domain="mail" notify="true" prompt="true" display_name="domaine non confine">
+				<matching>
+					<mrule>
+					        <from>.*\@.*</from>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="mail" notify="false" prompt="false"/>
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			
+<!--Firefox-->
+			<!--Impots-->
+			<rule app_name="firefox" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+				<matching>
+					<mrule>
+						<host>.*\.impots\.gouv\.fr</host>
+						<path>.*</path>
+						<protocol>https</protocol>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
+						<transit from_domain="default" /> <!--les params sont modifiables ici-->
+					</allow>
+				</transitions>
+			</rule>
+			
+			<!--Ecommerce-->
+			<rule app_name="firefox" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
+				<matching>
+					<mrule>
+						<host>(((rover|www|annonces|pages)\.ebay\.fr|(rover\.ebay|(include|pics)\.ebaystatic)\.com))|(https://((signin|scgi)\.ebay\.fr|(rover\.ebay|srv\.fr\.ebayrtm|(secureinclude|securepics)\.ebaystatic)\.com))</host>
+						<path>.*</path>
+						<protocol>(http|https)</protocol>
+
+					</mrule>
+					<mrule>
+						<host>.*\.ldlc\.com</host>
+						<path>.*</path>
+						<protocol>(http|https)</protocol>
+
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="ecommerce" notify="false" prompt="false"/>
+						<transit from_domain="mail" to_domain="ecommerce" prompt="true" /> 
+						<transit from_domain="default" to_domain="ecommerce" prompt="true" /> 
+					</allow>
+				</transitions>
+			</rule>
+			
+			<!-- Web-->
+			<rule app_name="firefox" to_domain="web" notify="true" prompt="true" display_name="web domain">
+				<matching>
+					<mrule>
+						<host>.*</host>
+						<path>.*</path>
+						<protocol>http</protocol>
+
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="web" notify="false" prompt="false"/>
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+<!-- context-notify -->		
+		<!-- Context Notify : Manual transitions-->
+			<rule app_name="context-notify" to_domain="impots" notify="true" prompt="false">
+				<matching>
+					<mrule>
+						<context>impots</context>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			<rule app_name="context-notify" to_domain="ecommerce" notify="true" prompt="false">
+				<matching>
+					<mrule>
+						<context>ecommerce</context>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="mail" />
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			<rule app_name="context-notify" to_domain="mail" notify="true" prompt="false">
+				<matching>
+					<mrule>
+						<context>mail</context>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+			<rule app_name="context-notify" to_domain="web" notify="true" prompt="false">
+				<matching>
+					<mrule>
+						<context>web</context>
+					</mrule>
+				</matching>
+				<transitions>
+					<allow>
+						<transit from_domain="default" />
+					</allow>
+				</transitions>
+			</rule>
+
+</PIGA_Transitions>
+

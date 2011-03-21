@@ -1,0 +1,552 @@
+#include "configuration.h"
+#include "xml_common.h"
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include "rule.h"
+#include "loop.h"
+
+#include <QDir>
+#include <QFileInfo>
+
+//global XML parsing variables
+MRule mrule;
+Rule tmp_rule;
+Loop tmp_loop;
+QString parsing;
+bool rule_opened=false;
+std::string tag_data;
+
+bool Configuration::on_tag_open(const std::string& tag_name, XMLSP::StringMap& attributes)
+{
+ 	if(tag_name==CONTEXT_TAG || tag_name==DOMAIN_TAG)
+	{
+		QString name=QString::fromUtf8(attributes[NAME_TAG].c_str());
+		QString display_name=QString::fromUtf8(attributes[DISPLAY_NAME_TAG].c_str());
+		QString icon_path=QString::fromUtf8(attributes[ICON_TAG].c_str());
+
+		//Add the domain to the domain list
+		if(name!=QString() && !domains.contains(name))
+		{
+			domains[name]=Domain(name, display_name, icon_path);
+			if(attributes[DEFAULT_TAG]==RULE_TRUE)
+				default_domain=domains[name];
+			else if(name==QString())
+				qWarning("Transitions.xml: Invalid domain name('%s').", qPrintable(name));
+			else if(programs.contains(name))
+				qWarning("Transitions.xml: The domain '%s' already exists.", qPrintable(name));
+		}
+	}
+	else if(tag_name==PROGRAM_TAG)
+	{
+		QString name=QString::fromUtf8(attributes[NAME_TAG].c_str());
+		QString display_name=QString::fromUtf8(attributes[DISPLAY_NAME_TAG].c_str());
+		QString icon_path=QString::fromUtf8(attributes[ICON_TAG].c_str());
+		QString full_path=QString::fromUtf8(attributes[FULLPATH_TAG].c_str());
+
+		//Add the domain to the domain list
+		if(name!=QString() && !programs.contains(name))
+			programs[name]=Program(name, display_name, icon_path, full_path);
+		else if(name==QString())
+			qWarning("Transitions.xml: Invalid program name('%s').", qPrintable(name));
+		else if(programs.contains(name))
+			qWarning("Transitions.xml: The program '%s' already exists.", qPrintable(name));
+	}
+	else if(tag_name==RULE_TAG)
+	{
+		//Create the transition
+		QString app_name=QString::fromUtf8(attributes[RULE_APP_NAME_TAG].c_str());
+		QString str_transitTo=QString::fromUtf8(attributes[RULE_TRANSIT_TO_TAG].c_str());
+		QString str_display_name=QString::fromUtf8(attributes[RULE_DISPLAY_NAME_TAG].c_str());
+
+		//If the target domain exists, we can continue
+		Domain transitTo=domains[str_transitTo];
+		if(transitTo!=Domain())
+		{
+			Program program=programs[app_name];
+			if(program!=Program())
+			{
+				parsing=RULE_TAG;
+				tmp_rule=Rule(program, transitTo, str_display_name);
+
+				//Prompt
+				if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+					tmp_rule.setPromptUser(true);
+				else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+					tmp_rule.setPromptUser(false);
+				else if(attributes[RULE_PROMPT_TAG]!="")
+					qWarning("Transitions.xml: '%s', '%s' is an invalid value for a prompt tag. Valid prompt values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_PROMPT_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+				//Notify
+				if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+					tmp_rule.setNotifyUser(true);
+				else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+					tmp_rule.setNotifyUser(false);
+				else if(attributes[RULE_NOTIFY_TAG]!="")
+					qWarning("Transitions.xml: '%s', '%s' is an invalid value for a notify tag. Valid notify values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_NOTIFY_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+			}
+			else
+				qWarning("Transitions.xml: The program %s doesn't exist!", qPrintable(app_name));
+		}
+		else
+			qWarning("Transitions.xml: The domain %s doesn't exist!", qPrintable(app_name));
+	}
+	else if(tag_name==LOOP_TAG)
+	{
+		//Create the transition
+		QString app_name=QString::fromUtf8(attributes[RULE_APP_NAME_TAG].c_str());
+		QString str_display_name=QString::fromUtf8(attributes[RULE_DISPLAY_NAME_TAG].c_str());
+
+		Program program=programs[app_name];
+		if(program!=Program())
+		{
+			parsing=LOOP_TAG;
+			tmp_loop=Loop(program, str_display_name);
+
+			//Prompt
+			if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+				tmp_loop.setPromptUser(true);
+			else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+				tmp_loop.setPromptUser(false);
+			else if(attributes[RULE_PROMPT_TAG]!="")
+				qWarning("Transitions.xml: '%s', '%s' is an invalid value for a prompt tag. Valid prompt values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_PROMPT_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+			//Notify
+			if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+				tmp_loop.setNotifyUser(true);
+			else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+				tmp_loop.setNotifyUser(false);
+			else if(attributes[RULE_NOTIFY_TAG]!="")
+				qWarning("Transitions.xml: '%s', '%s' is an invalid value for a notify tag. Valid notify values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_NOTIFY_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+		}
+		else
+			qWarning("Transitions.xml: The program %s doesn't exist!", qPrintable(app_name));
+	}
+	else if(tag_name==RULE_MRULE_TAG)
+	{
+		rule_opened=true;
+	}
+	else if(tag_name==RULE_TRANSIT_TAG)
+	{
+		QString str_from_domain=QString::fromUtf8(attributes[RULE_TRANSIT_FROM_TAG].c_str());
+
+		//Add the domain to the domain list
+		if(str_from_domain!=QString())
+		{
+			TRule trule(str_from_domain);
+
+			//Prompt
+			if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+				trule.setPrompt(true);
+			else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+				trule.setPrompt(false);
+			else if(attributes[RULE_PROMPT_TAG]!="")
+				qWarning("Transitions.xml: '%s', '%s' is an invalid value for a prompt tag. Valid prompt values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_PROMPT_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+			//Notify
+			if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+				trule.setNotify(true);
+			else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+				trule.setNotify(false);
+			else if(attributes[RULE_NOTIFY_TAG]!="")
+				qWarning("Transitions.xml: '%s', '%s' is an invalid value for a notify tag. Valid notify values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_NOTIFY_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+			//Add the transition rule to the tmp rule
+			tmp_rule.addTRule(trule);
+		}
+	}
+	else if(tag_name==LOOP_DOMAIN)
+	{
+		QString str_domain=QString::fromUtf8(attributes[LOOP_DOMAIN_NAME].c_str());
+
+		//Add the domain to the domain list
+		if(str_domain!=QString())
+		{
+			TRule trule(str_domain);
+
+			//Prompt
+			if(attributes[RULE_PROMPT_TAG]==RULE_TRUE)
+				trule.setPrompt(true);
+			else if(attributes[RULE_PROMPT_TAG]==RULE_FALSE)
+				trule.setPrompt(false);
+			else if(attributes[RULE_PROMPT_TAG]!="")
+				qWarning("TransitionRules: '%s', '%s' is an invalid value for a prompt tag. Valid prompt values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_PROMPT_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+			//Notify
+			if(attributes[RULE_NOTIFY_TAG]==RULE_TRUE)
+				trule.setNotify(true);
+			else if(attributes[RULE_NOTIFY_TAG]==RULE_FALSE)
+				trule.setNotify(false);
+			else if(attributes[RULE_NOTIFY_TAG]!="")
+				qWarning("Transitions.xml: '%s', '%s' is an invalid value for a notify tag. Valid notify values are '%s' and '%s'", attributes[RULE_APP_NAME_TAG].c_str(), attributes[RULE_NOTIFY_TAG].c_str(), RULE_TRUE, RULE_FALSE);
+
+			//Add the transition rule to the tmp rule
+			tmp_loop.addTRule(trule);
+		}
+	}else if(tag_name==NOKILL_PROGRAM_TAG)
+	{
+		if(attributes[FULLPATH_TAG]!=std::string())
+		{
+			QFileInfo file(attributes[FULLPATH_TAG].c_str());
+
+			if(!file.isRelative())
+				noKillPrograms.push_back(attributes[FULLPATH_TAG].c_str());
+			else
+				qWarning("Transitions.xml: Try to add a program to nokill usign a relative path. Please use full path names.");
+		}
+		else
+			qWarning("Transitions.xml: Try to add an empty full_path program to nokill.");
+	}
+
+	return true;
+}
+
+bool Configuration::on_cdata(const std::string& cdata)
+{
+	tag_data=cdata;
+	return true;
+}
+
+bool Configuration::on_tag_close(const std::string& tag_name)
+{
+	if(tag_name==RULE_TAG)
+	{
+		parsing=QString();
+		rules[tmp_rule.appName()].push_back(tmp_rule);
+	}
+	if(tag_name==LOOP_TAG)
+	{
+		parsing=QString();
+		loops[tmp_loop.appName()].push_back(tmp_loop);
+	}
+	if(tag_name==RULE_MRULE_TAG)
+	{
+		if(parsing==RULE_TAG)
+			tmp_rule.addMRule(mrule);
+		else if(parsing==LOOP_TAG)
+			tmp_loop.addMRule(mrule);
+		mrule=MRule();
+		rule_opened=false;
+	}
+	else if(rule_opened)
+	{
+		mrule.addRule(QString::fromUtf8(tag_name.c_str()), QString::fromUtf8(tag_data.c_str()));
+		tag_data="";
+	}
+
+	return true;
+}
+
+void Configuration::on_error(int errnr, int line, int col, const std::string& message)
+{
+	qWarning("transitions.xml: XML error %i at the line %i and column %i: %s", errnr, line, col, message.c_str());
+}
+
+// Program parsing
+void Configuration::programParsing()
+{
+	QDir dir("/etc/context.d/program.d/");
+	QFileInfoList list=dir.entryInfoList(QStringList("*.xml"));
+
+	for(int i=0; i<list.size(); i++)
+	{
+		QFile file(list.at(i).filePath());
+
+		Program p(file);
+		if(p!=Program())
+		{
+			if(!programs.contains(p.name()))
+				programs[p.name()]=p;
+			else
+				qWarning("Transition.xml: Program %s already exists. Cannot add a new one.", qPrintable(p.name()));
+		}
+	}
+}
+
+bool Configuration::readConf()
+{
+	bool res=false;
+
+	//Clear all the lists
+	rules.clear();
+	loops.clear();
+	programs.clear();
+	domains.clear();
+	noKillPrograms.clear();
+
+	//First, read the program List
+	programParsing();
+
+	//Then read transition.xml
+	const char* path="/etc/context.d/transitions.xml";
+	std::ifstream is(path);
+	if(is.is_open())
+	{
+		std::ostringstream iss;
+		iss << is.rdbuf();
+
+		if(!parse(iss.str()))
+		{
+			qWarning("Error while loading the rules: parse(iss.str()) returned false");
+		}
+		else
+			res=true;
+	}
+	else
+		qWarning("Error while loading the rules: The file '%s' cannot be opened", path);
+
+	return res;
+}
+
+Configuration::Configuration() : QObject(), XMLSP::Parser()
+{
+	//Read the configuration.
+	//It will only be read once as Configuration::Configuration() is private and only instance() can call it
+	readConf();
+}
+
+Configuration::Configuration(const Configuration& /*conf*/) : QObject(), XMLSP::Parser()
+{
+
+}
+
+const Configuration& Configuration::instance()
+{
+	static Configuration tr;
+
+	return tr;
+}
+
+Configuration& Configuration::instance_nonconst()
+{
+	return const_cast<Configuration&>(instance());
+}
+
+bool Configuration::updateRules()
+{
+	bool result=readConf();
+
+	if (result) {
+		emit loopsChanged();
+		emit rulesChanged();
+	}
+
+	return result;
+}
+
+Domain Configuration::getDomainByName(QString name) const
+{
+	return domains[name];
+}
+
+Domain Configuration::defaultDomain() const
+{
+	return default_domain;
+}
+
+const Transition Configuration::getFirstMatchingTransition(Program app, Domain current_domain, QMap<QString, QString> values) const
+{
+	bool matchedButRefused=false;
+
+	// Match loops first
+	QVector<Loop> app_loops=loops[app.name()];
+	for(int i=0; !matchedButRefused && i<app_loops.size(); i++)
+	{
+		Transition t=app_loops[i].matches(app, current_domain, values, matchedButRefused);
+		if(t.isValid())
+			return t;
+	}
+
+	// Match rules next
+	QVector<Rule> app_rules=rules[app.name()];
+	for(int i=0; !matchedButRefused && i<app_rules.size(); i++)
+	{
+		Transition t=app_rules[i].matches(app, current_domain, values, matchedButRefused);
+		if(t.isValid())
+			return t;
+	}
+
+	return Transition();
+}
+
+QList<Domain> Configuration::domainList() const
+{
+	return domains.values();
+}
+
+bool Configuration::isProgramAllowed(QString name, QString full_path) const
+{
+	if(!programs.contains(name))
+		return false;
+	else
+		return programs[name].fullPath()==full_path;
+}
+
+Program Configuration::getProgramByName(QString name) const
+{
+	return programs[name];
+}
+
+QList<Program> Configuration::programList() const
+{
+	return programs.values();
+}
+
+QList<QString> Configuration::noKillProgramList() const
+{
+	return noKillPrograms;
+}
+
+bool Configuration::isProgramKillable(const QString& full_path) const
+{
+	return !noKillPrograms.contains(full_path);
+}
+
+QVector<Loop> Configuration::loopsForProgram(QString name) const
+{
+	return loops[name];
+}
+
+QVector<Rule> Configuration::rulesForProgram(QString name) const
+{
+	return rules[name];
+}
+
+void Configuration::addLoop(Loop /*loop*/)
+{	
+	qWarning("addLoop not implemented");
+	emit loopsChanged();
+}
+
+void Configuration::addRule(Rule /*rule*/)
+{
+	qWarning("addRule not implemented");
+	emit rulesChanged();
+}
+
+void Configuration::updateLoop(Loop loop)
+{
+	QMap<QString, QVector<Loop> >::iterator it;
+
+	for (it=loops.begin(); it!=loops.end(); ++it) {
+		QVector<Loop> &vect = it.value();
+
+		for (int i=0, size=vect.size(); i<size; ++i)
+			if (vect.at(i).id() == loop.id()) {
+				vect.remove(i);
+				vect.append(loop);
+				emit loopsChanged();
+				return;
+			}
+	}
+}
+
+void Configuration::updateRule(Rule rule)
+{
+	QMap<QString, QVector<Rule> >::iterator it;
+
+	for (it=rules.begin(); it!=rules.end(); ++it) {
+		QVector<Rule> &vect = it.value();
+
+		for (int i=0, size=vect.size(); i<size; ++i)
+			if (vect.at(i).id() == rule.id()) {
+				vect.remove(i);
+				vect.append(rule);
+				emit loopsChanged();
+				return;
+			}
+	}
+}
+
+Loop Configuration::findLoop(int id)
+{
+	QMap<QString, QVector<Loop> >::iterator it;
+
+	for (it=loops.begin(); it!=loops.end(); ++it) {
+		QVector<Loop> &vect = it.value();
+
+		for (int i=0, size=vect.size(); i<size; ++i)
+			if (vect.at(i).id() == id)
+				return const_cast<Loop&>(vect.at(i));
+	}
+
+	return Loop();
+}
+
+Rule Configuration::findRule(int id)
+{
+	QMap<QString, QVector<Rule> >::iterator it;
+
+	for (it=rules.begin(); it!=rules.end(); ++it) {
+		QVector<Rule> &vect = it.value();
+
+		for (int i=0, size=vect.size(); i<size; ++i)
+			if (vect.at(i).id() == id)
+				return vect.at(i);
+	}
+
+	return Rule();
+}
+
+void Configuration::deleteLoop(int id)
+{
+	QMap<QString, QVector<Loop> >::iterator it;
+
+	for (it=loops.begin(); it!=loops.end(); ++it) {
+		QVector<Loop> &vect = it.value();
+		QVector<Loop>::iterator loopit;
+
+		for (loopit=vect.begin(); loopit!=vect.end(); ++loopit) {
+			if ((*loopit).id() == id) {
+				vect.erase(loopit);
+				emit loopsChanged();
+				return;
+			}
+		}
+	}
+}
+
+void Configuration::deleteLoop(Loop &loop)
+{
+	QVector<Loop>::iterator it;
+
+	for (it=loops[loop.program().name()].begin(); it!=loops[loop.program().name()].end(); ++it) {
+		if ((*it).id() == loop.id()) {
+			loops[loop.program().name()].erase(it);
+			emit loopsChanged();
+			return;
+		}
+	}
+}
+
+void Configuration::deleteRule(int id)
+{
+	QMap<QString, QVector<Rule> >::iterator it;
+
+	for (it=rules.begin(); it!=rules.end(); ++it) {
+		QVector<Rule> &vect = it.value();
+		QVector<Rule>::iterator ruleit;
+
+		for (ruleit=vect.begin(); ruleit!=vect.end(); ++ruleit) {
+			if ((*ruleit).id() == id) {
+				vect.erase(ruleit);
+				emit rulesChanged();
+				return;
+			}
+		}
+	}
+}
+
+void Configuration::deleteRule(Rule &rule)
+{
+	QVector<Rule>::iterator it;
+
+	for (it=rules[rule.program().name()].begin(); it!=rules[rule.program().name()].end(); ++it) {
+		if ((*it).id() == rule.id()) {
+			rules[rule.program().name()].erase(it);
+			emit rulesChanged();
+			return;
+		}
+	}
+}

@@ -1,0 +1,38 @@
+policy_module(top, 1.0.0)
+
+
+# ====================
+# Types
+# ====================
+type top_exec_t ;
+type user_top_t ;
+
+
+permissive user_top_t;
+# ====================
+# Roles
+# ====================
+role user_r types 'user_top_t';
+
+
+# ====================
+# Require
+# ====================
+require { type lib_t,xserver_port_t,xdm_t,user_t,user_mozilla_t;}
+
+# ====================
+# Interfaces
+# ====================
+domain_entry_file(user_top_t, top_exec_t);
+domain_type(user_top_t);
+domtrans_pattern(user_t, top_exec_t, user_top_t);
+
+
+# ====================
+# Rules
+# ====================
+
+# ==> user_mozilla_t
+allow user_mozilla_t lib_t:file execmod;
+allow user_mozilla_t xdm_t:unix_stream_socket connectto;
+allow user_mozilla_t xserver_port_t:tcp_socket name_connect;

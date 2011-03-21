@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/PIGA-SYSTRANS/!svn/ver/531/branches/v2/src/contextd_src/plugins/killer
+END
+contextdpluginkiller.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/PIGA-SYSTRANS/!svn/ver/516/branches/v2/src/contextd_src/plugins/killer/contextdpluginkiller.h
+END
+killingrule.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/PIGA-SYSTRANS/!svn/ver/470/branches/v2/src/contextd_src/plugins/killer/killingrule.cpp
+END
+killingrule.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/PIGA-SYSTRANS/!svn/ver/470/branches/v2/src/contextd_src/plugins/killer/killingrule.h
+END
+contextdpluginkiller.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/PIGA-SYSTRANS/!svn/ver/531/branches/v2/src/contextd_src/plugins/killer/contextdpluginkiller.cpp
+END

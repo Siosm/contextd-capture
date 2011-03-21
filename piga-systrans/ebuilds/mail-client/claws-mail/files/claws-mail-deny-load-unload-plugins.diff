@@ -1,0 +1,53 @@
+diff -urN claws-mail-3.7.6-old//src/gtk/pluginwindow.c claws-mail-3.7.6/src/gtk/pluginwindow.c
+--- claws-mail-3.7.6-old//src/gtk/pluginwindow.c	2010-06-21 21:54:36.000000000 +0200
++++ claws-mail-3.7.6/src/gtk/pluginwindow.c	2010-06-21 22:01:23.000000000 +0200
+@@ -182,49 +182,11 @@
+ 
+ static void unload_cb(GtkButton *button, PluginWindow *pluginwindow)
+ {
+-	Plugin *plugin = pluginwindow->selected_plugin;
+-
+-	cm_return_if_fail(plugin != NULL);
+-	pluginwindow->loading = TRUE;
+-	plugin_unload(plugin);
+-	pluginwindow->loading = FALSE;
+-	pluginwindow->selected_plugin = NULL;
+-	set_plugin_list(pluginwindow);
+ }
+ 
+ static void load_cb(GtkButton *button, PluginWindow *pluginwindow)
+ {
+-	GList *file_list;
+-
+-	file_list = filesel_select_multiple_files_open_with_filter(
+-			_("Select the Plugins to load"), get_plugin_dir(), 
+-			"*." G_MODULE_SUFFIX);
+-
+-	if (file_list) {
+-		GList *tmp;
+-		pluginwindow->loading = TRUE;
+-		for ( tmp = file_list; tmp; tmp = tmp->next) {
+-			gchar *file, *error = NULL;
+-
+-			file = (gchar *) tmp->data;
+-			if (!file) continue;
+-			plugin_load(file, &error);
+-			if (error != NULL) {
+-				gchar *basename = g_path_get_basename(file);
+-				alertpanel_error(
+-				_("The following error occurred while loading %s :\n\n%s\n"),
+-				basename, error);
+-				g_free(basename);
+-				g_free(error);
+-			}
+ 
+-			/* FIXME: globally or atom-ly : ? */
+-			set_plugin_list(pluginwindow);
+-			g_free(file);
+-		}
+-		pluginwindow->loading = FALSE;
+-		g_list_free(file_list);
+-	}		
+ }
+ 
+ static gboolean pluginwindow_key_pressed(GtkWidget *widget, GdkEventKey *event,

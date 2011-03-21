@@ -1,0 +1,17 @@
+policy_module(${module},1.0.0)
+
+require { type ${user_t}, tmp_t, var_log_t;}
+
+type ${module_exec_t};
+type ${module_domain_t};
+type ${module_tmp_domain_t};
+type ${module_log_domain_t};
+
+#transitions
+role ${user_r} types ${module_domain_t};
+domain_type(${module_domain_t});
+domain_entry_file(${module_domain_t}, ${module_exec_t})
+domtrans_pattern(${user_t}, ${module_exec_t}, ${module_domain_t});
+
+type_transition ${module_domain_t} tmp_t:file ${module_tmp_domain_t};
+type_transition ${module_domain_t} var_log_t:file ${module_log_domain_t};
