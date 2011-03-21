@@ -24,12 +24,8 @@
 #include "share.h"
 #include "hooks.h"
 
-
 asmlinkage long sys_auditsec_reg(int state)
 {
-// 	if(spin_trylock(auditsec_pid_lock()) == 0)
-// 		return -1;
-
 	down_write(auditsec_pid_lock());
 
 	if(state){
@@ -38,20 +34,20 @@ asmlinkage long sys_auditsec_reg(int state)
 			up_write(auditsec_pid_lock());
 			printk(KERN_INFO "AuditSec: Process %d successfully registered",
 					task_pid_nr(current));
-			return 0;
+			return *daemon_pid();
 		}
 	} else {
 		if(*daemon_pid() == task_pid_nr(current)){
 			*daemon_pid() = -1;
 			up_write(auditsec_pid_lock());
-			return 0;
+			return *daemon_pid();
 		}
 	}
 	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
 			task_pid_nr(current), *daemon_pid());
 	up_write(auditsec_pid_lock());
 
-	return -1;
+	return *daemon_pid();
 }
 
 
