@@ -1,311 +1,115 @@
 <PIGA_Transitions>
-	<!--Domains-->
-		<domain name="impots" display_name="Impôts" icon="/usr/share/icons/pigaos/Money_Coin_Icon.png">
-			<description>Navigation sur des sites critiques, comme impots.gouv.fr, et lecture de mails provenant des mêmes sites.</description>
-		</domain>
-		<domain name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/web.png">
-			<description>Navigation sur des sites Web de commerce électronique comme LDLC ou EBay, et lecture de mails provenant des mêmes sites.</description>
-		</domain>
-		<domain name="mail" display_name="E-Mail" icon="/usr/share/icons/pigaos/evolution.png">
-			<description>Lecture de courriers électroniques de sources variées.</description>
-		</domain>
-		<domain name="web" display_name="Web" icon="/usr/share/icons/pigaos/web.png">
-			<description>Navigation sur des sites Web non confinés.</description>
-		</domain>
-		<domain name="web-flash" display_name="Web Flash" icon="/usr/share/icons/pigaos/web.png">
-			<description>Navigation sur des sites Web avec support de flash non confinés.</description>
-		</domain>
-		<domain name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true">
-			<description>Domaine par défaut lors du lancement de Contextd.</description>
-		</domain>
+	<!--Contexts-->
+		<context name="impots" display_name="Impôts" icon="/usr/share/icons/pigaos/Money_Coin_Icon.png" />
+		<context name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/folder.png"/>
+		<context name="mail" display_name="E-Mail" icon="/usr/share/icons/pigaos/evolution.png" />
+		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>
 
-	<!-- Programs that should not be killed upon domain transition -->
-	<nokill>
-		<nokill_program full_path="/usr/bin/lxpanel" />
-		<nokill_program full_path="/usr/bin/lxsession" />
-		<nokill_program full_path="/usr/bin/context-notify" />
-		<nokill_program full_path="/usr/bin/lxlauncher" />
-		<nokill_program full_path="/usr/bin/openbox" />
-		<nokill_program full_path="/usr/libexec/menu-cached" />
-		<nokill_program full_path="/usr/libexec/menu-cache-gen" />
-		<nokill_program full_path="/usr/bin/firefox" />
-		<nokill_program full_path="/usr/bin/claws-mail" />
-		<nokill_program full_path="/usr/lib/mozilla-firefox/firefox" />
-		<nokill_program full_path="/usr/sbin/openvpn" />
-		<nokill_program full_path="/usr/bin/gnome-keyring-daemon" />
-		<nokill_program full_path="/usr/bin/dbus-daemon" />
-		<nokill_program full_path="/usr/bin/dbus-launch" />
-		<!-- to be filled -->
-	</nokill>
-
-	<!--Claws mail-->
-		<!-- loop getmail/sendmail-->
-		<loop app_name="claws-mail" notify="false" prompt="false" display_name="get and fetch mail"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
-			<matching>
-				<!-- get mail -->
-				<mrule display_name="GMail IMAP"><host>imap.gmail.com</host><port>993</port></mrule>
-				<!-- send mail-->
-				<mrule display_name="GMail SMTP"><host>smtp.gmail.com</host><port>465</port></mrule>
-			</matching>
-			<domains>
-				<loop_domain name="mail"/>
-				<loop_domain name="ecommerce" />
-				<loop_domain name="impots" />
-			</domains>
-		</loop>
-
-		<!-- loop getmail/sendmail-->
-		<loop app_name="claws-mail" notify="false" prompt="false" display_name="load/insert files into mail"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
-			<matching>
-				<mrule display_name="Downloaded mails"><file>/home/user/Download/.*</file></mrule>
-			</matching>
-			<domains>
-				<loop_domain name="mail"/>
-				<loop_domain name="ecommerce" />
-				<loop_domain name="impots" />
-			</domains>
-		</loop>
-
-		<!--Impots-->
-		<rule app_name="claws-mail" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
-			<matching>
-				<mrule display_name="dgfip.finances.gouv.fr">
-					<from>.*\@dgfip\.finances\.gouv\.fr</from>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
-					<transit from_domain="mail" prompt="true" /> 
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
 		
-		<!--Ecommerce-->
-		<rule app_name="claws-mail" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
-			<matching>
-				<mrule>
-					<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr)</from>
-				</mrule>
-				<mrule>
-					<from>(.*\@.*\.ldlc\.fr)</from>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" /> 
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-		
-		<!-- Fetch mail -->
-		<rule app_name="claws-mail" to_domain="mail" notify="false" prompt="true" display_name="domaine non confine">
-			<matching>
-				<mrule>
-					<from>.*\@.*</from>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="mail" notify="false" prompt="false"/>
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-		
+	<!--Programs-->
+		<program name="firefox" display_name="Firefox" icon="" full_path="/usr/lib/mozilla-firefox/firefox" />
+		<program name="claws-mail" display_name="Claws Mail" icon="" full_path="/usr/bin/claws-mail" />
+		<program name="context-notify" display_name="Context Notify" icon="" full_path="/usr/bin/context-notify" />
+
 	<!--Firefox-->
-		<!-- Allow to go to the error page -->
-		<loop app_name="firefox" notify="false" prompt="false" display_name="Allow to open the error page">
-			<matching>
-				<mrule><url></url></mrule>
-				<mrule><url>chrome://pigacontext/content/access_forbidden\.xul</url></mrule>
-				<mrule><url>file:///usr/lib/mozilla-firefox/extensions/PIGAContext\@sds-project\.fr/chrome/content/access_forbidden\.xul</url></mrule>
-				<mrule><url>jar:file:///usr/lib/mozilla-firefox/chrome/browser\.jar!/content/browser/aboutSessionRestore\.xhtml</url></mrule>
-				<mrule><url>about:sessionrestore</url></mrule>
-			</matching>
-			<domains>
-				<loop_domain name="default" />
-				<loop_domain name="mail" />
-				<loop_domain name="web" />
-				<loop_domain name="web-flash" />
-				<loop_domain name="ecommerce" />
-				<loop_domain name="impots" />
-			</domains>
-		</loop>
-		
-		<!--Impots-->
-		<rule app_name="firefox" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
-			<matching>
-				<mrule>
-					<host>.*\.impots\.gouv\.fr</host>
-					<path>.*</path>
-					<protocol>https</protocol>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
-					<transit from_domain="default" /> <!--les params sont modifiables ici-->
-				</allow>
-			</transitions>
-		</rule>
-		
-		<!--Ecommerce-->
-		<rule app_name="firefox" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
-			<matching>
-				<mrule>
-				<!--	 <host>(((rover|www|annonces|pages)\.ebay\.fr|(rover\.ebay|(include|pics)\.ebaystatic)\.com))|(https://((signin|scgi)\.ebay\.fr|(rover\.ebay|srx\.fr\.ebayrtm|(secureinclude|securepics)\.ebaystatic)\.com))</host>--> 
-				<host>(ebay\.(fr|com))|((.*\.ebayrtm\.com)|(www\.ebay-automobile|(((art-antiquite|stores|immobilier)\.)?shop|www|search\.stores|rtm|search\.avis-membres|module|annonces-immobilier|rover|depot-vente-partenaire|immobilier|cgi[0-9]|cgi|developpeur|offer|attr-search|annonces-aide|annonces|pages|search|listings|automobile-voiture|deals|contact|rssplayer|my)\.ebay)\.fr|(((www)\.)?monoutillage|(login|static|www)\.sanook|imagehost\.vendio|(fairway|rover|sofe|pics)\.ebay|fr\.ebayobjects|(rtm|thumbs[0-9]|pics|q|p|thumbs|include)\.ebaystatic|images\.neteven|lh4\.ggpht|www\.ebaydevcon|.*\.ebayimg)\.com|(shop|www|pages)\.ebay\.at|search\.stores\.ebay\.co\.uk|(shop|pages)\.ebay\.in|(shop|pages)\.ebay\.ie|static\.ebayanuncios\.es)</host>
-					<path>.*</path>
-					<protocol>(http|https)</protocol>
+	<rule app_name="firefox" transit_from=".*" transit_to="default" prompt="false" scope="global">
+		<host>[0-9].*</host>
+	</rule>
+		<!--Impots -->
+			<rule app_name="firefox" transit_from="impots" transit_to="impots" prompt="false" notify="false" scope="global">
+				<host>.*\.impots\.gouv\.fr</host>
+				<path>.*</path>
+				<protocol>https</protocol>
+			</rule>
+			<rule app_name="firefox" transit_from="default" transit_to="impots" prompt="true" scope="global">
+				<host>.*\.impots\.gouv\.fr</host>
+				<path>.*</path>
+				<protocol>https</protocol>
+			</rule>
+			<rule app_name="firefox" transit_from="impots" transit_to=".*" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
+			<!-- We forbid to go back from Impôts-->
 
-				</mrule>
-				<mrule>
-					<host>(ldlc\.(fr|com|be))|(.*\.ldlc\.(fr|com|be))|(www\.ldlc-pro\.be|(images|www)\.ldlc\.fr|(www\.ldlc-pro|pub\.groupe-ldlc|(images|media|www)\.ldlc|www\.newsgator|img0\.gmodules)\.com)</host>
-					<path>.*</path>
-					<protocol>(http|https)</protocol>
+		<!--E-commerce -->
+			<rule app_name="firefox" transit_from="ecommerce" transit_to="ecommerce" prompt="false" notify="false" scope="global">
+				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="firefox" transit_from="default" transit_to="ecommerce" prompt="true" scope="global">
+				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="firefox" transit_from="ecommerce" transit_to=".*" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
+			<!-- We forbid to go back from Impôts-->
+			<rule app_name="firefox" transit_from="mail" transit_to=".*" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
 
-				</mrule>
-				<mrule>
-					<host>(fnac\.(fr|com))|(.*\.fnac\.(com|fr))|(((selfservice|recherche|multimedia|www|www4|rendezvous)\.fnac|www\.fnacmusic)\.com)|((www|secure)\.fnac\.com)</host>
-					<path>.*</path>
-					<protocol>(http|https)</protocol>
+		<!-- default -->
+			<rule app_name="firefox" transit_from="default" transit_to="default" prompt="false" notify="false" scope="global">
+				<host>[a-z].*</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="firefox" transit_from="default" transit_to="default" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
 
-				</mrule>
+	<!-- Claws-mail -->
+		<!-- Impots -->
+			<rule app_name="claws-mail" transit_from="impots" transit_to="impots" scope="global" notify="false">
+				<from>.*\@dgfip\.finances\.gouv\.fr</from>
+			</rule>
+			<rule app_name="claws-mail" transit_from="default" transit_to="impots" scope="global" prompt="true" notify="true">
+				<from>.*\@dgfip\.finances\.gouv\.fr</from>
+			</rule>
+			<rule app_name="claws-mail" transit_from="mail" transit_to="impots" scope="global" prompt="true" notify="true">
+				<from>.*\@dgfip\.finances\.gouv\.fr</from>
+			</rule>
 
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" to_domain="ecommerce" prompt="true" /> 
-					<transit from_domain="default" to_domain="ecommerce" prompt="true" /> 
-				</allow>
-			</transitions>
+		<!--E-commerce -->
+            		<rule app_name="claws-mail" transit_from="ecommerce" transit_to="ecommerce" scope="global" notify="false">
+				<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
+			</rule>
+			<rule app_name="claws-mail" transit_from="mail" transit_to="ecommerce" scope="global" notify="false" prompt="true">
+				<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
+			</rule>
+
+			<rule app_name="claws-mail" transit_from="default" transit_to="ecommerce" scope="global" prompt="true" notify="true">
+				<from>(.*@\ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
+			</rule>
+		<!-- Mail -->
+			<rule app_name="claws-mail" transit_from="mail" transit_to="mail" scope="global" prompt="false" notify="false">
+				<from>.*</from>
+			</rule>
+			<rule app_name="claws-mail" transit_from="default" transit_to="mail" scope="global" prompt="true" notify="true">
+				<from>.*</from>
+			</rule>
+			<rule app_name="claws-mail" transit_from="mail" transit_to="mail" scope="global" prompt="false" notify="false">
+				<status>connect</status>
+				<session_type>(imap|smtp|pop)</session_type>
+				<host>.*</host>
+				<port>.*</port>
+			</rule>
+
+	<!-- Context Notify : Manual transitions-->
+		<rule app_name="context-notify" transit_from="default" transit_to="impots" scope="global" notify="true">
+			<context>impots</context>
+		</rule>
+		<rule app_name="context-notify" transit_from="default" transit_to="ecommerce" scope="global" notify="true">
+			<context>ecommerce</context>
+		</rule>
+		<rule app_name="context-notify" transit_from="default" transit_to="mail" scope="global" notify="true">
+			<context>mail</context>
+		</rule>
+		<rule app_name="context-notify" transit_from="mail" transit_to="ecommerce" scope="global" notify="true">
+			<context>ecommerce</context>
 		</rule>
 
- 
-		<!-- Web-flash-->
-		<rule app_name="firefox" to_domain="web-flash" notify="false" prompt="true" display_name="web-flash domain">
-			<matching>
-				<mrule>
-					<host>((youtube\.(com|fr))|www\.youtube\.fr|(.*\.ytimg|.*\.youtube)\.com)</host>
-					<path>.*</path>
-					<protocol>http</protocol>
-				</mrule>
-				<mrule>
-					<host>((.*\.)?dailymotion\.(com|fr))</host>
-					<path>.*</path>
-					<protocol>http</protocol>
-				</mrule>
-
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="web-flash" notify="false" prompt="false"/>
-					<transit from_domain="web" />
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-
-
-		<!-- Web-->
-		<rule app_name="firefox" to_domain="web" notify="false" prompt="true" display_name="web domain">
-			<matching>
-				<mrule>
-					<host>.*</host>
-					<path>.*</path>
-					<protocol>http</protocol>
-
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="web" notify="false" prompt="false"/>
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
- 	<!-- Context Notify : Manual transitions-->
-		<rule app_name="context-notify" to_domain="impots" notify="false" prompt="false" display_name="impots">
-			<matching>
-				<mrule>
-					<context>impots</context>
-				</mrule>
-				<mrule>
-					<domain>impots</domain>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-		<rule app_name="context-notify" to_domain="ecommerce" notify="false" prompt="false" display_name="ecommerce">
-			<matching>
-				<mrule>
-					<context>ecommerce</context>
-				</mrule>
-				<mrule>
-					<domain>ecommerce</domain>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="mail" />
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-		<rule app_name="context-notify" to_domain="mail" notify="false" prompt="false" display_name="mail">
-			<matching>
-				<mrule>
-					<context>mail</context>
-				</mrule>
-				<mrule>
-					<domain>mail</domain>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
-		<rule app_name="context-notify" to_domain="web-flash" notify="false" prompt="false" display_name="web-flash">
-			<matching>
-				<mrule>
-					<context>web-flash</context>
-				</mrule>
-				<mrule>
-					<domain>web-flash</domain>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="default" />
-					<transit from_domain="web" />
-				</allow>
-			</transitions>
-		</rule>
-		<rule app_name="context-notify" to_domain="web" notify="false" prompt="false" display_name="web">
-			<matching>
-				<mrule>
-					<context>web</context>
-				</mrule>
-				<mrule>
-					<domain>web</domain>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="default" />
-				</allow>
-			</transitions>
-		</rule>
 </PIGA_Transitions>
 
