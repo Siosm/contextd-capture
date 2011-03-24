@@ -2,3 +2,5 @@
 *~
 build
 daemon
+*.kdev4
+.kdev4
