@@ -1,5 +1,5 @@
 all:
-	gcc main.c syscall.c -o daemon -Wall
+	g++ main.cpp syscall.c -o daemon -Wall
 
 debug:
-	gcc main.c syscall.c -o daemon -DDEBUG -Wall
+	g++ main.cpp syscall.c -o daemon -DDEBUG -Wall
