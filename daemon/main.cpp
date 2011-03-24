@@ -4,8 +4,12 @@
 #include <string.h>
 #include <fcntl.h>
 #include <math.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-#include <libcontext.h>
+//#include <libcontext.h>
 
 #include "auditsec_info.h"
 #include "syscall.h"
@@ -30,26 +34,26 @@ int keep_going = 1;
 // 	return bool;
 // }
 
-int read_execpath (pid_t pid, path)
+int read_execpath (pid_t pid, char * path)
 {
-	int fd = 0, read = 0;
+	int fd = 0, nb = 0;
 	int size = 10 + ceil(log((double)pid));
 	char proc_file[size];
 
-	snprintf(proc_file, size, "/proc/%s/exe", pid);
+	snprintf(proc_file, size, "/proc/%lg/exe", (double) pid);
 	
-	if ((fd = open(proc_file, O_RDONLY|O_EXLOCK)) < 0) {
+	if ((fd = open(proc_file, O_RDONLY)) < 0) {
 		return 1;
 	}
 	
-	if((read = read(fd, path, PATH_MAX)) <= 0) {
+	if((nb = read(fd, path, PATH_MAX)) <= 0) {
 		close(fd);
 		return 1;
 	}
 
 	close(fd);	
 
-	return read;
+	return nb;
 }
 
 void signal_manager(int signal)
@@ -61,6 +65,7 @@ void signal_manager(int signal)
 int main(int argc, char* argv[])
 {
 	struct auditsec_info * usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
+	char path[PATH_MAX];
 	int i = 0;
 	struct sigaction action;
 	
@@ -84,9 +89,10 @@ int main(int argc, char* argv[])
 				case AUDITSEC_FILE:
 // 					if(is_monitored(usai->execname) == true){
 						#ifdef DEBUG
-						printf("AuditSec, file access: %s%s, pid: %d, execname: %s, mask: %d\n",
+						read_execpath(usai->pid, path);
+						printf("AuditSec, file access: %s%s, pid: %d, execname: %s%s, mask: %d, ",
 								usai->auditsec_struct.file.fullpath,
-								usai->auditsec_struct.file.name, usai->pid,
+								usai->auditsec_struct.file.name, usai->pid, path,
 								usai->execname, usai->auditsec_struct.file.mask);
 						#endif /* DEBUG */
 						auditsec_answer(true);
@@ -97,8 +103,9 @@ int main(int argc, char* argv[])
 				case AUDITSEC_DIR:
 // 					if(is_monitored(usai->execname) == true){
 						#ifdef DEBUG
-						printf("AuditSec, mkdir: %s, pid: %d, execname: %s, mode: %d\n",
-								usai->auditsec_struct.dir.fullpath, usai->pid,
+						read_execpath(usai->pid, path);
+						printf("AuditSec, mkdir: %s, pid: %d, execname: %s%s, mode: %d\n",
+								usai->auditsec_struct.dir.fullpath, usai->pid, path,
 								usai->execname, usai->auditsec_struct.dir.mode);
 						#endif /* DEBUG */
 						auditsec_answer(true);
