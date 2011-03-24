@@ -1013,7 +1013,7 @@ int flush_old_exec(struct linux_binprm * bprm)
 	current->flags &= ~PF_RANDOMIZE;
 	flush_thread();
 	current->personality &= ~bprm->per_clear;
-
+	printk(KERN_INFO "%s: program exited\n", bprm->filename);
 	return 0;
 
 out:
