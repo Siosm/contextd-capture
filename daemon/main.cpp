@@ -1,3 +1,6 @@
+#include <iostream>
+#include <sstream>
+
 #include <stdio.h>
 #include <malloc.h>
 #include <signal.h>
@@ -8,41 +11,29 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
-//#include <libcontext.h>
+#include "../piga-systrans/src/libcontext_src/libcontext.h"
 
 #include "auditsec_info.h"
 #include "syscall.h"
 
-#define APPS_SIZE 10;
 
-int keep_going = 1;
-// char apps[APPS_SIZE][TASK_COMM_LEN] = {"test", ""};
+int keep_going = true;
+int testprog_reg = false;
 
-
-// int is_monitored(char *execname)
-// {
-// 	int bool = false;
-// 	int i = 0;
-// 	
-// 	while ((i < APPS_SIZE) && (bool == false)){
-// 		if(strncmp(execname, apps[i], TASK_COMM_LEN)){
-// 			bool = true;
-// 		}
-// 		++i;
-// 	}
-// 	return bool;
-// }
 
 int read_execpath (pid_t pid, char * path)
 {
 	int fd = 0, nb = 0;
-	int size = 10 + ceil(log((double)pid));
-	char proc_file[size];
-
-	snprintf(proc_file, size, "/proc/%lg/exe", (double) pid);
+	std::string proc_file("/proc/");
+	std::stringstream out;
 	
-	if ((fd = open(proc_file, O_RDONLY)) < 0) {
+	out << (double) pid;
+	proc_file += out.str() + "/exe";
+	
+	if ((fd = open(proc_file.c_str(), O_RDONLY)) < 0) {
+		std::cerr << "Could not open file: " << proc_file << std::endl;
 		return 1;
 	}
 	
@@ -58,14 +49,14 @@ int read_execpath (pid_t pid, char * path)
 
 void signal_manager(int signal)
 {
-	printf("^C detected...\n");
+	std::cout << "^C detected...\n" << std::endl;
 	keep_going = 0;
 }
 
 int main(int argc, char* argv[])
 {
 	struct auditsec_info * usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
-	char path[PATH_MAX];
+	char exec_path[PATH_MAX];
 	int i = 0;
 	struct sigaction action;
 	
@@ -74,59 +65,80 @@ int main(int argc, char* argv[])
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
 	while((auditsec_register(true) != 0) && (i < 5)){
-		printf("FAILED to register with the kernel.\n");
+		std::cerr << "FAILED to register with the kernel.\n" << std::endl;
 		++i;
 	}
 	if((i == 5) || (keep_going == 0))
 		return -1;
 
-	printf("The daemon is registered with the kernel.\n");
+	std::cout << "The daemon is registered with the kernel.\n" << std::endl;
 
 	while(keep_going){
 		if(auditsec_question(usai) == 0){
 			
 			switch (usai->type){
 				case AUDITSEC_FILE:
-// 					if(is_monitored(usai->execname) == true){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN)){
+						if(testprog_reg == false){
+							context_register_application("testprog");
+						}
+						switch (context_changed("pid", usai->pid, NULL, NULL)){
+							case CONTEXT_ACCEPTED:
+								std::cout << "Transition acceptée." << std::endl;
+							case CONTEXT_REFUSED:
+								std::cout << "Transition refusée." << std::endl;
+							case CONTEXT_ERROR:
+								std::cout << "Erreur dans la transition." << std::endl;
+						}
 						#ifdef DEBUG
-						read_execpath(usai->pid, path);
-						printf("AuditSec, file access: %s%s, pid: %d, execname: %s%s, mask: %d, ",
-								usai->auditsec_struct.file.fullpath,
-								usai->auditsec_struct.file.name, usai->pid, path,
-								usai->execname, usai->auditsec_struct.file.mask);
+						read_execpath(usai->pid, exec_path);
+						std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
+						<< usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
+						<< exec_path << usai->execname << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
 						#endif /* DEBUG */
 						auditsec_answer(true);
-// 					}else{
-// 						auditsec_answer(true);
-// 					}
+					}else{
+						auditsec_answer(true);
+					}
 					break;
 				case AUDITSEC_DIR:
-// 					if(is_monitored(usai->execname) == true){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN)){
+						if(testprog_reg == false){
+							context_register_application("testprog");
+						}
+						switch (context_changed("pid", usai->pid, NULL, NULL)){
+							case CONTEXT_ACCEPTED:
+								std::cout << "Transition acceptée." << std::endl;
+							case CONTEXT_REFUSED:
+								std::cout << "Transition refusée." << std::endl;
+							case CONTEXT_ERROR:
+								std::cout << "Erreur dans la transition." << std::endl;
+						}
 						#ifdef DEBUG
-						read_execpath(usai->pid, path);
-						printf("AuditSec, mkdir: %s, pid: %d, execname: %s%s, mode: %d\n",
-								usai->auditsec_struct.dir.fullpath, usai->pid, path,
-								usai->execname, usai->auditsec_struct.dir.mode);
+						read_execpath(usai->pid, exec_path);
+						std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
+						<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname << ", mode: "
+						<< usai->auditsec_struct.dir.mode << std::endl;
 						#endif /* DEBUG */
 						auditsec_answer(true);
-// 					}else{
-// 						auditsec_answer(true);
-// 					}
+					}else{
+						auditsec_answer(true);
+					}
 					break;
 				default:
-					printf("AuditSec, can't determine struct type !");
+					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
 					auditsec_answer(true);
 					break;
 			}
 		}
 	}
 
-	printf("Stopping daemon and telling the kenel.\n");
+	std::cout << "Stopping daemon and telling the kenel." << std::endl;
 	if(auditsec_register(false) != 0){
-		printf("The kernel state may NOT be ok. You should reboot.\n");
+		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}
-	printf("The kernel is ok.\n");
+	std::cout << "The kernel is ok." << std::endl;
 
 	return 0;
 }
