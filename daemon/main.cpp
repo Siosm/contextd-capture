@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 								break;
 							case CONTEXT_ERROR:
 								auditsec_answer(false);
-								std::cout << "Erreur dans la transition." << std::endl;
+								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
 								break;
 							default:
 								auditsec_answer(false);
