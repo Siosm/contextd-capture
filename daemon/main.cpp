@@ -49,7 +49,7 @@ int read_execpath (pid_t pid, char * path)
 
 void signal_manager(int signal)
 {
-	std::cout << "^C detected...\n" << std::endl;
+	std::cout << "^C detected..." << std::endl;
 	keep_going = 0;
 }
 
@@ -65,13 +65,13 @@ int main(int argc, char* argv[])
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
 	while((auditsec_register(true) != 0) && (i < 5)){
-		std::cerr << "FAILED to register with the kernel.\n" << std::endl;
+		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
 	if((i == 5) || (keep_going == 0))
 		return -1;
 
-	std::cout << "The daemon is registered with the kernel.\n" << std::endl;
+	std::cout << "The daemon is registered with the kernel." << std::endl;
 
 	while(keep_going){
 		if(auditsec_question(usai) == 0){
