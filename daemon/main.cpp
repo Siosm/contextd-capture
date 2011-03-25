@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 						if(testprog_reg == false){
 							context_register_application("testprog");
 						}
-						switch (context_changed("pid", usai->pid,
+						switch (context_changed(//"pid", usai->pid,
 					"fullpath", usai->auditsec_struct.file.fullpath,
 					"filename", usai->auditsec_struct.file.name,
 					NULL, NULL)){
@@ -144,14 +144,13 @@ int main(int argc, char* argv[])
 						<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname << ", mode: "
 						<< usai->auditsec_struct.dir.mode << std::endl;
 						#endif /* DEBUG */
-						auditsec_answer(true);
 					}else{
 						auditsec_answer(true);
 					}
 					break;
 				default:
 					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-					auditsec_answer(true);
+					auditsec_answer(false);
 					break;
 			}
 		}

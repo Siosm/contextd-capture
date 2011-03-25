@@ -1,22 +1,74 @@
 <PIGA_Transitions>
 	<!--Contexts-->
 		<context name="impots" display_name="Impôts" icon="/usr/share/icons/pigaos/Money_Coin_Icon.png" />
-		<context name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/folder.png"/>
 		<context name="mail" display_name="E-Mail" icon="/usr/share/icons/pigaos/evolution.png" />
-		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>
+<!--		<context name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/folder.png"/>
+		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>-->
 
 		
 	<!--Programs-->
-		<program name="firefox" display_name="Firefox" icon="" full_path="/usr/lib/mozilla-firefox/firefox" />
-		<program name="claws-mail" display_name="Claws Mail" icon="" full_path="/usr/bin/claws-mail" />
+		<context name="testprog" display_name="Programme de test" icon="" full_path="/usr/testprog" />
+<!--		<program name="firefox" display_name="Firefox" icon="" full_path="/usr/lib/mozilla-firefox/firefox" />
+		<program name="claws-mail" display_name="Claws Mail" icon="" full_path="/usr/bin/claws-mail" />-->
 		<program name="context-notify" display_name="Context Notify" icon="" full_path="/usr/bin/context-notify" />
-
-	<!--Firefox-->
-	<rule app_name="firefox" transit_from=".*" transit_to="default" prompt="false" scope="global">
-		<host>[0-9].*</host>
+		
+		
+			<!--Programme de test-->
+	<rule app_name="testprog" transit_from=".*" transit_to="default" prompt="false" scope="global">
+			<path>.*</path>
+<!-- 		<host>[0-9].*</host> -->
 	</rule>
 		<!--Impots -->
-			<rule app_name="firefox" transit_from="impots" transit_to="impots" prompt="false" notify="false" scope="global">
+			<rule app_name="testprog" transit_from="impots" transit_to="impots" prompt="false" notify="false" scope="global">
+<!-- 				<host>.*\.impots\.gouv\.fr</host> -->
+				<fullpath>/home/pigauser/impots</fullpath>
+			</rule>
+			<rule app_name="testprog" transit_from="default" transit_to="impots" prompt="true" scope="global">
+<!-- 				<host>.*\.impots\.gouv\.fr</host> -->
+				<fullpath>/home/pigauser/impots</fullpath>
+<!-- 				<protocol>https</protocol> -->
+			</rule>
+<!-- 			<rule app_name="testprog" transit_from="impots" transit_to=".*" prompt="false" scope="global"> -->
+<!-- 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url> -->
+<!-- 			</rule> -->
+			<!-- We forbid to go back from Impôts-->
+
+		<!--E-commerce -->
+			<rule app_name="testprog" transit_from="ecommerce" transit_to="ecommerce" prompt="false" notify="false" scope="global">
+				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="testprog" transit_from="default" transit_to="ecommerce" prompt="true" scope="global">
+				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="testprog" transit_from="ecommerce" transit_to=".*" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>-->
+			<!-- We forbid to go back from Impôts-->
+			<rule app_name="testprog" transit_from="mail" transit_to=".*" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
+
+		<!-- default -->
+			<rule app_name="testprog" transit_from="default" transit_to="default" prompt="false" notify="false" scope="global">
+				<host>[a-z].*</host>
+				<path>.*</path>
+				<protocol>(http|https)</protocol>
+			</rule>
+			<rule app_name="testprog" transit_from="default" transit_to="default" prompt="false" scope="global">
+				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			</rule>
+
+
+	<!--Firefox-->
+<!--	<rule app_name="firefox" transit_from=".*" transit_to="default" prompt="false" scope="global">
+		<host>[0-9].*</host>
+	</rule>-->
+		<!--Impots -->
+<!--			<rule app_name="firefox" transit_from="impots" transit_to="impots" prompt="false" notify="false" scope="global">
 				<host>.*\.impots\.gouv\.fr</host>
 				<path>.*</path>
 				<protocol>https</protocol>
@@ -28,11 +80,11 @@
 			</rule>
 			<rule app_name="firefox" transit_from="impots" transit_to=".*" prompt="false" scope="global">
 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
-			</rule>
+			</rule>-->
 			<!-- We forbid to go back from Impôts-->
 
 		<!--E-commerce -->
-			<rule app_name="firefox" transit_from="ecommerce" transit_to="ecommerce" prompt="false" notify="false" scope="global">
+<!--			<rule app_name="firefox" transit_from="ecommerce" transit_to="ecommerce" prompt="false" notify="false" scope="global">
 				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
 				<path>.*</path>
 				<protocol>(http|https)</protocol>
@@ -44,25 +96,25 @@
 			</rule>
 			<rule app_name="firefox" transit_from="ecommerce" transit_to=".*" prompt="false" scope="global">
 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
-			</rule>
+			</rule>-->
 			<!-- We forbid to go back from Impôts-->
-			<rule app_name="firefox" transit_from="mail" transit_to=".*" prompt="false" scope="global">
+<!--			<rule app_name="firefox" transit_from="mail" transit_to=".*" prompt="false" scope="global">
 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
-			</rule>
+			</rule>-->
 
 		<!-- default -->
-			<rule app_name="firefox" transit_from="default" transit_to="default" prompt="false" notify="false" scope="global">
+<!--			<rule app_name="firefox" transit_from="default" transit_to="default" prompt="false" notify="false" scope="global">
 				<host>[a-z].*</host>
 				<path>.*</path>
 				<protocol>(http|https)</protocol>
 			</rule>
 			<rule app_name="firefox" transit_from="default" transit_to="default" prompt="false" scope="global">
 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
-			</rule>
+			</rule>-->
 
 	<!-- Claws-mail -->
 		<!-- Impots -->
-			<rule app_name="claws-mail" transit_from="impots" transit_to="impots" scope="global" notify="false">
+<!--			<rule app_name="claws-mail" transit_from="impots" transit_to="impots" scope="global" notify="false">
 				<from>.*\@dgfip\.finances\.gouv\.fr</from>
 			</rule>
 			<rule app_name="claws-mail" transit_from="default" transit_to="impots" scope="global" prompt="true" notify="true">
@@ -70,21 +122,21 @@
 			</rule>
 			<rule app_name="claws-mail" transit_from="mail" transit_to="impots" scope="global" prompt="true" notify="true">
 				<from>.*\@dgfip\.finances\.gouv\.fr</from>
-			</rule>
+			</rule>-->
 
 		<!--E-commerce -->
-            		<rule app_name="claws-mail" transit_from="ecommerce" transit_to="ecommerce" scope="global" notify="false">
+<!--            		<rule app_name="claws-mail" transit_from="ecommerce" transit_to="ecommerce" scope="global" notify="false">
 				<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
 			</rule>
 			<rule app_name="claws-mail" transit_from="mail" transit_to="ecommerce" scope="global" notify="false" prompt="true">
 				<from>(.*\@ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
-			</rule>
+			</rule>-->
 
-			<rule app_name="claws-mail" transit_from="default" transit_to="ecommerce" scope="global" prompt="true" notify="true">
+<!--			<rule app_name="claws-mail" transit_from="default" transit_to="ecommerce" scope="global" prompt="true" notify="true">
 				<from>(.*@\ebay\.fr|.*\@.*\.ebay\.fr|.*\@ldlc\.fr)</from>
-			</rule>
+			</rule>-->
 		<!-- Mail -->
-			<rule app_name="claws-mail" transit_from="mail" transit_to="mail" scope="global" prompt="false" notify="false">
+<!--			<rule app_name="claws-mail" transit_from="mail" transit_to="mail" scope="global" prompt="false" notify="false">
 				<from>.*</from>
 			</rule>
 			<rule app_name="claws-mail" transit_from="default" transit_to="mail" scope="global" prompt="true" notify="true">
@@ -95,7 +147,7 @@
 				<session_type>(imap|smtp|pop)</session_type>
 				<host>.*</host>
 				<port>.*</port>
-			</rule>
+			</rule>-->
 
 	<!-- Context Notify : Manual transitions-->
 		<rule app_name="context-notify" transit_from="default" transit_to="impots" scope="global" notify="true">
@@ -112,4 +164,3 @@
 		</rule>
 
 </PIGA_Transitions>
-
