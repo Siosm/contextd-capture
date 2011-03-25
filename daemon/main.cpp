@@ -82,13 +82,26 @@ int main(int argc, char* argv[])
 						if(testprog_reg == false){
 							context_register_application("testprog");
 						}
-						switch (context_changed("pid", usai->pid, NULL, NULL)){
+						switch (context_changed("pid", usai->pid,
+					"fullpath", usai->auditsec_struct.file.fullpath,
+					"filename", usai->auditsec_struct.file.name,
+					NULL, NULL)){
 							case CONTEXT_ACCEPTED:
+								auditsec_answer(true);
 								std::cout << "Transition acceptée." << std::endl;
+								break;
 							case CONTEXT_REFUSED:
+								auditsec_answer(false);
 								std::cout << "Transition refusée." << std::endl;
+								break;
 							case CONTEXT_ERROR:
+								auditsec_answer(false);
 								std::cout << "Erreur dans la transition." << std::endl;
+								break;
+							default:
+								auditsec_answer(false);
+								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
+								break;
 						}
 						#ifdef DEBUG
 						read_execpath(usai->pid, exec_path);
@@ -96,7 +109,6 @@ int main(int argc, char* argv[])
 						<< usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
 						<< exec_path << usai->execname << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
 						#endif /* DEBUG */
-						auditsec_answer(true);
 					}else{
 						auditsec_answer(true);
 					}
@@ -106,13 +118,25 @@ int main(int argc, char* argv[])
 						if(testprog_reg == false){
 							context_register_application("testprog");
 						}
-						switch (context_changed("pid", usai->pid, NULL, NULL)){
+						switch (context_changed("pid", usai->pid,
+					"fullpath", usai->auditsec_struct.dir.fullpath,
+					NULL, NULL)){
 							case CONTEXT_ACCEPTED:
+								auditsec_answer(true);
 								std::cout << "Transition acceptée." << std::endl;
+								break;
 							case CONTEXT_REFUSED:
+								auditsec_answer(false);
 								std::cout << "Transition refusée." << std::endl;
+								break;
 							case CONTEXT_ERROR:
+								auditsec_answer(false);
 								std::cout << "Erreur dans la transition." << std::endl;
+								break;
+							default:
+								auditsec_answer(false);
+								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
+								break;
 						}
 						#ifdef DEBUG
 						read_execpath(usai->pid, exec_path);
