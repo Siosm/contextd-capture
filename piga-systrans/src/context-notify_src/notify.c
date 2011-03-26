@@ -19,7 +19,7 @@ int sendNotification(const char* title, const char* message, int timeout, int pr
 	#ifdef HAVE_LIBNOTIFY
 
 	  if(notification==NULL)
-		  notification = notify_notification_new(title, message, img, NULL);
+		  notification = notify_notification_new(title, message, img);
 	  else
 		  notify_notification_update (notification, title, message, img);
 
