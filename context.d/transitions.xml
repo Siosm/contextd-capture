@@ -1,65 +1,45 @@
 <PIGA_Transitions>
 	<!--Contexts-->
-		<context name="impots" display_name="Impôts" icon="/usr/share/icons/pigaos/Money_Coin_Icon.png" />
-		<context name="mail" display_name="E-Mail" icon="/usr/share/icons/pigaos/evolution.png" />
-<!--		<context name="ecommerce" display_name="E-Commerce" icon="/usr/share/icons/pigaos/folder.png"/>
-		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>-->
+		<context name="impots" display_name="Impôts" />
+		<context name="mail" display_name="E-Mail" />
+		<context name="rapport" display_name="Rapport" />
+		<context name="default" display_name="Défaut" icon="/usr/share/icons/pigaos/go-home.png" default="true"/>
 
 		
 	<!--Programs-->
 		<context name="testprog" display_name="Programme de test" icon="" full_path="/usr/testprog" />
-<!--		<program name="firefox" display_name="Firefox" icon="" full_path="/usr/lib/mozilla-firefox/firefox" />
-		<program name="claws-mail" display_name="Claws Mail" icon="" full_path="/usr/bin/claws-mail" />-->
 		<program name="context-notify" display_name="Context Notify" icon="" full_path="/usr/bin/context-notify" />
 		
 		
-			<!--Programme de test-->
-	<rule app_name="testprog" transit_from=".*" transit_to="default" prompt="false" scope="global">
-			<path>.*</path>
-<!-- 		<host>[0-9].*</host> -->
-	</rule>
+	<!--Programme de test-->
+			<rule app_name="testprog" transit_from=".*" transit_to="default" prompt="false" scope="global">
+					<path>.*</path>
+			</rule>
 		<!--Impots -->
 			<rule app_name="testprog" transit_from="impots" transit_to="impots" prompt="false" notify="false" scope="global">
-<!-- 				<host>.*\.impots\.gouv\.fr</host> -->
-				<fullpath>/home/pigauser/impots</fullpath>
+					<fullpath>/home/pigauser/impots/*</fullpath>
 			</rule>
 			<rule app_name="testprog" transit_from="default" transit_to="impots" prompt="true" scope="global">
-<!-- 				<host>.*\.impots\.gouv\.fr</host> -->
-				<fullpath>/home/pigauser/impots</fullpath>
-<!-- 				<protocol>https</protocol> -->
+					<fullpath>/home/pigauser/impots/*</fullpath>
 			</rule>
-<!-- 			<rule app_name="testprog" transit_from="impots" transit_to=".*" prompt="false" scope="global"> -->
-<!-- 				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url> -->
-<!-- 			</rule> -->
-			<!-- We forbid to go back from Impôts-->
+			<rule app_name="testprog" transit_from="impots" transit_to=".*" prompt="true" scope="global">
+					<fullpath>/home/pigauser/*</fullpath>
+			</rule>
 
-		<!--E-commerce -->
-			<rule app_name="testprog" transit_from="ecommerce" transit_to="ecommerce" prompt="false" notify="false" scope="global">
-				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
-				<path>.*</path>
-				<protocol>(http|https)</protocol>
+		<!--Rapport -->
+			<rule app_name="testprog" transit_from="rapport" transit_to="rapport" prompt="false" notify="false" scope="global">
+					<fullpath>./home/pigauser/rapport/*</fullpath>
 			</rule>
-			<rule app_name="testprog" transit_from="default" transit_to="ecommerce" prompt="true" scope="global">
-				<host>(.*\.ebay\.fr|.*\.ebayrtm\.com|.*\.ebaystatic\.com|.*\.ldlc\.fr|.*\.ldlc\.com|.*\.ventesprivees\.fr|.*\.laredoute\.fr|.*\.darty\.fr)</host>
-				<path>.*</path>
-				<protocol>(http|https)</protocol>
+			<rule app_name="testprog" transit_from="default" transit_to="rapport" prompt="true" scope="global">
+					<fullpath>./home/pigauser/rapport/*</fullpath>
 			</rule>
-			<rule app_name="testprog" transit_from="ecommerce" transit_to=".*" prompt="false" scope="global">
-				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
-			</rule>-->
-			<!-- We forbid to go back from Impôts-->
-			<rule app_name="testprog" transit_from="mail" transit_to=".*" prompt="false" scope="global">
-				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+			<rule app_name="testprog" transit_from="rapport" transit_to=".*" prompt="true" scope="global">
+					<fullpath>./home/pigauser/rapport/*</fullpath>
 			</rule>
 
 		<!-- default -->
 			<rule app_name="testprog" transit_from="default" transit_to="default" prompt="false" notify="false" scope="global">
-				<host>[a-z].*</host>
-				<path>.*</path>
-				<protocol>(http|https)</protocol>
-			</rule>
-			<rule app_name="testprog" transit_from="default" transit_to="default" prompt="false" scope="global">
-				<url>file:///usr/lib/.*firefox.*/extensions/PIGAContext@sds-project.fr/chrome/content/access_forbidden.xul</url>
+				<fullpath>.*</fullpath>
 			</rule>
 
 
