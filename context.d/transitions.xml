@@ -7,7 +7,7 @@
 
 		
 	<!--Programs-->
-		<context name="testprog" display_name="Programme de test" icon="" full_path="/usr/testprog" />
+		<context name="testprog" display_name="Programme de test" icon="" full_path="/usr/bin/testprog" />
 		<program name="context-notify" display_name="Context Notify" icon="" full_path="/usr/bin/context-notify" />
 		
 		
