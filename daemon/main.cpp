@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
-	while((auditsec_register(true) != 0) && (i < 5)){
+	while((auditsec_register(true) != getpid()) && (i < 5)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
