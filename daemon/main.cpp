@@ -75,14 +75,18 @@ int main(int argc, char* argv[])
 
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
+	sleep(2);
+
 	while(keep_going){
+		std::cout << "Boucle" << std::endl;
 		if(auditsec_question(usai) == 0){
 			
 			switch (usai->type){
 				case AUDITSEC_FILE:
 					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) || (usai->pid != contextd_pid)){
 						if(testprog_reg == false){
-							context_register_application("testprog");
+							std::cout << "Trying to reg as daemon" << std::endl;
+							context_register_application("daemon");
 						}
 						switch (context_changed(//"pid", usai->pid,
 					"fullpath", usai->auditsec_struct.file.fullpath,
@@ -93,11 +97,11 @@ int main(int argc, char* argv[])
 								std::cout << "Transition acceptee." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Transition refuse." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Erreur dans la transition." << std::endl;
 								break;
 							default:
@@ -118,7 +122,7 @@ int main(int argc, char* argv[])
 				case AUDITSEC_DIR:
 					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN)){
 						if(testprog_reg == false){
-							context_register_application("testprog");
+							context_register_application("daemon");
 						}
 						switch (context_changed("pid", usai->pid,
 					"fullpath", usai->auditsec_struct.dir.fullpath,
@@ -128,15 +132,15 @@ int main(int argc, char* argv[])
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
 								break;
 							default:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
 								break;
 						}
@@ -152,7 +156,7 @@ int main(int argc, char* argv[])
 					break;
 				default:
 					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-					auditsec_answer(false);
+					auditsec_answer(true);
 					break;
 			}
 		}
