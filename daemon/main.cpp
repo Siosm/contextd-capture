@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 						}
 						switch (context_changed(//"pid", usai->pid,
 					"fullpath", usai->auditsec_struct.file.fullpath,
-					"filename", usai->auditsec_struct.file.name,
+// 					"filename", usai->auditsec_struct.file.name,
 					NULL, NULL)){
 							case CONTEXT_ACCEPTED:
 								auditsec_answer(true);
