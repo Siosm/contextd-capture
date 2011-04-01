@@ -4,5 +4,6 @@ build
 daemon
 *.kdev4
 .kdev4
+.kdev*
 *.so
 *.so.0.2.0
