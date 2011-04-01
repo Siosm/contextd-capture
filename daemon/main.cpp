@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "../piga-systrans/src/libcontext_src/libcontext.h"
+#include <libcontext.h>
 
 #include "auditsec_info.h"
 #include "syscall.h"
