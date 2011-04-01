@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <signal.h>
 #include <string.h>
@@ -25,25 +26,18 @@ int testprog_reg = false;
 
 int read_execpath (pid_t pid, char * path)
 {
-	int fd = 0, nb = 0;
+	ssize_t nb = 0;
 	std::string proc_file("/proc/");
 	std::stringstream out;
 	
 	out << (double) pid;
 	proc_file += out.str() + "/exe";
 	
-	if ((fd = open(proc_file.c_str(), O_RDONLY)) < 0) {
-		std::cerr << "Could not open file: " << proc_file << std::endl;
-		return 1;
-	}
 	
-	if((nb = read(fd, path, PATH_MAX)) <= 0) {
-		close(fd);
+	if((nb = readlink(proc_file.c_str(), path, PATH_MAX)) <= 0) {
 		return 1;
 	}
-
-	close(fd);	
-
+	path[nb] = '\0';
 	return nb;
 }
 
@@ -56,9 +50,17 @@ void signal_manager(int signal)
 int main(int argc, char* argv[])
 {
 	struct auditsec_info * usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
+#ifdef DEBUG
 	char exec_path[PATH_MAX];
+#endif
 	int i = 0;
 	struct sigaction action;
+	pid_t contextd_pid = atoi(argv[1]);
+
+	if(argc != 2) {
+		std::cerr << "Usage: " << argv[0] << "contextd_pid" << std::endl;
+		return -1;
+	}
 	
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
@@ -78,7 +80,7 @@ int main(int argc, char* argv[])
 			
 			switch (usai->type){
 				case AUDITSEC_FILE:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN)){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) || (usai->pid != contextd_pid)){
 						if(testprog_reg == false){
 							context_register_application("testprog");
 						}
@@ -88,11 +90,11 @@ int main(int argc, char* argv[])
 					NULL, NULL)){
 							case CONTEXT_ACCEPTED:
 								auditsec_answer(true);
-								std::cout << "Transition acceptée." << std::endl;
+								std::cout << "Transition acceptee." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
 								auditsec_answer(false);
-								std::cout << "Transition refusée." << std::endl;
+								std::cout << "Transition refuse." << std::endl;
 								break;
 							case CONTEXT_ERROR:
 								auditsec_answer(false);
@@ -100,14 +102,14 @@ int main(int argc, char* argv[])
 								break;
 							default:
 								auditsec_answer(false);
-								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
+								std::cout << "Default ! On ne devrait pas etre la !" << std::endl;
 								break;
 						}
 						#ifdef DEBUG
 						read_execpath(usai->pid, exec_path);
 						std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
 						<< usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
-						<< exec_path << usai->execname << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
+						<< exec_path << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
 						#endif /* DEBUG */
 					}else{
 						auditsec_answer(true);
