@@ -1,0 +1,40 @@
+<program name="claws-mail" display_name="Claws Mail" icon="/usr/share/icons/hicolor/48x48/apps/claws-mail.png" full_path="/usr/bin/claws-mail">
+	<actions>
+		<action name="session" display_name="Session" description="" />
+		<action name="open_mail" display_name="Open Mail" description="" />
+		<action name="attach_file" display_name="Attach File" description="" />
+		<action name="insert_file" display_name="Insert File" description="" />
+		<action name="claws_open_close" display_name="Claws-mail oppening/closing" description="" />
+	</actions>
+	
+	<variables>
+		<!--Read/list/send mail-->
+		<variable name="action" description="The action made by the user. Can be either 'read', 'list' or 'send'" action="open_mail"/>
+		<variable name="from" description="The email adress of the sender" action="open_mail"/>
+		<variable name="to" description="The email adresses of the the recipients" action="open_mail"/>
+		<variable name="subject" description="The subject of the email" action="open_mail"/>
+		<variable name="date" description="The date of the mail. The format is 'Tue, 10 Nov 2009 10:24:51 +0100 (CET)'" action="open_mail"/>
+		<variable name="inreplyto" description="The reply ID. Format is '92ab2980695d61d735ef8dad82da1c73.squirrel@webmail.ensi-bourges.fr'" action="open_mail"/>
+        
+		<!-- Attach File-->
+		<variable name="action" description="The action of the user. Must be 'attach_file'" action="attach_file"/>
+		<variable name="file" description="The filepath of the attached file." action="attach_file"/>
+		<variable name="content_type" description="TThe mimetype of the attached file" action="attach_file"/>
+		<variable name="name" description="The name of the file" action="attach_file"/>
+		<variable name="file_size" description="Size of the mail, in bytes." action="attach_file"/>
+		
+		<!-- Insert File-->
+		<variable name="action" description="The action of the user. Must be 'attach_file'" action="insert_file"/>
+		<variable name="file" description="The filepath of the attached file." action="insert_file"/>
+	
+		<!-- Session -->
+		<variable name="action" description="The action of the user. Must be either 'connect' or 'close'" action="session"/>
+		<variable name="host" description="Domain name of the server" action="session"/>
+		<variable name="port" description="Domain name of the server" action="session"/>
+		<variable name="session_type" description="The type of the session. Must be either 'imap', 'news', 'smtp', 'pop3' or 'unknown'." action="session"/>
+		
+		<!-- Claws-mail open/close -->
+		<variable name="action" description="The action of the user. Must be either 'claws_open' or 'claws_close'." action="claws_open_close"/>
+		<variable name="pid" description="The pid of claws-mail." action="claws_open_close"/>
+	</variables>
+</program>

@@ -1,0 +1,21 @@
+<program name="firefox" display_name="Firefox" icon="/usr/share/pixmaps/firefox.png" full_path="/usr/lib/mozilla-firefox/firefox">
+	<actions>
+		<action name="open_url" display_name="Open an URL" description="" />
+		<action name="open_path" display_name="Open path" description="" />
+	</actions>
+	
+	<variables>
+		<!--Full-->
+		<variable name="url_type" description="The type of the URL. Must be 'full'." action="open_url"/>
+		<variable name="url" description="The full URL that is currently being opened(eg. 'http://www.google.com/')" action="open_url"/>
+		<variable name="protocol" description="The protocol, extracted from the url(eg. 'http')." action="open_url"/>
+		<variable name="host" description="The domain name, extracted from the url(eg. 'www.google.com')." action="open_url"/>
+		<variable name="port" description="The port, extracted from the url(eg. '80')." action="open_url"/>
+		<variable name="path" description="The path, extracted from the url(eg. '/')." action="open_url"/>
+		
+		<!-- Path -->
+		<variable name="url_type" description="The type of the URL. Must be 'path'." action="open_path"/>
+		<variable name="url" description="The full URL that is currently being opened." action="open_path"/>
+
+	</variables>
+</program>
