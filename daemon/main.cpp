@@ -43,7 +43,7 @@ int read_execpath (pid_t pid, char * path)
 
 void signal_manager(int signal)
 {
-	std::cout << "^C detected..." << std::endl;
+	std::cout << " detected..." << std::endl;
 	keep_going = 0;
 }
 
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	pid_t contextd_pid = atoi(argv[1]);
 
 	if(argc != 2) {
-		std::cerr << "Usage: " << argv[0] << "contextd_pid" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " contextd_pid" << std::endl;
 		return -1;
 	}
 	
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-	if(auditsec_register(false) != 0){
+	if(auditsec_register(false) != getpid()){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}
