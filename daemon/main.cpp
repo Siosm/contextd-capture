@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 						#ifdef DEBUG
 						read_execpath(usai->pid, exec_path);
 						std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
-						<< usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
+						<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
 						<< exec_path << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
 						#endif /* DEBUG */
 					}else{
