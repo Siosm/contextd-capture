@@ -76,8 +76,6 @@ int main(int argc, char* argv[])
 
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
-	sleep(2);
-
 	while(keep_going){
 		std::cout << "Boucle" << std::endl;
 		if(auditsec_question(usai) == 0){
