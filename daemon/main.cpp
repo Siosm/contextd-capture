@@ -55,13 +55,14 @@ int main(int argc, char* argv[])
 #endif
 	int i = 0;
 	struct sigaction action;
-	pid_t contextd_pid = atoi(argv[1]);
 
 	if(argc != 2) {
 		std::cerr << "Usage: " << argv[0] << "contextd_pid" << std::endl;
 		return -1;
 	}
-	
+
+	pid_t contextd_pid = atoi(argv[1]);
+
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
@@ -163,7 +164,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-	if(auditsec_register(false) != 0){
+	if(auditsec_register(false) != -1){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}
