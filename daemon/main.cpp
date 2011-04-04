@@ -55,13 +55,14 @@ int main(int argc, char* argv[])
 #endif
 	int i = 0;
 	struct sigaction action;
-	pid_t contextd_pid = atoi(argv[1]);
 
 	if(argc != 2) {
 		std::cerr << "Usage: " << argv[0] << " contextd_pid" << std::endl;
 		return -1;
 	}
-	
+
+	pid_t contextd_pid = atoi(argv[1]);
+
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
@@ -74,8 +75,6 @@ int main(int argc, char* argv[])
 		return -1;
 
 	std::cout << "The daemon is registered with the kernel." << std::endl;
-
-	sleep(2);
 
 	while(keep_going){
 		std::cout << "Boucle" << std::endl;
@@ -112,7 +111,7 @@ int main(int argc, char* argv[])
 						#ifdef DEBUG
 						read_execpath(usai->pid, exec_path);
 						std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
-						<< usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
+						<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
 						<< exec_path << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
 						#endif /* DEBUG */
 					}else{
@@ -163,7 +162,11 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
+<<<<<<< HEAD
 	if(auditsec_register(false) != getpid()){
+=======
+	if(auditsec_register(false) != -1){
+>>>>>>> bb2dc4f7436680a75a13c684251fb69d5d6946b7
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}
