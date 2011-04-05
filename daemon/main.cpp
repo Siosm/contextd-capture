@@ -77,12 +77,12 @@ int main(int argc, char* argv[])
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
 	while(keep_going){
-		std::cout << "Boucle" << std::endl;
+// 		std::cout << "Boucle" << std::endl;
 		if(auditsec_question(usai) == 0){
 			
 			switch (usai->type){
 				case AUDITSEC_FILE:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) || (usai->pid != contextd_pid)){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 || (usai->pid != contextd_pid)){
 						if(testprog_reg == false){
 							std::cout << "Trying to reg as daemon" << std::endl;
 							context_register_application("daemon");
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 					}
 					break;
 				case AUDITSEC_DIR:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN)){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 || (usai->pid != contextd_pid)){
 						if(testprog_reg == false){
 							context_register_application("daemon");
 						}
