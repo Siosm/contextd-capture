@@ -38,13 +38,25 @@
 		<!-- Tmp daemon process -->
 		<nokill_program full_path="/root/systemtap/daemon/daemon" />
 		<nokill_program full_path="/usr/bin/progtest" />
+		<!-- Debug -->
+		<nokill_program full_path="/usr/sbin/hald" />
+		<nokill_program full_path="/usr/sbin/sshd" />
+		<nokill_program full_path="/bin/login" />
+		<nokill_program full_path="/bin/sh" />
+		<nokill_program full_path="/bin/bash" />
 		<!-- KDE -->
 		<nokill_program full_path="/usr/bin/kdm" />
 		<nokill_program full_path="/usr/lib/polkit-1/polkitd" />
 		<nokill_program full_path="/usr/sbin/console-kit-daemon" />
 		<nokill_program full_path="/usr/lib/kde4/libexec/start_kdeinit" />
 		<nokill_program full_path="/usr/bin/kwin" />
+		<nokill_program full_path="/usr/bin/xinit" />
+		<nokill_program full_path="/usr/bin/X" />
+		<nokill_program full_path="/usr/bin/startx" />
+		<nokill_program full_path="/usr/bin/startkde" />
 		<nokill_program full_path="/usr/bin/knotify4" />
+		<nokill_program full_path="/usr/bin/kwrapper4" />
+		<nokill_program full_path="/usr/bin/kdeinit4" />
 		<nokill_program full_path="/usr/bin/kuiserver" />
 		<nokill_program full_path="/usr/bin/kwrited" />
 		<nokill_program full_path="/usr/bin/ksysguardd" />
