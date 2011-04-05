@@ -6,9 +6,6 @@
 
 #include "auditsec_info.h"
 
-#define true 1
-#define false 0
-
 // appels system sur x64 : 299, 300, 301
 // appels system sur i386 : 337, 338, 339
 #ifdef __x86_64
