@@ -338,6 +338,26 @@
 				</allow>
 			</transitions>
 		</rule>
+		<rule app_name="context-notify" to_domain="default" notify="true" prompt="false" display_name="impots">
+			<matching>
+<!--				<mrule>
+					<context>impots</context>
+				</mrule>-->
+				<mrule>
+					<domain>default</domain>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="default" />
+					<transit from_domain="web" />
+					<transit from_domain="mail" />
+					<transit from_domain="web-flash" />
+					<transit from_domain="ecommerce" />
+					<transit from_domain="impots" />
+				</allow>
+			</transitions>
+		</rule>
 
 
 		<!-- Daemon to be tested -->
