@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 	sigaction(SIGINT, &action, NULL);
 	
 	std::cout << "Trying to register with the kernel" << std::endl;
-	while((auditsec_register(true) != getpid()) && (i < 5)){
+	while((auditsec_register(true) != getpid()) && (i < 2)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
@@ -79,9 +79,10 @@ int main(int argc, char* argv[])
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
 	i = 0;
-	while((testprog_reg == false) && (i < 5)){
+	while((testprog_reg == false) && (i < 2)){
 		std::cout << "Trying to register with contextd" << std::endl;
 		context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
+		++i;
 	}
 	if((i == 5) || (keep_going == 0))
 		return -1;
