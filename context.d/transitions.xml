@@ -44,6 +44,8 @@
 		<nokill_program full_path="/bin/login" />
 		<nokill_program full_path="/bin/sh" />
 		<nokill_program full_path="/bin/bash" />
+		<!-- VMware -->
+		<nokill_program full_path="/usr/lib/vmware-tools/bin32/vmware-user-loader" />
 		<!-- KDE -->
 		<nokill_program full_path="/usr/bin/kdm" />
 		<nokill_program full_path="/usr/lib/polkit-1/polkitd" />
