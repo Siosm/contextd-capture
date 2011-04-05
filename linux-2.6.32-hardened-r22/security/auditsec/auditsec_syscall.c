@@ -24,13 +24,16 @@
 #include "share.h"
 #include "hooks.h"
 
-asmlinkage long sys_auditsec_reg(int state)
+asmlinkage long sys_auditsec_reg(int state, int contextd, int cnotify)
 {
 	down_write(auditsec_pid_lock());
 
 	if(state){
 		if(*daemon_pid() == -1){
 			*daemon_pid() = task_pid_nr(current);
+			*contextd_pid() = contextd;
+			*cnotify_pid() = cnotify;
+
 			up_write(auditsec_pid_lock());
 			printk(KERN_INFO "AuditSec: Process %d successfully registered",
 					task_pid_nr(current));
@@ -39,6 +42,8 @@ asmlinkage long sys_auditsec_reg(int state)
 	} else {
 		if(*daemon_pid() == task_pid_nr(current)){
 			*daemon_pid() = -1;
+			*contextd_pid() = -1;
+			*cnotify_pid() = -1;
 			up_write(auditsec_pid_lock());
 			return *daemon_pid();
 		}

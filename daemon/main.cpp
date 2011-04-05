@@ -56,12 +56,13 @@ int main(int argc, char* argv[])
 	int i = 0;
 	struct sigaction action;
 
-	if(argc != 2) {
-		std::cerr << "Usage: " << argv[0] << " contextd_pid" << std::endl;
+	if(argc != 3) {
+		std::cerr << "Usage: " << argv[0] << " contextd_pid, context-notify_pid" << std::endl;
 		return -1;
 	}
 
 	pid_t contextd_pid = atoi(argv[1]);
+	pid_t cnotify_pid = atoi(argv[2]);
 
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));
@@ -69,11 +70,11 @@ int main(int argc, char* argv[])
 	sigaction(SIGINT, &action, NULL);
 	
 	std::cout << "Trying to register with the kernel" << std::endl;
-	while((auditsec_register(true) != getpid()) && (i < 2)){
+	while((auditsec_register(true, contextd_pid, cnotify_pid) != getpid()) && (i < 2)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
-	if((i == 5) || (keep_going == 0))
+	if((i == 2) || (keep_going == 0))
 		return -1;
 
 	std::cout << "The daemon is registered with the kernel." << std::endl;
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 		context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
 		++i;
 	}
-	if((i == 5) || (keep_going == 0))
+	if((i == 2) || (keep_going == 0))
 		return -1;
 
 	std::cout << "The daemon is registered with contextd." << std::endl;
@@ -92,10 +93,9 @@ int main(int argc, char* argv[])
 	while(keep_going){
 // 		std::cout << "Boucle" << std::endl;
 		if(auditsec_question(usai) == 0){
-			
 			switch (usai->type){
 				case AUDITSEC_FILE:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 && (usai->pid != contextd_pid)){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
 						switch (context_changed(//"pid", usai->pid,
 								"fullpath", usai->auditsec_struct.file.fullpath,
 // 								"filename", usai->auditsec_struct.file.name,
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 					}
 					break;
 				case AUDITSEC_DIR:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 && (usai->pid != contextd_pid)){
+					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
 						switch (context_changed("pid", usai->pid,
 								"fullpath", usai->auditsec_struct.dir.fullpath,
 								NULL, NULL)){
