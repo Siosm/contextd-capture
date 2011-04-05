@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
 								std::cout << "Transition acceptee." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Transition refuse." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Erreur dans la transition." << std::endl;
 								break;
 							default:
@@ -136,11 +136,11 @@ int main(int argc, char* argv[])
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(true);
 								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
 								break;
 							default:
