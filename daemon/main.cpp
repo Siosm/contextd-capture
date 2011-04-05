@@ -76,6 +76,16 @@ int main(int argc, char* argv[])
 
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
+	i = 0;
+	while((testprog_reg == false) && (i < 5)){
+		std::cout << "Trying to register with contextd" << std::endl;
+		context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
+	}
+	if((i == 5) || (keep_going == 0))
+		return -1;
+
+	std::cout << "The daemon is registered with contextd." << std::endl;
+
 	while(keep_going){
 // 		std::cout << "Boucle" << std::endl;
 		if(auditsec_question(usai) == 0){
@@ -83,24 +93,20 @@ int main(int argc, char* argv[])
 			switch (usai->type){
 				case AUDITSEC_FILE:
 					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 && (usai->pid != contextd_pid)){
-						if(testprog_reg == false){
-							std::cout << "Trying to reg as daemon" << std::endl;
-							context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
-						}
 						switch (context_changed(//"pid", usai->pid,
-					"fullpath", usai->auditsec_struct.file.fullpath,
-// 					"filename", usai->auditsec_struct.file.name,
-					NULL, NULL)){
+								"fullpath", usai->auditsec_struct.file.fullpath,
+// 								"filename", usai->auditsec_struct.file.name,
+								NULL, NULL)){
 							case CONTEXT_ACCEPTED:
 								auditsec_answer(true);
 								std::cout << "Transition acceptee." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Transition refuse." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Erreur dans la transition." << std::endl;
 								break;
 							default:
@@ -120,26 +126,23 @@ int main(int argc, char* argv[])
 					break;
 				case AUDITSEC_DIR:
 					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0 && (usai->pid != contextd_pid)){
-						if(testprog_reg == false){
-							context_register_application("daemon");
-						}
 						switch (context_changed("pid", usai->pid,
-					"fullpath", usai->auditsec_struct.dir.fullpath,
-					NULL, NULL)){
+								"fullpath", usai->auditsec_struct.dir.fullpath,
+								NULL, NULL)){
 							case CONTEXT_ACCEPTED:
 								auditsec_answer(true);
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
 								break;
 							default:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
 								break;
 						}
@@ -155,7 +158,7 @@ int main(int argc, char* argv[])
 					break;
 				default:
 					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-					auditsec_answer(true);
+					auditsec_answer(false);
 					break;
 			}
 		}
