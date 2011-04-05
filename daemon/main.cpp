@@ -102,11 +102,11 @@ int main(int argc, char* argv[])
 								NULL, NULL)){
 							case CONTEXT_ACCEPTED:
 								auditsec_answer(true);
-								std::cout << "Transition acceptee." << std::endl;
+								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(true);
-								std::cout << "Transition refuse." << std::endl;
+								auditsec_answer(false);
+								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
 								auditsec_answer(true);
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 								break;
 							default:
 								auditsec_answer(false);
-								std::cout << "Default ! On ne devrait pas etre la !" << std::endl;
+								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
 								break;
 						}
 						#ifdef DEBUG
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(true);
+								auditsec_answer(false);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
