@@ -1,2 +1,2 @@
 all:
-	g++ main.cpp -Wall -o progtest
+	g++ main.cpp -Wall -o testprog
