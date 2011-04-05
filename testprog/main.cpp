@@ -28,7 +28,7 @@ int openfile(std::string filename)
 
 int main(int argc, char ** argv)
 {
-	for(int i = 0; i < 4 ; ++i){
+	for(int i = 0; i < 2 ; ++i){
 		openfile("/home/user/impots/test");
 		openfile("/home/user/ecommerce/test");
 	}

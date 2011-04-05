@@ -101,19 +101,19 @@ int main(int argc, char* argv[])
 // 								"filename", usai->auditsec_struct.file.name,
 								NULL, NULL)){
 							case CONTEXT_ACCEPTED:
-								auditsec_answer(true);
+								auditsec_answer(1);
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Erreur dans la transition." << std::endl;
 								break;
 							default:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
 								break;
 						}
@@ -133,19 +133,19 @@ int main(int argc, char* argv[])
 								"fullpath", usai->auditsec_struct.dir.fullpath,
 								NULL, NULL)){
 							case CONTEXT_ACCEPTED:
-								auditsec_answer(true);
+								auditsec_answer(1);
 								std::cout << "Transition acceptée." << std::endl;
 								break;
 							case CONTEXT_REFUSED:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Transition refusée." << std::endl;
 								break;
 							case CONTEXT_ERROR:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
 								break;
 							default:
-								auditsec_answer(false);
+								auditsec_answer(0);
 								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
 								break;
 						}
