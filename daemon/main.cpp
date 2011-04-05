@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-	if(auditsec_register(false) != -1){
+	if(auditsec_register(false, 0, 0) != -1){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}
