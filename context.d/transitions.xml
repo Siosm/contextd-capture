@@ -35,6 +35,8 @@
 		<nokill_program full_path="/usr/bin/gnome-keyring-daemon" />
 		<nokill_program full_path="/usr/bin/dbus-daemon" />
 		<nokill_program full_path="/usr/bin/dbus-launch" />
+		<!-- Tmp daemon process -->
+		<nokill_program full_path="/root/systemtap/daemon/daemon" />
 		<!-- to be filled -->
 	</nokill>
 
@@ -229,7 +231,9 @@
 				</allow>
 			</transitions>
 		</rule>
- 	<!-- Context Notify : Manual transitions-->
+
+
+	<!-- Context Notify : Manual transitions-->
 		<rule app_name="context-notify" to_domain="impots" notify="false" prompt="false" display_name="impots">
 			<matching>
 				<mrule>
@@ -307,5 +311,57 @@
 				</allow>
 			</transitions>
 		</rule>
-</PIGA_Transitions>
 
+
+		<!-- Daemon to be tested -->
+		<!-- Loop -->
+		<loop app_name="daemon" notify="true" prompt="false" display_name="Loop">
+			<matching>
+				<mrule>
+					<fullpath></fullpath>
+<!-- 					<execname>progtest</execname> -->
+				</mrule>
+			</matching>
+			<domains>
+				<loop_domain name="default" />
+				<loop_domain name="mail" />
+				<loop_domain name="web" />
+				<loop_domain name="web-flash" />
+				<loop_domain name="ecommerce" />
+				<loop_domain name="impots" />
+			</domains>
+		</loop>
+		
+		<!--Impots-->
+		<rule app_name="daemon" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+			<matching>
+				<mrule>
+					<fullpath>/home/pigauser/impots/*</fullpath>
+<!-- 					<execname>progtest</execname> -->
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="true" prompt="false"/> <!--les params sont modifiables ici-->
+					<transit from_domain="default" /> <!--les params sont modifiables ici-->
+				</allow>
+			</transitions>
+		</rule>
+		
+		<!--Ecommerce-->
+		<rule app_name="daemon" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>/home/pigauser/ecommerce/*</fullpath>
+<!-- 					<execname>progtest</execname> -->
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="true" prompt="false"/>
+					<transit from_domain="mail" to_domain="ecommerce" prompt="true" /> 
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" /> 
+				</allow>
+			</transitions>
+		</rule>
+</PIGA_Transitions>

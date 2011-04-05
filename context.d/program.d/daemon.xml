@@ -1,0 +1,22 @@
+<program name="daemon" display_name="Programme de test" icon="" full_path="/root/systemtap/daemon/daemon">
+	<actions>
+		<action name="open_file" display_name="Open a file" description="" />
+		<action name="open_path" display_name="Open path" description="" />
+<!-- 		<action name="open_url" display_name="Open url" description="" /> -->
+	</actions>
+	
+	<variables>
+		<!--open_file-->
+		<variable name="fullpath" description="" action="open_file"/>
+<!--		<variable name="filename" description="" action="open_file"/>	-->
+<!-- 		<variable name="execname" description="" action="open_file"/> -->
+
+		<!-- open_path -->
+		<variable name="fullpath" description="" action="open_path"/>
+<!-- 		<variable name="execname" description="" action="open_path"/> -->
+		
+		<!-- open url -->
+<!-- 		<variable name="url" description="" action="open_url"/> -->
+<!--		<variable name="execname" description="" action="open_path"/> -->
+	</variables>
+</program>
