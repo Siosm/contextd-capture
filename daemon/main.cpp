@@ -164,6 +164,8 @@ int main(int argc, char* argv[])
 					auditsec_answer(false);
 					break;
 			}
+		} else {
+			break;
 		}
 	}
 
