@@ -47,8 +47,8 @@ asmlinkage long sys_auditsec_reg(int state, int contextd, int cnotify)
 		printk(KERN_INFO "AuditSec: Process %d successfully unregistered",
 				task_pid_nr(current));
 	} else {
-		printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is
-				%d", task_pid_nr(current), *daemon_pid());
+		printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is 	%d",
+				task_pid_nr(current), *daemon_pid());
 	}
 	up_write(auditsec_pid_lock());
 
