@@ -12,7 +12,6 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/swap.h>
-// #include <linux/spinlock.h>
 #include <linux/syscalls.h>
 #include <linux/file.h>
 #include <linux/fdtable.h>
