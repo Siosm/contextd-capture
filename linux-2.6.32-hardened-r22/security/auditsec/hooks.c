@@ -240,25 +240,27 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	dir_path(dentry, fullpath);
 
 	down_read(auditsec_pid_lock());
-	test = ((*daemon_pid() == -1)
-		|| (*contextd_pid() == -1)
-		|| (*cnotify_pid() == -1)
-		|| (*daemon_pid() == task_pid_nr(current))
-		|| (*contextd_pid() == task_pid_nr(current))
-		|| (*cnotify_pid() == task_pid_nr(current)));
+	test = ((*daemon_pid() != -1)
+		&& (*contextd_pid() != -1)
+		&& (*cnotify_pid() != -1)
+		&& (*daemon_pid() != task_pid_nr(current))
+		&& (*contextd_pid() != task_pid_nr(current))
+		&& (*cnotify_pid() != task_pid_nr(current)));
+		
+	up_read(auditsec_pid_lock());
 
 	if(test){
-		up_read(auditsec_pid_lock());
-
-/*		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
-				fullpath, task_pid_nr(current), current->comm, mode);*/
-	} else {
-		up_read(auditsec_pid_lock());
-
 		if(down_timeout(auditsec_hook_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
 			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
 					fullpath, task_pid_nr(current), current->comm, mode);
 			vfree(fullpath);
+
+			/* FIXME WHEN READY */
+			*daemon_pid() == -1;
+			*contextd_pid() == -1;
+			*cnotify_pid() == -1;
+			/* FIXME WHEN READY */
+
 			return -1;
 		}
 
@@ -276,6 +278,13 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 					fullpath, task_pid_nr(current), current->comm, mode);
 			up(auditsec_hook_lock());
 			vfree(fullpath);
+
+			/* FIXME WHEN READY */
+			*daemon_pid() == -1;
+			*contextd_pid() == -1;
+			*cnotify_pid() == -1;
+			/* FIXME WHEN READY */
+
 			return -1;
 		}
 
@@ -284,6 +293,8 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		vfree(fullpath);
 		return answer;
 	}
+/*	printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+				fullpath, task_pid_nr(current), current->comm, mode);*/
 	vfree(fullpath);
 
 	return 0;
@@ -372,21 +383,16 @@ int auditsec_file_permission(struct file *file, int mask)
 	file_path(file, fullpath);
 
 	down_read(auditsec_pid_lock());
-	test = ((*daemon_pid() == -1)
-		|| (*contextd_pid() == -1)
-		|| (*cnotify_pid() == -1)
-		|| (*daemon_pid() == task_pid_nr(current))
-		|| (*contextd_pid() == task_pid_nr(current))
-		|| (*cnotify_pid() == task_pid_nr(current)));
+	test = ((*daemon_pid() != -1)
+		&& (*contextd_pid() != -1)
+		&& (*cnotify_pid() != -1)
+		&& (*daemon_pid() != task_pid_nr(current))
+		&& (*contextd_pid() != task_pid_nr(current))
+		&& (*cnotify_pid() != task_pid_nr(current)));
+		
+	up_read(auditsec_pid_lock());
 
 	if(test){
-		up_read(auditsec_pid_lock());
-
-/*		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-				fullpath, task_pid_nr(current), current->comm, mask);*/
-	} else {
-		up_read(auditsec_pid_lock());
-
 		if(down_timeout(auditsec_hook_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
 			printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
 				fullpath, task_pid_nr(current), current->comm, mask);
@@ -416,6 +422,8 @@ int auditsec_file_permission(struct file *file, int mask)
 		vfree(fullpath);
 		return answer;
 	}
+/*	printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);*/
 	vfree(fullpath);
 
 	return 0;

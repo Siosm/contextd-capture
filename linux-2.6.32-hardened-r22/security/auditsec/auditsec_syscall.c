@@ -30,7 +30,7 @@
  *
  * Returns the pid that is stored in the kernel
  **/
-asmlinkage long sys_auditsec_reg(int state, int contextd, int cnotify)
+asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 {
 	down_write(auditsec_pid_lock());
 
