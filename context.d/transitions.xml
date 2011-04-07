@@ -385,8 +385,7 @@
 		<rule app_name="daemon" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<!--<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>-->
-					<fullpath>.*</fullpath>
+					<fullpath>/home/user/impots/*</fullpath>
 <!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>
@@ -402,8 +401,7 @@
 		<rule app_name="daemon" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<!--<fullpath>(/home/user/ecommerce/*|((/usr)?/lib/*))</fullpath>-->
-					<fullpath>.*</fullpath>
+					<fullpath>/home/user/ecommerce/*</fullpath>
 <!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>

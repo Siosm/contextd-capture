@@ -24,32 +24,27 @@
 #include "share.h"
 #include "hooks.h"
 
-
-/**
- * Try to register the current process as the main daemon 
- *
- * Returns the pid that is stored in the kernel
- **/
-asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
+asmlinkage long sys_auditsec_reg(int state)
 {
 	down_write(auditsec_pid_lock());
 
-	if((state == 1) && (*daemon_pid() == -1)){
-		*daemon_pid() = task_pid_nr(current);
-		*contextd_pid() = contextd;
-		*cnotify_pid() = cnotify;
-		printk(KERN_INFO "AuditSec: Process %d successfully registered",
-				task_pid_nr(current));
-	} else if((state == 0) && (*daemon_pid() == task_pid_nr(current))){
-		*daemon_pid() = -1;
-		*contextd_pid() = -1;
-		*cnotify_pid() = -1;
-		printk(KERN_INFO "AuditSec: Process %d successfully unregistered",
-				task_pid_nr(current));
+	if(state){
+		if(*daemon_pid() == -1){
+			*daemon_pid() = task_pid_nr(current);
+			up_write(auditsec_pid_lock());
+			printk(KERN_INFO "AuditSec: Process %d successfully registered",
+					task_pid_nr(current));
+			return *daemon_pid();
+		}
 	} else {
-		printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is 	%d",
-				task_pid_nr(current), *daemon_pid());
+		if(*daemon_pid() == task_pid_nr(current)){
+			*daemon_pid() = -1;
+			up_write(auditsec_pid_lock());
+			return *daemon_pid();
+		}
 	}
+	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
+			task_pid_nr(current), *daemon_pid());
 	up_write(auditsec_pid_lock());
 
 	return *daemon_pid();

@@ -8,8 +8,6 @@
 
 
 pid_t * daemon_pid(void);
-pid_t * contextd_pid(void);
-pid_t * cnotify_pid(void);
 struct auditsec_info * k_auditsec_info(void);
 int * auditsec_answer(void);
 

@@ -12,6 +12,7 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/swap.h>
+// #include <linux/spinlock.h>
 #include <linux/syscalls.h>
 #include <linux/file.h>
 #include <linux/fdtable.h>
@@ -233,68 +234,52 @@ int auditsec_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	int		answer = -1, test = false;
+	int		answer = -1;
 	char *	fullpath = NULL;
 
 	fullpath = vmalloc(PATH_MAX + 1);
 	dir_path(dentry, fullpath);
 
 	down_read(auditsec_pid_lock());
-	test = ((*daemon_pid() != -1)
-		&& (*contextd_pid() != -1)
-		&& (*cnotify_pid() != -1)
-		&& (*daemon_pid() != task_pid_nr(current))
-		&& (*contextd_pid() != task_pid_nr(current))
-		&& (*cnotify_pid() != task_pid_nr(current)));
-		
-	up_read(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			up_read(auditsec_pid_lock());
+			if(down_timeout(auditsec_hook_lock(), 500) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
+						fullpath, task_pid_nr(current), current->comm, mode);
+				vfree(fullpath);
+				*daemon_pid() == -1;
+				return 0; // Change it to -1 when ready
+			}
 
-	if(test){
-		if(down_timeout(auditsec_hook_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
-			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
-					fullpath, task_pid_nr(current), current->comm, mode);
-			vfree(fullpath);
+			k_auditsec_info()->pid = task_pid_nr(current);
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->type = AUDITSEC_DIR;
+			strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
+			k_auditsec_info()->auditsec_struct.dir.mode = mode;
+			// TODO Finir de remplir la struct correctement
 
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
-
-			return -1;
-		}
-
-		k_auditsec_info()->pid = task_pid_nr(current);
-		get_task_comm(k_auditsec_info()->execname, current);
-		k_auditsec_info()->type = AUDITSEC_DIR;
-		strncpy(k_auditsec_info()->auditsec_struct.dir.fullpath, fullpath, PATH_MAX + 1);
-		strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
-		k_auditsec_info()->auditsec_struct.dir.mode = mode;
-		// TODO Add fields to this struct ? (se_context)
-
-		up(auditsec_question_lock());
-		if(down_timeout(auditsec_answer_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
-			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
-					fullpath, task_pid_nr(current), current->comm, mode);
+			up(auditsec_question_lock());
+			if(down_timeout(auditsec_answer_lock(), 500) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
+						fullpath, task_pid_nr(current), current->comm, mode);
+				up(auditsec_hook_lock());
+				vfree(fullpath);
+				*daemon_pid() == -1;
+				return 0; // Change it to -1 when ready
+			}
+			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 			vfree(fullpath);
-
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
-
-			return -1;
+			return answer;
 		}
-
-		answer = (*auditsec_answer() == 0);
-		up(auditsec_hook_lock());
-		vfree(fullpath);
-		return answer;
+		up_read(auditsec_pid_lock());
+	} else {
+		up_read(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
+				fullpath, task_pid_nr(current), current->comm, mode);
 	}
-/*	printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
-				fullpath, task_pid_nr(current), current->comm, mode);*/
 	vfree(fullpath);
 
 	return 0;
@@ -376,54 +361,54 @@ void auditsec_inode_getsecid(const struct inode *inode, u32 *secid)
 
 int auditsec_file_permission(struct file *file, int mask)
 {
-	int		answer = -1, test = false;
-	pid_t 	current_pid = task_pid_nr(current);
+	int		answer = -1;
 	char *	fullpath = NULL;
 
+	fullpath = vmalloc(PATH_MAX + 1);
+	file_path(file, fullpath);
 
 	down_read(auditsec_pid_lock());
-	test =	((*daemon_pid() != -1) && (*daemon_pid() != current_pid));
-	//test &= ((*contextd_pid() != -1) && (*contextd_pid() != current_pid));
-	//test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
-	up_read(auditsec_pid_lock());
+	if(*daemon_pid() != -1){
+		if(*daemon_pid() != task_pid_nr(current)){
+			up_read(auditsec_pid_lock());
+			if(down_timeout(auditsec_hook_lock(), 500) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
+					fullpath, task_pid_nr(current), current->comm, mask);
+				vfree(fullpath);
+				*daemon_pid() == -1;
+				return 0; // Change it to -1 when ready
+			}
 
-	if(test){
-		fullpath = vmalloc(PATH_MAX + 1);
-		file_path(file, fullpath);
+			k_auditsec_info()->pid = task_pid_nr(current);
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->type = AUDITSEC_FILE;
+			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
+			k_auditsec_info()->auditsec_struct.file.mask = mask;
+			// TODO Finir de remplir la struct correctement
 
-		if(down_timeout(auditsec_hook_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
-			printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
-				fullpath, task_pid_nr(current), current->comm, mask);
-			vfree(fullpath);
-			*daemon_pid() = -1;
-			return -1;
-		}
-
-		k_auditsec_info()->pid = current_pid;
-		get_task_comm(k_auditsec_info()->execname, current);
-		k_auditsec_info()->type = AUDITSEC_FILE;
-		strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
-		strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
-		k_auditsec_info()->auditsec_struct.file.mask = mask;
-		// TODO Add other info to the struct (se_context)
-
-		up(auditsec_question_lock());
-		if(down_timeout(auditsec_answer_lock(), 5000) != 0){ // 10s timeout. Is it too much ?
-			printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
-				fullpath, current_pid, current->comm, mask);
+			up(auditsec_question_lock());
+			if(down_timeout(auditsec_answer_lock(), 500) != 0){ // 1s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
+					fullpath, task_pid_nr(current), current->comm, mask);
+				up(auditsec_hook_lock());
+				vfree(fullpath);
+				*daemon_pid() == -1;
+				return 0; // Change it to -1 when ready
+			}
+			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 			vfree(fullpath);
-			*daemon_pid() = -1;
-			return -1;
+			return answer;
 		}
-
-		answer = (*auditsec_answer() == 0);
-		up(auditsec_hook_lock());
-		vfree(fullpath);
-		return answer;
+		up_read(auditsec_pid_lock());
+	} else {
+		up_read(auditsec_pid_lock());
+		printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);
 	}
-/*	printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-				fullpath, task_pid_nr(current), current->comm, mask);*/
+	vfree(fullpath);
+
 	return 0;
 }
 
