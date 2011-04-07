@@ -50,9 +50,9 @@ void signal_manager(int signal)
 int main(int argc, char* argv[])
 {
 	struct auditsec_info * usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
-#ifdef DEBUG
+	#ifdef DEBUG
 	char exec_path[PATH_MAX];
-#endif
+	#endif
 	int i = 0;
 	struct sigaction action;
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 	sigaction(SIGINT, &action, NULL);
 
 	std::cout << "Trying to register with the kernel" << std::endl;
-	while((auditsec_register(true, contextd_pid, cnotify_pid) != getpid()) && (i < 2)){
+	while((auditsec_register(1, contextd_pid, cnotify_pid) != getpid()) && (i < 2)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-	if(auditsec_register(false, 0, 0) != -1){
+	if(auditsec_register(0, 0, 0) != -1){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}

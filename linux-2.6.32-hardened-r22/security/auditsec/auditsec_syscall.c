@@ -34,8 +34,8 @@ asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 {
 	if(down_write_trylock(auditsec_pid_lock()) == 0)
 		printk(KERN_INFO "AuditSec: Process %d can't register at the moment", task_pid_nr(current));
-		return -1;
-	down_write(auditsec_pid_lock());
+	return -1;
+// 	down_write(auditsec_pid_lock());
 
 	if((state == 1) && (*daemon_pid() == -1)){
 		*daemon_pid() = task_pid_nr(current);
