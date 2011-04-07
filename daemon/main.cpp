@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	pid_t daemon_pid = getpid();
 	pid_t contextd_pid = atoi(argv[1]);
 	pid_t cnotify_pid = atoi(argv[2]);
 
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
 	sigaction(SIGINT, &action, NULL);
 
 	std::cout << "Trying to register with the kernel" << std::endl;
-	while((auditsec_register(1, contextd_pid, cnotify_pid) != getpid()) && (i < 2)){
+	while((auditsec_register(1, contextd_pid, cnotify_pid) != daemon_pid) && (i < 2)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
