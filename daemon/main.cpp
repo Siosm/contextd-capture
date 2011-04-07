@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 					break;
 				default:
 					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-					auditsec_answer(false);
+					auditsec_answer(0);
 					break;
 			}
 		} else {
