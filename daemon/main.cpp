@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
-	
+
 	std::cout << "Trying to register with the kernel" << std::endl;
 	while((auditsec_register(true, contextd_pid, cnotify_pid) != getpid()) && (i < 2)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
@@ -90,82 +90,79 @@ int main(int argc, char* argv[])
 
 	std::cout << "The daemon is registered with contextd." << std::endl;
 
-	while(keep_going){
-// 		std::cout << "Boucle" << std::endl;
-		if(auditsec_question(usai) == 0){
-			switch (usai->type){
-				case AUDITSEC_FILE:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
-						switch (context_changed(//"pid", usai->pid,
-								"fullpath", usai->auditsec_struct.file.fullpath,
-// 								"filename", usai->auditsec_struct.file.name,
-								NULL, NULL)){
-							case CONTEXT_ACCEPTED:
-								auditsec_answer(1);
-								std::cout << "Transition acceptée." << std::endl;
-								break;
-							case CONTEXT_REFUSED:
-								auditsec_answer(0);
-								std::cout << "Transition refusée." << std::endl;
-								break;
-							case CONTEXT_ERROR:
-								auditsec_answer(0);
-								std::cout << "Erreur dans la transition." << std::endl;
-								break;
-							default:
-								auditsec_answer(0);
-								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
-								break;
-						}
-						#ifdef DEBUG
-						read_execpath(usai->pid, exec_path);
-						std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
-						<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
-						<< exec_path << ", mask: " << usai->auditsec_struct.file.mask << std::endl;
-						#endif /* DEBUG */
-					}else{
-						auditsec_answer(1);
+	while(keep_going && (auditsec_question(usai) == 0)){
+		switch (usai->type){
+			case AUDITSEC_FILE:
+				if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
+					switch (context_changed(//"pid", usai->pid,
+							"fullpath", usai->auditsec_struct.file.fullpath,
+//								"filename", usai->auditsec_struct.file.name,
+							NULL, NULL)){
+						case CONTEXT_ACCEPTED:
+							auditsec_answer(1);
+							std::cout << "Transition acceptée." << std::endl;
+							break;
+						case CONTEXT_REFUSED:
+							auditsec_answer(0);
+							std::cerr << "Transition refusée." << std::endl;
+							break;
+						case CONTEXT_ERROR:
+							auditsec_answer(0);
+							std::cerr << "Erreur dans la transition." << std::endl;
+							break;
+						default:
+							auditsec_answer(0);
+							std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
+							break;
 					}
-					break;
-				case AUDITSEC_DIR:
-					if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
-						switch (context_changed("pid", usai->pid,
-								"fullpath", usai->auditsec_struct.dir.fullpath,
-								NULL, NULL)){
-							case CONTEXT_ACCEPTED:
-								auditsec_answer(1);
-								std::cout << "Transition acceptée." << std::endl;
-								break;
-							case CONTEXT_REFUSED:
-								auditsec_answer(0);
-								std::cout << "Transition refusée." << std::endl;
-								break;
-							case CONTEXT_ERROR:
-								auditsec_answer(0);
-								std::cout << "Erreur dans la transition : " << context_getLastError() << std::endl;
-								break;
-							default:
-								auditsec_answer(0);
-								std::cout << "Default ! On ne devrait pas être là !" << std::endl;
-								break;
-						}
-						#ifdef DEBUG
-						read_execpath(usai->pid, exec_path);
-						std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
-						<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname << ", mode: "
-						<< usai->auditsec_struct.dir.mode << std::endl;
-						#endif /* DEBUG */
-					}else{
-						auditsec_answer(1);
+					#ifdef DEBUG
+					read_execpath(usai->pid, exec_path);
+					std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
+					<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
+					<< exec_path /*<< ", mask: " << usai->auditsec_struct.file.mask*/ << std::endl;
+					#endif /* DEBUG */
+				}else{
+					auditsec_answer(1);
+				}
+				break;
+
+			case AUDITSEC_DIR:
+				if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
+					switch (context_changed("pid", usai->pid,
+							"fullpath", usai->auditsec_struct.dir.fullpath,
+							NULL, NULL)){
+						case CONTEXT_ACCEPTED:
+							auditsec_answer(1);
+							std::cout << "Transition acceptée." << std::endl;
+							break;
+						case CONTEXT_REFUSED:
+							auditsec_answer(0);
+							std::cerr << "Transition refusée." << std::endl;
+							break;
+						case CONTEXT_ERROR:
+							auditsec_answer(0);
+							std::cerr << "Erreur dans la transition : " << context_getLastError() << std::endl;
+							break;
+						default:
+							auditsec_answer(0);
+							std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
+							break;
 					}
-					break;
-				default:
-					std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-					auditsec_answer(0);
-					break;
-			}
-		} else {
-			break;
+					#ifdef DEBUG
+					read_execpath(usai->pid, exec_path);
+					std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
+					<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname /*<< ", mode: "
+					<< usai->auditsec_struct.dir.mode*/ << std::endl;
+					#endif /* DEBUG */
+				}else{
+					auditsec_answer(1);
+				}
+				break;
+				
+			default:
+				std::cerr << "AuditSec, can't determine struct type !" << std::endl;
+				auditsec_answer(0);
+				break;
 		}
 	}
 
