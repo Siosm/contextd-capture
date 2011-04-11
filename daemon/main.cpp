@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = signal_manager;
 	sigaction(SIGINT, &action, NULL);
-	while((auditsec_register(true) != getpid()) && (i < 5)){
+	while((auditsec_register(true, 10, 15) != getpid()) && (i < 5)){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
 		++i;
 	}
@@ -162,11 +162,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-<<<<<<< HEAD
-	if(auditsec_register(false) != getpid()){
-=======
-	if(auditsec_register(false) != -1){
->>>>>>> bb2dc4f7436680a75a13c684251fb69d5d6946b7
+	if(auditsec_register(false, 0, 0) != getpid()){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}

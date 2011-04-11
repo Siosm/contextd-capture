@@ -13,6 +13,17 @@ pid_t * daemon_pid()
 	return &daemon_pid;
 }
 
+pid_t * contextd_pid()
+{
+	static pid_t 		contextd_pid = -1;
+	return &contextd_pid;
+}
+
+pid_t * cnotify_pid()
+{
+	static pid_t 		cnotify_pid = -1;
+	return &cnotify_pid;
+}
 
 struct auditsec_info * k_auditsec_info()
 {

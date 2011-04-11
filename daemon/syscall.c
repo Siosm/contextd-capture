@@ -5,9 +5,9 @@
 #include "auditsec_info.h"
 
 
-long auditsec_register(int state)
+long auditsec_register(int state, pid_t contextd, pid_t cnotify)
 {
-	return syscall(__NR_sys_auditsec_reg, state);
+	return syscall(__NR_sys_auditsec_reg, state, contextd, cnotify);
 }
 
 

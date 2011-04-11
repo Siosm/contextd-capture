@@ -23,8 +23,8 @@
 #define __NR_sys_auditsec_answer 339
 #endif
 
-long auditsec_register(int state);
-long auditsec_question(struct auditsec_info * user_as_i);
-long auditsec_answer(int answer);
+long auditsec_register(int, pid_t, pid_t);
+long auditsec_question(struct auditsec_info *);
+long auditsec_answer(int);
 
 #endif
