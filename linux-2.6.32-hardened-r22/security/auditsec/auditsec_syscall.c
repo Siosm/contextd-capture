@@ -24,8 +24,16 @@
 #include "share.h"
 #include "hooks.h"
 
+/**
+ * Try to register the current process as the main daemon 
+ *
+ * Returns the pid that is stored in the kernel
+ **/
 asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 {
+/*	if(down_write_trylock(auditsec_pid_lock()) == 0)
+		printk(KERN_INFO "AuditSec: Process %d can't register at the moment", task_pid_nr(current));
+	return -1;*/
 	down_write(auditsec_pid_lock());
 
 	if(state){
@@ -47,8 +55,7 @@ asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 			return *daemon_pid();
 		}
 	}
-	printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
-			task_pid_nr(current), *daemon_pid());
+	
 	up_write(auditsec_pid_lock());
 
 	return *daemon_pid();

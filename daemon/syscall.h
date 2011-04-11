@@ -6,22 +6,19 @@
 
 #include "auditsec_info.h"
 
-#define true 1
-#define false 0
-
-// appels system sur x64 : 299, 300, 301
-// appels system sur i386 : 337, 338, 339
+// system calls for x64 : 299, 300, 301
+// system calls for i386 : 337, 338, 339
 #ifdef __x86_64
 #define __NR_sys_auditsec_reg 299
 #define __NR_sys_auditsec_question 300
 #define __NR_sys_auditsec_answer 301
-#endif
+#endif /* __x86_64 */
 
 #ifdef __i686
 #define __NR_sys_auditsec_reg 337
 #define __NR_sys_auditsec_question 338
 #define __NR_sys_auditsec_answer 339
-#endif
+#endif /* __x86_64 */
 
 long auditsec_register(int, pid_t, pid_t);
 long auditsec_question(struct auditsec_info *);

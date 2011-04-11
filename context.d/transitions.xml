@@ -37,6 +37,35 @@
 		<nokill_program full_path="/usr/bin/dbus-launch" />
 		<!-- Tmp daemon process -->
 		<nokill_program full_path="/root/systemtap/daemon/daemon" />
+		<nokill_program full_path="/usr/bin/progtest" />
+		<!-- Debug -->
+		<nokill_program full_path="/usr/sbin/hald" />
+		<nokill_program full_path="/usr/sbin/sshd" />
+		<nokill_program full_path="/bin/login" />
+		<nokill_program full_path="/bin/sh" />
+		<nokill_program full_path="/bin/bash" />
+		<!-- VMware -->
+		<nokill_program full_path="/usr/lib/vmware-tools/bin32/vmware-user-loader" />
+		<!-- KDE -->
+		<nokill_program full_path="/usr/bin/kdm" />
+		<nokill_program full_path="/usr/lib/polkit-1/polkitd" />
+		<nokill_program full_path="/usr/sbin/console-kit-daemon" />
+		<nokill_program full_path="/usr/lib/kde4/libexec/start_kdeinit" />
+		<nokill_program full_path="/usr/bin/kwin" />
+		<nokill_program full_path="/usr/bin/xinit" />
+		<nokill_program full_path="/usr/bin/X" />
+		<nokill_program full_path="/usr/bin/startx" />
+		<nokill_program full_path="/usr/bin/startkde" />
+		<nokill_program full_path="/usr/bin/knotify4" />
+		<nokill_program full_path="/usr/bin/kwrapper4" />
+		<nokill_program full_path="/usr/bin/kdeinit4" />
+		<nokill_program full_path="/usr/bin/kuiserver" />
+		<nokill_program full_path="/usr/bin/kwrited" />
+		<nokill_program full_path="/usr/bin/ksysguardd" />
+		<nokill_program full_path="/usr/lib/kde4/libexec/polkit-kde-authentication-agent-1" />
+		<!-- Openbox -->
+		<nokill_program full_path="/usr/bin/openbox" />
+		<nokill_program full_path="/usr/bin/xinit" />
 		<!-- to be filled -->
 	</nokill>
 
@@ -236,9 +265,9 @@
 	<!-- Context Notify : Manual transitions-->
 		<rule app_name="context-notify" to_domain="impots" notify="false" prompt="false" display_name="impots">
 			<matching>
-				<mrule>
+<!--				<mrule>
 					<context>impots</context>
-				</mrule>
+				</mrule>-->
 				<mrule>
 					<domain>impots</domain>
 				</mrule>
@@ -251,9 +280,9 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="ecommerce" notify="false" prompt="false" display_name="ecommerce">
 			<matching>
-				<mrule>
+<!--				<mrule>
 					<context>ecommerce</context>
-				</mrule>
+				</mrule>-->
 				<mrule>
 					<domain>ecommerce</domain>
 				</mrule>
@@ -267,9 +296,9 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="mail" notify="false" prompt="false" display_name="mail">
 			<matching>
-				<mrule>
+<!--				<mrule>
 					<context>mail</context>
-				</mrule>
+				</mrule>-->
 				<mrule>
 					<domain>mail</domain>
 				</mrule>
@@ -282,9 +311,9 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="web-flash" notify="false" prompt="false" display_name="web-flash">
 			<matching>
-				<mrule>
+<!--				<mrule>
 					<context>web-flash</context>
-				</mrule>
+				</mrule>-->
 				<mrule>
 					<domain>web-flash</domain>
 				</mrule>
@@ -298,9 +327,9 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="web" notify="false" prompt="false" display_name="web">
 			<matching>
-				<mrule>
+<!--				<mrule>
 					<context>web</context>
-				</mrule>
+				</mrule>-->
 				<mrule>
 					<domain>web</domain>
 				</mrule>
@@ -308,6 +337,26 @@
 			<transitions>
 				<allow>
 					<transit from_domain="default" />
+				</allow>
+			</transitions>
+		</rule>
+		<rule app_name="context-notify" to_domain="default" notify="true" prompt="false" display_name="impots">
+			<matching>
+<!--				<mrule>
+					<context>impots</context>
+				</mrule>-->
+				<mrule>
+					<domain>default</domain>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="default" />
+					<transit from_domain="web" />
+					<transit from_domain="mail" />
+					<transit from_domain="web-flash" />
+					<transit from_domain="ecommerce" />
+					<transit from_domain="impots" />
 				</allow>
 			</transitions>
 		</rule>
@@ -336,8 +385,8 @@
 		<rule app_name="daemon" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<fullpath>/home/pigauser/impots/*</fullpath>
-<!-- 					<execname>progtest</execname> -->
+					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>
+<!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>
 			<transitions>
@@ -352,8 +401,8 @@
 		<rule app_name="daemon" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<fullpath>/home/pigauser/ecommerce/*</fullpath>
-<!-- 					<execname>progtest</execname> -->
+					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>
+<!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>
 			<transitions>
