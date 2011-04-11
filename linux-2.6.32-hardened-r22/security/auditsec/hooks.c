@@ -242,7 +242,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	test &= ((*contextd_pid() != -1) && (*contextd_pid() != current_pid));
 	test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
 	up_read(auditsec_pid_lock());
-
+/*
 	if(test){
 		fullpath = vmalloc(PATH_MAX + 1);
 		dir_path(dentry, fullpath);
@@ -252,11 +252,11 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 					fullpath, current_pid, current->comm, mode);
 			vfree(fullpath);
 
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
+			// FIXME WHEN READY 
+			*daemon_pid() = -1;
+			*contextd_pid() = -1;
+			*cnotify_pid() = -1;
+			// FIXME WHEN READY
 
 			return -1;
 		}
@@ -276,11 +276,11 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			up(auditsec_hook_lock());
 			vfree(fullpath);
 
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
+			// FIXME WHEN READY
+			*daemon_pid() = -1;
+			*contextd_pid() = -1;
+			*cnotify_pid() = -1;
+			// FIXME WHEN READY 
 
 			return -1;
 		}
@@ -290,6 +290,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		up(auditsec_hook_lock());
 		return answer;
 	}
+*/
 /*	printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
 				fullpath, task_pid_nr(current), current->comm, mode);*/
 	vfree(fullpath);
@@ -380,8 +381,8 @@ int auditsec_file_permission(struct file *file, int mask)
 
 	down_read(auditsec_pid_lock());
 	test =	((*daemon_pid() != -1) && (*daemon_pid() != current_pid));
-	test &= ((*contextd_pid() != -1) && (*contextd_pid() != current_pid));
-	test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
+	//test &= ((*contextd_pid() != -1) && (*contextd_pid() != current_pid));
+	//test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
 	up_read(auditsec_pid_lock());
 
 	if(test){
@@ -393,11 +394,11 @@ int auditsec_file_permission(struct file *file, int mask)
 				fullpath, current_pid, current->comm, mask);
 			vfree(fullpath);
 
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
+			// FIXME WHEN READY
+			*daemon_pid() = -1;
+			*contextd_pid() = -1;
+			*cnotify_pid() = -1;
+			// FIXME WHEN READY 
 
 			return -1;
 		}
@@ -417,11 +418,11 @@ int auditsec_file_permission(struct file *file, int mask)
 			up(auditsec_hook_lock());
 			vfree(fullpath);
 
-			/* FIXME WHEN READY */
-			*daemon_pid() == -1;
-			*contextd_pid() == -1;
-			*cnotify_pid() == -1;
-			/* FIXME WHEN READY */
+			// FIXME WHEN READY 
+			*daemon_pid() = -1;
+			*contextd_pid() = -1;
+			*cnotify_pid() = -1;
+			// FIXME WHEN READY 
 
 			return -1;
 		}
@@ -431,6 +432,7 @@ int auditsec_file_permission(struct file *file, int mask)
 		up(auditsec_hook_lock());
 		return answer;
 	}
+
 /*	printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
 				fullpath, task_pid_nr(current), current->comm, mask);*/
 	return 0;
