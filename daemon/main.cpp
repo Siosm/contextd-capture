@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
 	std::cout << "The daemon is registered with contextd." << std::endl;
 
-	while(keep_going && (auditsec_question(usai) == 0)){
+	while(keep_going){
 		switch (usai->type){
 			case AUDITSEC_FILE:
 				if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){

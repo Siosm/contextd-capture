@@ -391,26 +391,10 @@ int auditsec_file_permission(struct file *file, int mask)
 		
 		if(down_timeout(auditsec_hook_lock(), 500) != 0){ // 1s timeout. Is it too much ?
 			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
-				fullpath, task_pid_nr(current), current->comm, mask);
+				fullpath, current_pid, current->comm, mask);
 			vfree(fullpath);
-			*daemon_pid() = -1;
+			//*daemon_pid() = -1;
 			return 0; // Change it to -1 when ready
-		}
-
-		k_auditsec_info()->pid = task_pid_nr(current);
-		get_task_comm(k_auditsec_info()->execname, current);
-		k_auditsec_info()->type = AUDITSEC_FILE;
-		strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
-		strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
-		k_auditsec_info()->auditsec_struct.file.mask = mask;
-		// TODO Finir de remplir la struct correctement
-
-		up(auditsec_question_lock());
-		if(down_timeout(auditsec_answer_lock(), 500) != 0){ // 1s timeout. Is it too much ?
-			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
-				fullpath, task_pid_nr(current), current->comm, mask);
-			up(auditsec_hook_lock());
-			return -1;
 		}
 
 		k_auditsec_info()->pid = current_pid;
@@ -419,14 +403,14 @@ int auditsec_file_permission(struct file *file, int mask)
 		strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
 		strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
 		k_auditsec_info()->auditsec_struct.file.mask = mask;
-		// TODO Add other info to the struct (se_context)
+		// TODO Finir de remplir la struct correctement
 
 		up(auditsec_question_lock());
 		if(down_timeout(auditsec_answer_lock(), 500) != 0){ // 10s timeout. Is it too much ?
 			printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 				fullpath, current_pid, current->comm, mask);
 			vfree(fullpath);
-			*daemon_pid() = -1;
+			//*daemon_pid() = -1;
 			return 0; // Change it to -1 when ready
 		}
 		
