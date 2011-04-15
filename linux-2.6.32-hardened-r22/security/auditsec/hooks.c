@@ -301,7 +301,6 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		up(auditsec_hook_lock());
 		return answer;
 	}
-*/
 /*	printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
 				fullpath, task_pid_nr(current), current->comm, mode);*/
 	return 0;
