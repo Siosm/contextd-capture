@@ -17,6 +17,7 @@ struct auditsec_info * k_auditsec_info(void);
 int * auditsec_answer(void);
 
 char ** monitored_prog(void);
+int prog_is_monitored (struct task_struct *);
 
 struct semaphore * auditsec_hook_lock(void);
 struct semaphore * auditsec_question_lock(void);

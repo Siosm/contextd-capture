@@ -29,8 +29,23 @@ pid_t * cnotify_pid(void)
 
 char ** monitored_prog(void)
 {
-	static char			monitored_prog[MONITORED_PROG_SIZE]={"","",""};
-	return &monitored_prog;
+	static char monitored_prog[MONITORED_PROG_SIZE][TASK_COMM_LEN]={"firefox","testprog","libreoffice"};
+	return monitored_prog;
+}
+
+
+int prog_is_monitored (struct task_struct * current)
+{
+	int res=1, i=0;
+	task_lock(current);
+
+	for(i=0; i<MONITORED_PROG_SIZE && res; ++i) {
+		res &= strncmp(execname, current->com, TASK_COMM_LEN);
+	}
+
+	task_unlock(current);
+	
+	return res == 0;
 }
 
 
