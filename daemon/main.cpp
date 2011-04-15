@@ -56,14 +56,10 @@ int main(int argc, char* argv[])
 	int i = 0;
 	struct sigaction action;
 
-	if(argc != 3) {
-		std::cerr << "Usage: " << argv[0] << " contextd_pid, context-notify_pid" << std::endl;
+	if(argc > 1) {
+		std::cerr << "Usage: " << argv[0] << std::endl;
 		return -1;
 	}
-
-	pid_t daemon_pid = getpid();
-	pid_t contextd_pid = atoi(argv[1]);
-	pid_t cnotify_pid = atoi(argv[2]);
 
 	//TODO Finir de bloquer les signaux
 	memset(&action, 0, sizeof(struct sigaction));

@@ -22,7 +22,7 @@
 #define __NR_sys_auditsec_answer 339
 #endif /* __x86_64 */
 
-long auditsec_register(int, pid_t, pid_t);
+long auditsec_register(int);
 long auditsec_question(struct auditsec_info *);
 long auditsec_answer(int);
 

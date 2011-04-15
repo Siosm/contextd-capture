@@ -233,24 +233,24 @@ int auditsec_inode_symlink(struct inode *dir, struct dentry *dentry,
 
 int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
-	int		answer = -1, test = false;
+	int		answer = -1;
 	pid_t 	current_pid = task_pid_nr(current);
 	char *	fullpath = NULL;
-
-	down_read(auditsec_pid_lock());
-	test =	((*daemon_pid() != -1) && (*daemon_pid() != current_pid));
-	test &= ((*contextd_pid() != -1) && (*contextd_pid() != current_pid));
-	test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
-	up_read(auditsec_pid_lock());
 
 	if(prog_is_monitored(current)){
 		if(daemon_launched){
 			do_the_job
 		}else{
-			refuse
+			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d REFUSED : daemon not launched",
+				   fullpath, current_pid, current->comm, mode);
+			vfree(fullpath);
+			return -1;
 		}
 	}else{
-		Audit_stuff_commented
+		printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
+				fullpath, current_pid, current->comm, mode);
+			vfree(fullpath);
+
 	}
 	
 	if(test){
@@ -286,12 +286,6 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 					fullpath, current_pid, current->comm, mode);
 			vfree(fullpath);
 
-			// FIXME WHEN READY
-			*daemon_pid() = -1;
-			*contextd_pid() = -1;
-			*cnotify_pid() = -1;
-			// FIXME WHEN READY 
-
 			up(auditsec_hook_lock());
 			return 0;// Change to -1 whne ready !
 		}
@@ -301,7 +295,6 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		up(auditsec_hook_lock());
 		return answer;
 	}
-*/
 /*	printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d",
 				fullpath, task_pid_nr(current), current->comm, mode);*/
 	return 0;
