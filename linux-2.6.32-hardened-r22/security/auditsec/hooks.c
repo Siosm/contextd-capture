@@ -243,6 +243,16 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	test &= ((*cnotify_pid() != -1) && (*cnotify_pid() != current_pid));
 	up_read(auditsec_pid_lock());
 
+	if(prog_is_monitored(current)){
+		if(daemon_launched){
+			do_the_job
+		}else{
+			refuse
+		}
+	}else{
+		Audit_stuff_commented
+	}
+	
 	if(test){
 		fullpath = vmalloc(PATH_MAX + 1);
 		dir_path(dentry, fullpath);
