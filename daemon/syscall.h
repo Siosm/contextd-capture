@@ -3,8 +3,10 @@
 
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
 
 #include "auditsec_info.h"
+
 
 // system calls for x64 : 299, 300, 301
 // system calls for i386 : 337, 338, 339

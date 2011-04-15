@@ -31,31 +31,29 @@
  **/
 asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 {
-/*	if(down_write_trylock(auditsec_pid_lock()) == 0)
+	if(down_write_trylock(auditsec_pid_lock()) == 0){
 		printk(KERN_INFO "AuditSec: Process %d can't register at the moment", task_pid_nr(current));
-	return -1;*/
-	down_write(auditsec_pid_lock());
-
-	if(state){
-		if(*daemon_pid() == -1){
-			*daemon_pid() = task_pid_nr(current);
-			*contextd_pid() = contextd;
-			*cnotify_pid() = cnotify;
-			up_write(auditsec_pid_lock());
-			printk(KERN_INFO "AuditSec: Process %d (contextd %d - context-notify %d) successfully registered",
-					task_pid_nr(current), contextd, cnotify);
-			return *daemon_pid();
-		}
-	} else {
-		if(*daemon_pid() == task_pid_nr(current)){
-			*daemon_pid() = -1;
-			*contextd_pid() = -1;
-			*cnotify_pid() = -1;
-			up_write(auditsec_pid_lock());
-			return *daemon_pid();
-		}
+		return -1;
 	}
-	
+//	down_write(auditsec_pid_lock());
+
+	if((state == 1) && (*daemon_pid() == -1)){
+		*daemon_pid() = task_pid_nr(current);
+		*contextd_pid() = contextd;
+		*cnotify_pid() = cnotify;
+		printk(KERN_INFO "AuditSec: Process %d successfully registered",
+				task_pid_nr(current));
+	} else if((state == 0) && (*daemon_pid() == task_pid_nr(current))){
+		*daemon_pid() = -1;
+		*contextd_pid() = -1;
+		*cnotify_pid() = -1;
+		printk(KERN_INFO "AuditSec: Process %d successfully unregistered",
+				task_pid_nr(current));
+	} else {
+		printk(KERN_INFO "AuditSec: Process %d NOT registered ; Current is %d",
+				task_pid_nr(current), *daemon_pid());
+	}
+
 	up_write(auditsec_pid_lock());
 
 	return *daemon_pid();
@@ -64,17 +62,15 @@ asmlinkage long sys_auditsec_reg(int state, pid_t contextd, pid_t cnotify)
 
 asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 {
-	if(down_read_trylock(auditsec_pid_lock()) == 0)
+	if(down_read_trylock(auditsec_pid_lock()) == 0){
+		printk(KERN_INFO "AuditSec: Process %d can't get the lock at the moment", task_pid_nr(current));
 		return -1;
-
-	if(*daemon_pid() == -1){
+	}else if(*daemon_pid() == -1){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered",
 				task_pid_nr(current));
 		up_read(auditsec_pid_lock());
 		return -1;
-	}
-
-	if(*daemon_pid() != task_pid_nr(current)){
+	}else if(*daemon_pid() != task_pid_nr(current)){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to question: NOT registered ; Current is %d",
 				task_pid_nr(current), *daemon_pid());
 		up_read(auditsec_pid_lock());
@@ -82,7 +78,6 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	}
 
 	up_read(auditsec_pid_lock());
-
 	if(down_interruptible(auditsec_question_lock()) != 0)
 		return -1;
 
@@ -97,23 +92,21 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	up(auditsec_answer_lock());
 	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace ; Current is %d",
 			task_pid_nr(current), *daemon_pid());
+	
 	return -EFAULT;
 }
 
 
 asmlinkage long sys_auditsec_answer(int answer)
 {
-	if(down_read_trylock(auditsec_pid_lock()) == 0)
+	if(down_read_trylock(auditsec_pid_lock()) == 0){
 		return -1;
-
-	if(*daemon_pid() == -1){
+	}else if(*daemon_pid() == -1){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to answer: NOT registered",
 				task_pid_nr(current));
 		up_read(auditsec_pid_lock());
 		return -1;
-	}
-
-	if(*daemon_pid() != task_pid_nr(current)){
+	}else if(*daemon_pid() != task_pid_nr(current)){
 		printk(KERN_INFO "AuditSec: Process %d FAILED to answer ; Current is %d", task_pid_nr(current), *daemon_pid());
 		up_read(auditsec_pid_lock());
 		return -1;

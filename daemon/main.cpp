@@ -86,8 +86,15 @@ int main(int argc, char* argv[])
 		context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
 		++i;
 	}
-	if((i == 2) || (keep_going == 0))
+	if((i == 2) || (keep_going == 0)){
+		std::cout << "Stopping daemon and telling the kenel." << std::endl;
+		if(auditsec_register(0, 0, 0) != -1){
+			std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
+		}else{
+		std::cout << "The kernel is ok." << std::endl;
+		}
 		return -1;
+	}
 
 	std::cout << "The daemon is registered with contextd." << std::endl;
 
