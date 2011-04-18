@@ -20,8 +20,7 @@
 #include "syscall.h"
 
 
-int keep_going = true;
-int testprog_reg = false;
+bool keep_going = true;
 
 
 int read_execpath (pid_t pid, char * path)
@@ -53,7 +52,6 @@ int main(int argc, char* argv[])
 	#ifdef DEBUG
 	char exec_path[PATH_MAX];
 	#endif
-	int i = 0;
 	struct sigaction action;
 
 	if(argc > 1) {
@@ -67,111 +65,93 @@ int main(int argc, char* argv[])
 	sigaction(SIGINT, &action, NULL);
 
 	std::cout << "Trying to register with the kernel" << std::endl;
-	while((auditsec_register(1, contextd_pid, cnotify_pid) != daemon_pid) && (i < 2)){
+	if(auditsec_register(1) != 1){
 		std::cerr << "FAILED to register with the kernel." << std::endl;
-		++i;
-	}
-	if((i == 2) || (keep_going == 0))
 		return -1;
-
+	}
 	std::cout << "The daemon is registered with the kernel." << std::endl;
 
-	i = 0;
-	while((testprog_reg == false) && (i < 2)){
-		std::cout << "Trying to register with contextd" << std::endl;
-		context_register_application("daemon") == CONTEXT_TRUE ? testprog_reg = true : testprog_reg = false;
-		++i;
-	}
-	if((i == 2) || (keep_going == 0)){
-		std::cout << "Stopping daemon and telling the kenel." << std::endl;
-		if(auditsec_register(0, 0, 0) != -1){
+	std::cout << "Trying to register with contextd" << std::endl;
+	if(context_register_application("daemon") != CONTEXT_TRUE){
+		std::cerr << "FAILED to register with contextd." << std::endl;
+		if(auditsec_register(0) == 1){
 			std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		}else{
-		std::cout << "The kernel is ok." << std::endl;
+			std::cout << "The kernel is ok." << std::endl;
 		}
 		return -1;
 	}
-
 	std::cout << "The daemon is registered with contextd." << std::endl;
 
 	while(keep_going){
 		switch (usai->type){
-			case AUDITSEC_FILE:
-				if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
-					switch (context_changed(//"pid", usai->pid,
-							"fullpath", usai->auditsec_struct.file.fullpath,
-//								"filename", usai->auditsec_struct.file.name,
-							NULL, NULL)){
-						case CONTEXT_ACCEPTED:
-							auditsec_answer(1);
-							std::cout << "Transition acceptée." << std::endl;
-							break;
-						case CONTEXT_REFUSED:
-							auditsec_answer(0);
-							std::cerr << "Transition refusée." << std::endl;
-							break;
-						case CONTEXT_ERROR:
-							auditsec_answer(0);
-							std::cerr << "Erreur dans la transition." << std::endl;
-							break;
-						default:
-							auditsec_answer(0);
-							std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
-							break;
-					}
-					#ifdef DEBUG
-					read_execpath(usai->pid, exec_path);
-					std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
-					<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
-					<< exec_path /*<< ", mask: " << usai->auditsec_struct.file.mask*/ << std::endl;
-					#endif /* DEBUG */
-				}else{
-					auditsec_answer(1);
-				}
+		case AUDITSEC_FILE:
+			switch (context_changed(//"pid", usai->pid,
+					"fullpath", usai->auditsec_struct.file.fullpath,
+//					"filename", usai->auditsec_struct.file.name,
+					NULL, NULL)){
+			case CONTEXT_ACCEPTED:
+				auditsec_answer(true);
+				std::cout << "Transition acceptée." << std::endl;
 				break;
-
-			case AUDITSEC_DIR:
-				if(strncmp(usai->execname, "testprog", TASK_COMM_LEN) == 0){
-					switch (context_changed("pid", usai->pid,
-							"fullpath", usai->auditsec_struct.dir.fullpath,
-							NULL, NULL)){
-						case CONTEXT_ACCEPTED:
-							auditsec_answer(1);
-							std::cout << "Transition acceptée." << std::endl;
-							break;
-						case CONTEXT_REFUSED:
-							auditsec_answer(0);
-							std::cerr << "Transition refusée." << std::endl;
-							break;
-						case CONTEXT_ERROR:
-							auditsec_answer(0);
-							std::cerr << "Erreur dans la transition : " << context_getLastError() << std::endl;
-							break;
-						default:
-							auditsec_answer(0);
-							std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
-							break;
-					}
-					#ifdef DEBUG
-					read_execpath(usai->pid, exec_path);
-					std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
-					<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname /*<< ", mode: "
-					<< usai->auditsec_struct.dir.mode*/ << std::endl;
-					#endif /* DEBUG */
-				}else{
-					auditsec_answer(1);
-				}
+			case CONTEXT_REFUSED:
+				auditsec_answer(false);
+				std::cerr << "Transition refusée." << std::endl;
 				break;
-				
+			case CONTEXT_ERROR:
+				auditsec_answer(false);
+				std::cerr << "Erreur dans la transition : " << context_getLastError() << std::endl;
+				break;
 			default:
-				std::cerr << "AuditSec, can't determine struct type !" << std::endl;
-				auditsec_answer(0);
+				auditsec_answer(false);
+				std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
 				break;
+			}
+			#ifdef DEBUG
+			read_execpath(usai->pid, exec_path);
+			std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
+			<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
+			<< exec_path /*<< ", mask: " << usai->auditsec_struct.file.mask*/ << std::endl;
+			#endif /* DEBUG */
+			break;
+
+		case AUDITSEC_DIR:
+			switch (context_changed("pid", usai->pid,
+					"fullpath", usai->auditsec_struct.dir.fullpath,
+					NULL, NULL)){
+				case CONTEXT_ACCEPTED:
+					auditsec_answer(true);
+					std::cout << "Transition acceptée." << std::endl;
+					break;
+				case CONTEXT_REFUSED:
+					auditsec_answer(false);
+					std::cerr << "Transition refusée." << std::endl;
+					break;
+				case CONTEXT_ERROR:
+					auditsec_answer(false);
+					std::cerr << "Erreur dans la transition : " << context_getLastError() << std::endl;
+					break;
+				default:
+					auditsec_answer(false);
+					std::cerr << "Default ! On ne devrait pas être là !" << std::endl;
+					break;
+			}
+			#ifdef DEBUG
+			read_execpath(usai->pid, exec_path);
+			std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
+			<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname /*<< ", mode: "
+			<< usai->auditsec_struct.dir.mode*/ << std::endl;
+			#endif /* DEBUG */
+			break;
+		default:
+			std::cerr << "AuditSec, can't determine struct type !" << std::endl;
+			auditsec_answer(false);
+			break;
 		}
 	}
 
 	std::cout << "Stopping daemon and telling the kenel." << std::endl;
-	if(auditsec_register(false, 0, 0) != getpid()){
+	if(auditsec_register(0) != 0){
 		std::cerr << "The kernel state may NOT be ok. You should reboot." << std::endl;
 		return -1;
 	}

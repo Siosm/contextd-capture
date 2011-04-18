@@ -1,29 +1,25 @@
 #include <linux/pid.h>
 #include <linux/semaphore.h>
+#include <linux/limits.h>
+#include <linux/sched.h>
 
 
-#include "share.h"
-#include "hooks.h"
+#include "include/share.h"
+#include "include/struct.h"
 
 
-char ** monitored_prog(void)
+int prog_is_monitored()
 {
+	int res = 1, i = 0;
 	static char monitored_prog[MONITORED_PROG_SIZE][TASK_COMM_LEN]={"firefox","testprog","libreoffice"};
-	return monitored_prog;
-}
 
-
-int prog_is_monitored (struct task_struct * current)
-{
-	int res=1, i=0;
 	task_lock(current);
-
-	for(i=0; i<MONITORED_PROG_SIZE && res; ++i) {
-		res &= strncmp(execname, current->com, TASK_COMM_LEN);
+	for(i=0; i<MONITORED_PROG_SIZE && res; ++i){
+		if(strncmp(monitored_prog[i], current->comm, TASK_COMM_LEN) == 0)
+			res = 0;
 	}
-
 	task_unlock(current);
-	
+
 	return res == 0;
 }
 
@@ -63,8 +59,8 @@ struct semaphore * auditsec_answer_lock()
 }
 
 
-struct semaphore * auditsec_daemon_lock()
+bool * daemon_launched()
 {
-	static DECLARE_MUTEX(auditsec_daemon_lock);
-	return &auditsec_daemon_lock;
+	static bool daemon_launched = false;
+	return &daemon_launched;
 }

@@ -3,13 +3,21 @@
  **/
 
 
-#ifndef __AUDITSEC_HOOKS_H__
-#define __AUDITSEC_HOOKS_H__
+#ifndef __AUDITSEC_STRUCT_H__
+#define __AUDITSEC_STRUCT_H__
 
 
 #include <linux/pid.h>
 #include <linux/limits.h>
 #include <linux/sched.h>
+// #include <net/ipv6.h>
+// #include <linux/un.h>		/* for Unix socket types */
+// #include <net/af_unix.h>	/* for Unix socket types */
+// #include <linux/netdevice.h>	/* for network interface checks */
+// #include <linux/netlink.h>
+// #include <net/ip.h>		/* for local_port_range[] */
+#include <linux/net.h>
+#include <linux/socket.h>
 
 
 enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR};
@@ -24,9 +32,10 @@ struct auditsec_file {
 
 
 struct auditsec_socket {
-	//TODO
-	//struct aaa	ip_dest;
-	int			port;
+	//FIXME Fill this struct
+	struct socket	sock;
+	struct sockaddr address;
+	int				port;
 };
 
 
@@ -40,12 +49,8 @@ struct auditsec_dir {
 
 struct auditsec_info {
 	pid_t		pid;
-// 	char		execname[TASK_COMM_LEN];
-	//char		fullpath_execname[PATH_MAX + 1];
-	/**
-	 * Si l'on veut prendre en compte les contextes de sécurité SELinux, il
-	 * suffit de les rajouter dans cette structure : char * sc;
-	 **/
+	char *		execname;
+	//FIXME Add SELinux context to this struct
 	enum		auditsec_type type;
 	union
 	{
@@ -55,4 +60,4 @@ struct auditsec_info {
 	} auditsec_struct;
 };
 
-#endif
+#endif /* __AUDITSEC_STRUCT_H__ */

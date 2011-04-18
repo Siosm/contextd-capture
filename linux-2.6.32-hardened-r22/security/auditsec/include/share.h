@@ -1,9 +1,18 @@
+/*
+ * Defines fucntions to access shared semaphore and data
+ **/
+
+
 #ifndef __AUDITSEC_SHARE_H__
 #define __AUDITSEC_SHARE_H__
 
 
 #include <linux/pid.h>
 #include <linux/semaphore.h>
+#include <linux/limits.h>
+#include <linux/sched.h>
+
+#include "struct.h"
 
 
 #define MONITORED_PROG_SIZE 3
@@ -11,14 +20,15 @@
 
 struct auditsec_info * k_auditsec_info(void);
 
-char ** monitored_prog(void);
-int prog_is_monitored (struct task_struct *);
+int prog_is_monitored(void);
+
 int * auditsec_answer(void);
 
 struct semaphore * auditsec_hook_lock(void);
 struct semaphore * auditsec_question_lock(void);
 struct semaphore * auditsec_answer_lock(void);
-struct semaphore * auditsec_daemon_lock(void);
+
+bool * daemon_launched(void);
 
 
-#endif /* share.h */
+#endif /* __AUDITSEC_SHARE_H__ */
