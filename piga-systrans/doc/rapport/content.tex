@@ -1,0 +1,171 @@
+\chapter*{Introduction}
+	\paragraph*{}
+		Mon stage de fin de première année s'est déroulé dans la spin-off SPIDWARE initiée par Martial Szpieg et ayant comme but principal de valoriser la recherche effectuée par les chercheurs du projet SDS\footnote{Sécurité et Distribution des Systèmes. Ce projet est porté par l'équipe de chercheurs du Laboratoire d'Informatique Fondamentale d'Orléans (LIFO) basée à l'ENSI de Bourges}.
+	
+	\paragraph*{}
+		Actuellement, le projet SDS	a deux objectifs, remporter le défi sécurité SEC-SI initié par l'ANSSI\footnote{Agence Nationale pour la Sécurité des Systèmes d'Information, anciennement DCSSI: Organisme inter-ministériel officiel visant au conseil et à la validation sur les techniques de sécurité pour l'état et ses administrés} et porté par l'ANR\footnote{Agence Nationale de la Recherche: Ses buts sont de promouvoir la recherche et de la financer} mais aussi la création de l'entreprise SPIDWARE visant à promouvoir la recherche en informatique de l'ENSI de Bourges.
+		
+	\paragraph*{}
+		Le travail actuel se base en grande partie sur la thèse de Jérémy Briffault encadrée par Christian Toinard et qui, après 7 ans de travail a abouti à PIGA\footnote{Policy Interaction Graph Analysis}, un logiciel de détection et prévention d'intrusion. Ce programme a montré sa fiabilité sur le pot de miel\footnote{Serveur ayant l'apparence d'un système non-sécurisé sur lequel des attaquants se connectent. Ce genre de serveur permet d'analyser les types d'attaque informatique actuelles. Malgré les apparences, il se doit d'être extrêmement sécurisé pour ne pas devenir une machine zombie.} de l'école en résistant depuis plus de 3 ans à une moyenne d'une centaine d'attaques par jour. 
+	
+	\paragraph*{}
+		Mon stage à SPIDWARE a duré 3 mois et avait pour objectif la création d'un nouvel outil de sécurité permettant d'amener une gestion des droits à l'intérieur même des applications. Ce firewall applicatif est appelé PIGA-SYSTRANS.\\
+		Les applications à protéger sont Firefox, Claws-mail et Open Office. Le choix s'est porté sur celles-ci car elles répondent aux besoins de base de la bureautique.\\
+		Au cours de mon stage, j'ai donc travaillé avec les chercheurs en sécurité de l'ENSI de Bourges et notamment avec Jéméry Briffault qui m'a encadré lors de cette réalisation.
+	
+	\paragraph*{}
+		Dans ce rapport, on s'attachera à mieux définir l'environnement dans lequel j'ai travaillé en détaillant un peu plus ce qu'est PIGA, le défi sécurité SEC-SI, SPIDWARE et mon projet, PIGA-SYSTRANS.
+		Ensuite, je détaillerai la méthode de travail et de validation de PIGA-SYSTRANS par les chercheurs. Pour finir, je présenterai les évolutions nécessaires pour atteindre une qualité satisfaisante.
+
+\chapter{Environnement de travail}
+	\section{PIGA}
+		\paragraph*{}
+			PIGA est un logiciel permettant de faire de la détection et de la prévention d'intrusion. En d'autres termes, cela permet de savoir si une personne qui n'a normalement pas les droits accéder aux ressources d'un serveur essaye de se les approprier et, si tel est le cas, de l'en empêcher.
+
+		\paragraph*{}
+			Le travail sur PIGA a commencé il y a environ 8 ans lors du début de la thèse de Jérémy Briffault, encadrée par Christian Toinard. Le projet a progressivement muri au point de défaire chaque jour plus d'une centaine d'attaque sur le pot de miel de l'école et ce, depuis plus de 3 ans. C'est une performance importante et possiblement inégalée.
+			
+		\paragraph*{}
+			PIGA permet aux administrateurs d'utiliser ou d'écrire des règles de haut-niveau (donc, plus faciles à comprendre) permettant de garantir en quelques lignes qu'une propriété de sécurité telle que la confidentialité des données sera respectée.\newline
+			Ces règles de haut niveau sont ensuite compilées sur un serveur qui va analyser tous les cas possibles de violation de ces propriétés de sécurité puis les interdire.
+			
+		\paragraph*{}
+			Le nombre de façons possibles de contourner une propriété de sécurité étant énorme et bien au delà de notre imagination, nous laissons la machine tout calculer pour nous.\\
+			La masse d'information à avoir en mémoire lors d'une telle compilation est tellement importante que le serveur compilant ces propriétés a actuellement besoin de 24Go de mémoire vive et nécessite six heures de calcul. Pour mémoire, un ordinateur de bureau actuel embarque en moyenne 2Go de mémoire vive, c'est à dire 12 fois moins. 
+			Cela montre bien l'étendu du travail effectué et la nécessité d'un tel produit.
+			
+		\paragraph*{}
+			PIGA ne fonctionne actuellement que sur les systèmes Linux car il se base sur le travail de sécurisation effectué par la NSA appelé SELinux. Cependant, il serait tout à fait possible de porter celui-ci sur des noyaux de type Unix tel que les systèmes Solaris de Sun ou Mac OS d'Apple. Pour ce faire, il faudrait cependant avoir déjà un marché solide et un nombre potentiel de clients important pour commencer à envisager le portage de la solution sur l'un ou l'autre de ces systèmes. En effet, le travail à effectuer est énorme et nécessiterait vraisemblablement plusieurs années avant d'arriver à un résultat comparable à ce que l'on peut trouver aujourd'hui sous Linux.
+			
+		\paragraph*{}
+			Il ne faut cependant pas penser que parce que les règles sont de haut-niveau, elles sont accessibles par tout un chacun. En effet, par haut-niveau, j'entends que le compilateur permet de faire le plus gros du travail technique mais il reste encore à penser des règles cohérentes et suffisantes puis savoir les exprimer sans erreurs dans le langage de PIGA.\newline
+			Brian LEE, aussi en stage, a comme projet de faciliter l'écriture de ces règles ainsi que leur déploiement.
+	
+	\newpage
+	\section{Le défi sécurité SEC-SI}
+		Le défi sécurité SEC-SI auquel participe l'ENSI de Bourges a été lancé par l'Agence Nationale pour la Recherche(ANR) sur une proposition de l'Agence Nationale pour la Sécurité des Systèmes d'Information(ANSSI).
+		
+		\subsection{Objectif}
+			\paragraph*{}
+				L'objectif de ce défi est triple:
+				\begin{itemize}
+   					\item Augmenter le niveau de sécurisation moyen des ordinateurs;
+   					\item Promouvoir le logiciel libre car il est plus facile à garantir et l'on est moins dépendant d'une organisation pour la correction des failles de sécurité;
+   					\item Financer des projets qui pourraient aboutir commercialement et qui pourraient servir dans les ministères et chez les particuliers.
+   				\end{itemize}
+			
+			
+		\subsection{Les candidats}
+			\paragraph*{}
+				Le nombre de candidat ayant répondu à la proposition de concours a été bien plus faible que la moyenne des défis de l'ANR. Cela s'explique sûrement par la difficulté de la tâche et surtout du haut niveau de spécialisation requis pour pouvoir prétendre vouloir créer un système d'exploitation sécurisé.\newline
+				Sur environ septs participants, seul trois ont été retenus:
+				\begin{itemize}
+   					\item EADS/Supelec : OS4
+   					\item LRI(Université d'Orsay)/LIP6(Université Paris VI) : Safe OS
+   					\item LIFO(ENSI de Bourges) : PIGA-OS
+   				\end{itemize}
+   			
+   		\subsection{Le planning}
+   			\paragraph*{}
+   				Le défi sécurité SEC-SI se déroule sur deux ans. Il a débuté le 1\up{er} octobre 2008 et l'annonce des résultats se fera en octobre 2010. Le développement des solutions est continu, mais a recherche de faille ne peut se faire que durant les 3 périodes de durée variables que voici:
+   				\begin{itemize}
+   					\item Avril 2009 - Octobre 2009
+   					\item Janvier 2010 - Avril 2010
+   					\item Juillet 2010 - Octobre 2010
+   				\end{itemize}
+   			
+   		\subsection{Notation et résultats intermédiaires}
+   			\paragraph*{}
+   				De façon à évaluer les différentes équipe, un jury et un système de points a été mis en place.
+   			
+   			\paragraph*{}
+   				Le jury est indépendant. Il est composé de Loïc Duflot de l'Agence Nationale pour la Sécurité des Systèmes d'Information qui en est le président puis est essentiellement constitué d'Universitaires(INSA Lyon, ENS Cachan, CNRS, ...) et de quelques industriels(Thomson et CEA).
+   			
+   			\paragraph*{}
+   				À chaque période d'évaluation, chaque équipe débute avec 100 points. Lorsqu'une équipe découvre une faille dans un système, elle prend des points à l'autre équipe au pro-rata de la gravité de la faille et du temps mis à la corriger.
+   				
+   			\paragraph*{}
+   				Voici le classement actuel:
+   				\begin{itemize}
+   					\item 1\up{er}: ENSI de Bourges (210 points)
+   					\item 2\up{nd}: EADS/Supelec (70 points)
+   					\item 3\up{ème}: LRI(Université d'Orsay)/LIP6(Université Paris VI)(20 points)
+   				\end{itemize}	
+	
+	\newpage
+	\section{SPIDWARE}
+		\paragraph*{}
+			La société SPIDWARE est un projet d'entreprise de type spin-off initiée par Martial Szpieg en Avril 2008.
+		
+		\subsection{Objectif}
+			\paragraph*{}
+		 		Cette société se veut être un partenaire industriel privilégié pour valoriser la recherche future de l'équipe SDS de l'ENSI de Bourges. Elle sera aussi un moyen d'augmenter la notoriété de l'école et de son jeune pôle Informatique en portant à une échelle internationale les travaux des chercheurs de l'école.\\
+		 	 De plus, elle sera aussi bénéfique aux étudiants de l'école qui se verront proposer des stages ou un emploi à leur sortie.
+		 	 
+		\subsection{Actif}
+			\paragraph*{}
+				L'entreprise a déjà à son actif un dépôt de brevet, effectué le 19/06/2009, portant sur les méthodes d'analyse des propriétés de sécurité informatique.\\
+		Elle est pour l'instant entièrement financée par des fonds publics grâce à ses résultats dans les concours d'aide à la création d'entreprise.
+		
+		\paragraph*{}
+			Voici le détail des 75k\textgreek{\euro} déjà reçu par différents concours:
+			\begin{itemize}
+   				\item Avril 2008: 15k\textgreek{\euro} par l'ARIT Centre
+   				\item Juin 2009: Nouveau versement de l'ARIT Centre de 15k\textgreek{\euro}.
+   				\item Juin 2009: SPIDWARE remporte le prix "En émergence" du concours national d'aide à la création d'entreprise de technologies innovantes et repars avec un chèque de 45k\textgreek{\euro}.
+   			\end{itemize}	
+		
+		\subsection{Création et statut}
+			Le projet est actuellement soutenu par l'OSEO et devrait se concrétiser dans le courant de l'année 2010 par la création d'une entreprise de type JEI\footnote{Jeune Entreprise Innovante: Créé par la loi de finances pour 2004, ce type d'entreprise se voit exonérée de certain type de charges.}. Cela lui permettra d'être exonérée de charge patronales pour les chercheurs, techniciens, juristes et gestionnaires de projets mais cela permettra aussi une exonération totale d'impôts sur les bénéfices les trois premières années suivi d'une exonération à 50\% les deux années suivantes.\\
+			Ce statut d'entreprise innovante peut lui être conféré car l'entreprise est nouvelle, indépendante, de type PME et qu'elle consacre plus de 15\% de son chiffre d'affaire en cherche et développement.
+		
+		\subsection{Locaux de l'entreprise}
+			L'entreprise est actuellement logée dans la pépinière d'entreprise de Bourges appelée "Carré des Créateurs".\\
+			L'adresse de celle-ci est:\\
+			Le Carré des Créateurs  ADIC\\
+			9 boulevard Lahitolle\\
+			\\
+			18000 BOURGES
+
+\chapter{PIGA-SYSTRANS}
+	Ce chapitre a pour but de vulgariser le travail effectué. Si vous êtes intéressés par la technique, veuillez vous référer aux  annexes \ref{PIGA_SYSTRANS tech} et \ref{PIGA_SYSTRANS plugins}.
+	
+	\section{Travail effectué}
+		\paragraph*{}
+			Le travail effectué est en continuation du projet d'application. Il consiste en la création d'un pare-feu applicatif administrable par fichiers de type XML. 
+			
+		\paragraph*{}
+			Plus concrètement, le projet est composé d'un daemon\footnote{Un daemon est un service tournant en tâche de fond}(contextd) qui contrôle l'état interne des programmes qu'il administre et leurs attribue les droits nécessaires leurs permettant de réaliser les taches relatives à leur état interne.
+			Par exemple, lorsqu'un client de messagerie électronique se met en mode réception de mail, il va avoir besoin de  modifier ses fichiers de sauvegarde d'email mais va aussi avoir besoin de pouvoir se connecter au serveur de messagerie pour recevoir les messages. Contextd permet de récupérer les informations sur l'état interne de chaque programme le souhaitant et ajuster ses droits dynamiquement pour coller au principe de base de sécurité qui est celui des moindres privilèges.
+			
+		\paragraph*{}
+			Pour permettre cette gestion dynamique des droits SELinux, les programmes doivent pouvoir faire remonter leurs informations internes à contextd. Pour ce faire, j'ai aussi créé la bibliothèque libcontext qui se charge de faire abstraction de la couche de communication basée sur D-Bus\footnote{IPC(Communication Inter Processus) la plus utilisée sous Linux, elle présente des mécanismes de sécurité et de gestion de privilèges. Elle est portée par l'organisation de normalisation des bureaux informatiques FreeDesktop}. J'ai ensuite écrit des extensions pour Firefox et Claws-mail implémentant cette gestion des droits.
+
+	\section{Organisation, validation et suivi du travail}
+		\paragraph*{}
+			Mes horaires était 9h-12h puis 13h30-17h30. Le premier mois, j'ai travaillé en CRI-16. Puis, avec Brian Lee, nous avons aménagé au carré des créateurs où nous avons travaillé jusqu'au 28 Août.
+			
+		\paragraph*{}
+			Les professeurs qui nous ont encadrés sont Jérémy Briffaut, Martial Szpieg et Christian Toinard. Ceux-ci venaient régulièrement contrôler l'avancement et discuter des évolutions possibles.
+			
+		\paragraph*{}
+			Notre travail était stocké en local mais aussi sur un serveur à l'école. Ce serveur nous a aussi permis d'écrire de la documentation ainsi que consulter le code source et l'avancement du projet grâce à des systèmes de tickets à valider.
+
+	\section{Perspectives}
+		\paragraph*{}
+			Bien que Contextd ait techniquement atteint le stade de la beta, le travail est encore loin d'être fini. Le programme étant hautement critique d'un point de vue sécurité, il reste encore tout un processus de formalisation, de preuve et de sécurisation à opérer en plus de l'habituelle phase de correction de bogues.
+		
+		\paragraph*{}
+			De plus, le travail sur l'intégration des plugins dans les applications n'est pas encore terminée. Le plugin Firefox est à valider, celui de Claws-mail ne filtre pas encore l'envoie/réception de message et le plugin Open Office est tout simplement absent.
+	
+\chapter{Conclusion}
+	\paragraph*{}
+		L'objectif de développement d'un pare-feu applicatif a été réalisé même si le travail restant d'intégration durable à PIGA-OS n'est qu'à peine commencé. Ce pare-feu permet de combler un manque dans la solution actuelle présentée au défi sécurité et complétera ainsi la future solution commerciale de la société SPIDWARE.
+		
+	\paragraph*{}
+		En plus du travail d'intégration, il reste encore tout un travail de transformation des programmes pour autoriser l'utilisation de ce pare-feu applicatif. Je n'ai fait que créer et pseudo-valider mon système en modifiant deux applications nécessaires à l'augmentation de la sécurité de la solution présentée par l'ENSI de Bourges au concours de l'ANR.
+		
+	\paragraph*{}
+		J'ai particulièrement apprécié le travail à double finalité. En effet, le concours oblige à avoir une réflexion universitaire et force à mettre en place une certaine logique démonstration. Mais, à l'opposé, SPIDWARE a besoin de produits compréhensibles, robuste et ergonomiques.\\
+		D'un point de vue personnel, cela me conforte dans l'idée de vouloir travailler dans la recherche et développement.
+		

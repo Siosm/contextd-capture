@@ -1,0 +1,30 @@
+digraph G {
+	node [shape=record];
+
+	default[label="default | no web \n no email"]; 
+	email[style=filled, fillcolor=gray,label="email |  no web \n email=.*"];
+	web[style=filled, fillcolor=gray,label="web | web=http://.* \n no email"];
+	taxes[label=" taxes | email=taxes \n web=taxes"];
+	eshopping[label=" eshopping | web=http[s]://eshopping \n email=eshopping"];
+	epayment[label=" epayment | web=https://bank \n no email"];
+	
+
+	default -> default[label="no activities"];
+	default -> email[label="mail read/send"];
+	default -> web[label="web open http://.*"];
+
+	email->email;
+
+	web->web;
+	web->eshopping[label="mail=@eshopping\nweb=http://eshopping.*"];
+	eshopping->epayment[label="web=https://bank.*"];
+
+	epayment-> epayment;	
+
+	eshopping -> eshopping;
+
+	default->taxes[label="mail=.*@impots.gouv.fr \n web=http[s]://.*.impots.gouv.fr"];
+	taxes->taxes;
+	taxes->epayment[label="web=https://bank.*"];
+
+}

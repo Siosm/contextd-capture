@@ -1,7 +1,6 @@
-BUILD/
-build/
+BUILD
+build
 *~
-doc/
-systemtap.kdev4
+*.kdev4
 .kdev4
 piga-systrans-build-desktop

@@ -1,0 +1,378 @@
+@inproceedings{TELECOM_BRETAGNE-7660,
+author = {Samiha AYED and Nora CUPPENS and Frederic CUPPENS},
+title = {Deploying security policy in intra and inter Workflows Management Systems},
+booktitle = {ARES 2009 : Third International Conference on Availability, Reliability and Security, 16-19 March, Fukuoka, Japan},
+year = {2009},
+organization = { LUSSI - DÃ©pt. Logique des Usages, Sciences Sociales et de l'Information (Institut TELECOM ; TELECOM Bretagne)}
+}
+
+
+@inproceedings{LAHMADI:2009:INRIA-00404853:1,
+	title = { {S}ec{S}ip: {A} {S}tateful {F}irewall for {SIP}-based {N}etworks},
+	author = {{L}ahmadi, {A}bdelkader and {F}estor, {O}livier},
+	abstract = {{SIP}-based networks are becoming the de-facto standard for voice, video and instant messaging services. {B}eing exposed to many threats while playing an major role in the operation of essential services, the need for dedicated security management approaches is rapidly increasing. {I}n this paper we present an original security management approach based on a specific vulnerability aware {SIP} stateful firewall. {T}hrough known attack descriptions, we illustrate the power of the configuration language of the firewall which uses the capability to specify stateful objects that track data from multiple {SIP} elements within their lifetime. {W}e demonstrate through measurements on a real implementation of the firewall its efficiency and performance.},
+	keywords = {{SIP}; {V}o{IP}; {S}ecurity; {F}irewall},
+	language = {{A}nglais},
+	affiliation = {{MADYNES} - {INRIA} {L}orraine - {LORIA} - {INRIA} - {CNRS} : {UMR}7503 - {U}niversit{\'e} {H}enri {P}oincar{\'e} - {N}ancy {I} - {U}niversit{\'e} {N}ancy {II} - {I}nstitut {N}ational {P}olytechnique de {L}orraine },
+	booktitle = {11th {IFIP}/{IEEE} {I}nternational {S}ymposium on {I}ntegrated {N}etwork {M}anagement - {IM} 2009 },
+	address = {{L}ong {I}sland {\'E}tats-{U}nis d'{A}m{\'e}rique },
+	note = {{D}.: {S}oftware, {K}.: {C}omputing {M}ilieux, {K}.: {C}omputing {M}ilieux/{K}.6: {MANAGEMENT} {OF} {COMPUTING} {AND} {INFORMATION} {SYSTEMS}/{K}.6.5: {S}ecurity and {P}rotection },
+	audience = {internationale },
+    year = {2009},
+    URL = {http://hal.inria.fr/inria-00404853/en/},
+    URL = {http://hal.inria.fr/inria-00404853/PDF/im09.pdf},
+}
+
+@article{firefox_ccr_2009,
+	author = {Stefan Frei and Thomas Duebendorfer and Bernhard Plattner},
+	title = {Firefox (In) security update dynamics exposed},
+	journal = {SIGCOMM Comput. Commun. Rev.},
+	volume = {39},
+	number = {1},
+	year = {2009},
+	issn = {0146-4833},
+	pages = {16--22},
+	doi = {http://doi.acm.org/10.1145/1496091.1496094},
+	publisher = {ACM},
+	address = {New York, NY, USA},
+}
+
+@INPROCEEDINGS{1004370,
+title={Noninterference and intrusion detection},
+author={Ko, C. and Redmond, T.},
+booktitle={Security and Privacy, 2002. Proceedings. 2002 IEEE Symposium on},
+year={2002},
+month={},
+volume={},
+number={},
+pages={ 177-187},
+keywords={ Unix, authorisation, formal specification, hazards and race conditions Unix system calls, formal model, formal specification, illegal operations, intrusion detection methodology, noninterference, privileged process, race condition attack detection, reasoning, strategic operation execution, timing window, unprivileged process, valid interleaving},
+doi={10.1109/SECPRI.2002.1004370},
+ISSN={1081-6011 }, }
+
+@article{RCCTB09,
+  title = {Classification of Malicious Distributed SELinux Activities},
+  author = {M. Blanc and P. Clemente and J. Rouzaud-Cornabas and C. Toinard},
+  year = {2009},
+  editor = {Luca Spalazzi and Ratan Guha},
+  volume = {4},
+  number = {5},
+  journal = "Journal Of Computers",
+  month = {may},
+  pdf = {http://www.academypublisher.com/jcp/vol04/no05/jcp0405423432.pdf},
+  publisher = {Academy publisher},
+  pages = {423-432},
+  categorie = {a}
+}
+
+@MISC{CVE_login,
+  title = "/bin/login gives root to group utmp",
+  year = 2008,
+  month = 11,
+  author = "Paul Szabo",
+  url = "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2008-5394"
+}
+
+@MISC{CVE_phpBB,
+  title = "Security Advisory - phpBB 2.0.15 PHP-code injection bug",
+  year = 2005,
+  month = 06,
+  author = "Ron van Daal",
+  url = "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2005-2086"
+}
+
+@inproceedings{1268322,
+ author = {McVoy, Larry and Staelin, Carl},
+ title = {lmbench: portable tools for performance analysis},
+ booktitle = {ATEC '96: Proceedings of the 1996 annual conference on USENIX Annual Technical Conference},
+ year = {1996},
+ pages = {23--23},
+ location = {San Diego, CA},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+ }
+
+@INPROCEEDINGS{4223222,
+title={Usable Mandatory Integrity Protection for Operating Systems},
+author={Ninghui Li and Ziqing Mao and Hong Chen},
+booktitle={Security and Privacy, 2007. SP '07. IEEE Symposium on},
+year={2007},
+month={May},
+volume={},
+number={},
+pages={164-178},
+keywords={Linux, authorisation, systems analysisLinux security module framework, mandatory usable access control system, network-based attack, operating system, usable mandatory integrity protection},
+doi={10.1109/SP.2007.37},
+ISSN={1081-6011}, }
+
+
+@inproceedings{851452,
+ author = {Liang, Hongliang and Sun, Yufang},
+ title = {Enforcing Mandatory Integrity Protection in Operating System},
+ booktitle = {ICCNMC '01: Proceedings of the 2001 International Conference on Computer Networks and Mobile Computing (ICCNMC'01)},
+ year = {2001},
+ isbn = {0-7695-1381-6},
+ pages = {435},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
+
+@inproceedings{1542244,
+ author = {Mao, Ziqing and Li, Ninghui and Chen, Hong and Jiang, Xuxian},
+ title = {Trojan horse resistant discretionary access control},
+ booktitle = {SACMAT '09: Proceedings of the 14th ACM symposium on Access control models and technologies},
+ year = {2009},
+ isbn = {978-1-60558-537-6},
+ pages = {237--246},
+ location = {Stresa, Italy},
+ doi = {http://doi.acm.org/10.1145/1542207.1542244},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+
+@inproceedings{1608123,
+ author = {Cai, Xiang and Gui, Yuwei and Johnson, Rob},
+ title = {Exploiting Unix File-System Races via Algorithmic Complexity Attacks},
+ booktitle = {SP '09: Proceedings of the 2009 30th IEEE Symposium on Security and Privacy},
+ year = {2009},
+ isbn = {978-0-7695-3633-0},
+ pages = {27--41},
+ doi = {http://dx.doi.org/10.1109/SP.2009.10},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
+
+@INPROCEEDINGS{4731013,
+title={A race condition graph for concurrent program behavior},
+author={Yan Chen and Yann-Hang Lee and Wong, W.E. and Donghui Guo},
+booktitle={Intelligent System and Knowledge Engineering, 2008. ISKE 2008. 3rd International Conference on},
+year={2008},
+month={Nov.},
+volume={1},
+number={},
+pages={662-667},
+keywords={data structures, graph theory, program debugging, program verificationconcurrent program behavior, data structure, dining philosopher program, formal graph, potential RCG, program verification, race condition graph, sharing resource},
+doi={10.1109/ISKE.2008.4731013},
+ISSN={}, }
+
+
+@INPROCEEDINGS{184003,
+title={Detecting data races from sequential traces},
+author={Helmbold, D.P. and McDowell, C.E. and Jian-Zhong Wang},
+booktitle={System Sciences, 1991. Proceedings of the Twenty-Fourth Annual Hawaii International Conference on},
+year={1991},
+month={Jan},
+volume={ii},
+number={},
+pages={408-417 vol.2},
+keywords={FORTRAN, hazards and race conditions, parallel languages, parallel programming, program debuggingIBM parallel fortran, data races, debugging, distributed systems, linear event trace, parallel program, partial ordering, program execution, program traces, race conditions, sequential traces, shared data accessing, time vector, unordered pairs, variable access conflicts},
+doi={10.1109/HICSS.1991.184003},
+ISSN={}, }
+
+
+@inproceedings{1066758,
+ author = {Uppuluri, Prem and Joshi, Uday and Ray, Arnab},
+ title = {Preventing race condition attacks on file-systems},
+ booktitle = {SAC '05: Proceedings of the 2005 ACM symposium on Applied computing},
+ year = {2005},
+ isbn = {1-58113-964-0},
+ pages = {346--353},
+ location = {Santa Fe, New Mexico},
+ doi = {http://doi.acm.org/10.1145/1066677.1066758},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+
+@article{772504,
+ author = {Carr, Steve and Mayo, Jean and Shene, Ching-Kuang},
+ title = {Race conditions: a case study},
+ journal = {J. Comput. Small Coll.},
+ volume = {17},
+ number = {1},
+ year = {2001},
+ issn = {1937-4771},
+ pages = {90--105},
+ publisher = {Consortium for Computing Sciences in Colleges},
+ address = {, USA},
+ }
+
+@inproceedings{BLT08,
+  title = {A Proposal For Securing a Large-Scale High-Interaction Honeypot},
+  author = {J. Briffaut and J.-F. Lalande and C. Toinard},
+  booktitle = {Workshop on Security and High Performance Computing Systems},
+  publisher = {ECMS},
+  editor = {Ratan Kumar Guha and Luca Spalazzi},
+  year = {2008},
+  address = {Cyprus},
+  categorie = {e}
+}
+
+@inproceedings{BBLT09,
+  title = {Enforcement of Security Properties for Dynamic MAC Policies},
+  author = {M. Blanc and J. Briffaut and J.-F. Lalande and C. Toinard},
+  booktitle = {Third International Conference on Emerging Security Information, Systems and Technologies},
+  publisher = {IEEE Computer Society Press},
+  editor = {IARIA},
+  year = {2009},
+  address = {Athens/Vouliagmeni, Greece},
+  month = {June},
+  pages = {114-120},
+  categorie = {d}
+}
+
+
+
+@inproceedings{1251370,
+ author = {Tsyrklevich, Eugene and Yee, Bennet},
+ title = {Dynamic detection and prevention of race conditions in file accesses},
+ booktitle = {SSYM'03: Proceedings of the 12th conference on USENIX Security Symposium},
+ year = {2003},
+ pages = {17--17},
+ location = {Washington, DC},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+ }
+
+
+@inproceedings{1390847,
+ author = {Jannesari, Ali and Tichy, Walter F.},
+ title = {On-the-fly race detection in multi-threaded programs},
+ booktitle = {PADTAD '08: Proceedings of the 6th workshop on Parallel and distributed systems},
+ year = {2008},
+ isbn = {978-1-60558-052-4},
+ pages = {1--10},
+ location = {Seattle, Washington},
+ doi = {http://doi.acm.org/10.1145/1390841.1390847},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+
+@InProceedings{tsafrir08-tocttou,
+author 	= 	{Dan Tsafrir and Tomer Hertz and David Wagner and Dilma Da Silva},
+title 	= 	{Portably solving file {TOCTTOU} races with hardness amplification},
+booktitle 	= 	{USENIX Conference on File and Storage Technologies (FAST)},
+year 	= 	2008,
+month 	= 	{February},
+pages 	= 	{189--206},
+address 	= 	{San Jose, California}
+} 
+
+@inproceedings{Zdancewic04,
+    author = {Steve Zdancewic},
+    title = {Challenges for information-flow security},
+    booktitle = {In Proceedings of the 1st International Workshop on the Programming Language Interference and Dependence (PLID04},
+    year = {2004}
+}
+
+@INPROCEEDINGS{GM,
+        AUTHOR = {J. Goguen and J. Meseguer},
+        TITLE = {Security Policies and Security Models},
+        BOOKTITLE = {Proc. 1982 IEEE symp. Security and Privacy},
+        YEAR = {1982},
+        PAGES = {11--20},
+        PUBLISHER = {IEEE},
+        ADDRESS = {Oakland, CA},
+        KEYWORDS = {'},
+        ENTEREDBY = {Glenn S Benson (benson@python)},
+        TIMESTAMP = {1-Dec-88, 5:06pm}
+        }
+
+@INPROCEEDINGS{FLR,
+        AUTHOR = {R. Feiertag and K. Levitt and L. Robinson},
+        TITLE = {Proving Multi-level Security of system Design},
+        BOOKTITLE = {Proc. $6^{th}$ ACM Symposium on Operating Systems Principles},
+        YEAR = {1977},
+        PAGES = {57--65},
+        PUBLISHER = {IEEE},
+        ORGANIZATION = {ACM},
+        ENTEREDBY = {Glenn S Benson (benson@python)},
+        TIMESTAMP = {1-Dec-88, 5:02pm}
+        }
+
+@article{360333,
+ author = {Harrison, Michael A. and Ruzzo, Walter L. and Ullman, Jeffrey D.},
+ title = {Protection in operating systems},
+ journal = {Commun. ACM},
+ volume = {19},
+ number = {8},
+ year = {1976},
+ issn = {0001-0782},
+ pages = {461--471},
+ doi = {http://doi.acm.org/10.1145/360303.360333},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@article{ 10.1109/CSFW.2002.1021825,
+author = {Riccardo Focardi and Sabina Rossi},
+title = {Information Flow Security in Dynamic Contexts},
+journal ={Computer Security Foundations Workshop, IEEE},
+volume = {0},
+year = {2002},
+issn = {1063-6900},
+pages = {307},
+doi = {http://doi.ieeecomputersociety.org/10.1109/CSFW.2002.1021825},
+publisher = {IEEE Computer Society},
+address = {Los Alamitos, CA, USA},
+}
+
+@article{ prevint,
+author = {Marco Giunti},
+title = {Preventing Intrusions through Non-Interference},
+journal ={Mexican Conference on Informatics Security, IEEE},
+year = {2006},
+publisher = {IEEE Computer Society},
+}
+
+@inproceedings{1068881,
+ author = {Zheng, Lantian and Myers, Andrew C.},
+ title = {End-to-End Availability Policies and Noninterference},
+ booktitle = {CSFW '05: Proceedings of the 18th IEEE workshop on Computer Security Foundations},
+ year = {2005},
+ isbn = {0-7695-2340-4},
+ pages = {272--286},
+ doi = {http://dx.doi.org/10.1109/CSFW.2005.16},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
+
+
+@inproceedings{1251432,
+ author = {Spencer, Ray and Smalley, Stephen and Loscocco, Peter and Hibler, Mike and Andersen, David and Lepreau, Jay},
+ title = {The flask security architecture: system support for diverse security policies},
+ booktitle = {SSYM'99: Proceedings of the 8th conference on USENIX Security Symposium},
+ year = {1999},
+ pages = {11--11},
+ location = {Washington, D.C.},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+ }
+
+
+@conference{cowan2001raceguard,
+  title={{RaceGuard: Kernel protection from temporary file race vulnerabilities}},
+  author={Cowan, C. and Beattie, S. and Wright, C. and Kroah-Hartman, G.},
+  booktitle={Proceedings of the 10th USENIX Security Symposium},
+  pages={165--172},
+  year={2001}
+}
+
+@inproceedings{SHPCS09,
+  title = {A New Approach to Enforce the Security Properties of a Clustered High-Interaction Honeypot},
+  author = {J. Briffaut and J. Rouzaud-Cornabas and C. Toinard and Y. Zemali},
+  booktitle = {Workshop on Security and High Performance Computing Systems},
+  publisher = {IEEE Computer Society},
+  editor = {Ratan Kumar Guha and Luca Spalazzi},
+  year = {2009},
+  address = {Leipzig, Germany},
+  month = {June},
+  pages = {184-192},
+  isbn = {978-3-8325-2224-7},
+  categorie = {e}
+}

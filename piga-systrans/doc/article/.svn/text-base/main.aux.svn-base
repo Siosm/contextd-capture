@@ -1,0 +1,61 @@
+\relax 
+\citation{LAHMADI:2009:INRIA-00404853:1}
+\citation{1542244}
+\citation{4223222}
+\citation{firefox_ccr_2009}
+\citation{BBLT09}
+\citation{GM}
+\citation{10.1109/CSFW.2002.1021825}
+\citation{TELECOM_BRETAGNE-7660}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Architecture}{1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {II-}1}Userspace communication}{2}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {II-}1a}Registration}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Example of a registration process between Firefox and Contextd}}{2}}
+\newlabel{app_registration}{{1}{2}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {II-}1b}Context change}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Example of a request of Firefox for visiting google.com}}{2}}
+\newlabel{app_contextchanged}{{2}{2}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {II-}1c}Integration}{2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {II-}2}Contextd: The privileged daemon}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Implementation}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-A}}Language}{2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-A}1}Creating domains}{2}}
+\citation{BBLT09}
+\citation{BBLT09}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-A}2}Applications authentication}{3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-A}3}Adding transitions}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-B}}Interaction between the security components and the applications}{3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-B}1}Security components}{3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-B}2}User applications}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The global architecture}}{3}}
+\newlabel{architecture}{{3}{3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-B}3}Interactions}{3}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experimentation}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}}Secure desktop for Internet users}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}1}Domain}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}2}Domain Transitions}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}}Security Mechanism Details}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}1}Applications control}{4}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {IV-B}1a}Web Browser}{4}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {IV-B}1b}Email client}{4}}
+\citation{SHPCS09}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Domains and Domain transition rules}}{5}}
+\newlabel{transitions}{{4}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}2}Mandatory Access Control}{5}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {IV-B}2a}Firewall}{5}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {IV-B}2b}SELinux}{5}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {IV-B}2c}PIGA}{5}}
+\bibstyle{plain}
+\bibdata{biblio}
+\bibcite{TELECOM_BRETAGNE-7660}{1}
+\bibcite{BBLT09}{2}
+\bibcite{SHPCS09}{3}
+\bibcite{10.1109/CSFW.2002.1021825}{4}
+\bibcite{firefox_ccr_2009}{5}
+\bibcite{GM}{6}
+\bibcite{LAHMADI:2009:INRIA-00404853:1}{7}
+\bibcite{4223222}{8}
+\bibcite{1542244}{9}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{6}}
+\@writefile{toc}{\contentsline {section}{References}{6}}

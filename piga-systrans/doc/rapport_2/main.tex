@@ -1,0 +1,47 @@
+\documentclass[10pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{ucs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[english,greek,francais]{babel}
+\usepackage{graphicx} 
+\usepackage[final]{pdfpages} 
+
+%Symbole €
+\usepackage[LGR,T1]{fontenc}
+
+%Doxygen
+\usepackage{a4wide}
+\usepackage{makeidx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{alltt}
+\usepackage{doxygen/doxygen}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage{geometry}
+\geometry{ hmargin=2.5cm, vmargin=1.8cm }
+
+\input{page_garde.tex}
+\title{Développement de PIGA-SYSTRANS}
+\author{Martin Peres}
+\location{Bourges}
+
+
+\begin{document}
+	%intro
+	\maketitle
+	\input{intro.tex}
+	\tableofcontents
+	\listoffigures
+		
+	\input{content.tex}	
+
+% 	\input{biblio.tex}	
+
+	\input{annexes.tex}	
+	
+\end{document}

@@ -1,0 +1,5 @@
+\addcontentsline{toc}{chapter}{Bibliographie}
+\begin{thebibliography}{9}
+	\bibitem{lamport94}Bill Mccarty, \emph{SELinux: NSA's Open Source Security Enhanced Linux}. O'Reilly, First Edition, October 1994.
+	\bibitem{lamport94}Frank Mayer, Karl MacMillan, David Caplan, \emph{SELinux By Example}. Prentice Hall, First Edition (August 6, 2006).
+\end{thebibliography}

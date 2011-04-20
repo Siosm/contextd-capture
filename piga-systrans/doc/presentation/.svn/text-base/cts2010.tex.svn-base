@@ -1,0 +1,151 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usetheme{Antibes}
+
+% À chaque nouvelle section, on dit où on est
+\AtBeginSection[ ]
+{
+ \begin{frame}<beamer>
+   \frametitle{Plan}
+   \tableofcontents[currentsection]
+  \end{frame}
+} 
+
+\title{A Dynamic End-to-End Security for Coordinating Multiple Protections within a Linux Desktop}
+\subtitle{COLSEC 2010}
+\author{J.~Briffaut, M.~Peres \& C. Toinard}
+\institute{ENSI de Bourges}
+
+\begin{document}
+
+	% page de garde
+	\begin{frame}
+		\titlepage
+	\end{frame}
+
+	% Ajoute le logo à toutes les autres pages
+	\logo{\includegraphics[height=1.0cm]{figures/ensib_logo.png}}
+
+	\section{Introduction}
+
+		\begin{frame}
+			\begin{block}{}
+				Today's protection models are:
+				\begin{itemize}
+					\item mostly static
+					\item made of several security components (firewalls, MAC, etc...)
+					\item not adaptating to the user's task
+				\end{itemize}
+			\end{block}
+
+			\begin{block}{}
+				This leads administrators to:
+				\begin{itemize}
+					\item grant a user all the rights he needs, ever
+					\item make use of virtual/physical machines dedicated for every single sensitive task
+					\item think about hardware price and usability vs security
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+		\begin{frame}
+			\begin{block}{}
+				A protection model should:
+				\begin{itemize}
+					\item not require the use of virtualization
+					\item be driven by the user's current task
+					\item involve all the security components
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+		\begin{frame}
+			\begin{block}{Example of security domains}
+				\begin{itemize}
+					\item email
+					\item accounting/taxes
+					\item epayment
+				\end{itemize}
+			\end{block}
+
+			\begin{block}{Example of security components}
+				\begin{itemize}
+					\item firewalls (IPTables)
+					\item loggers (Syslog)
+					\item MAC systems (SELinux)
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+	\section{Architecture}
+		\subsection*{Basics}
+			\begin{frame}
+				\begin{block}{}
+					To implement such a protection model, it is needed to:
+					\begin{itemize}
+						\item determine which task the user in performing
+						\item have a security model to match the user's task with
+						\item glue all the security component and coordinate them
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Tracking the user}
+			\begin{frame}
+				\begin{block}{Tracking's requirement}
+					Should gather information upon what the user is doing.\\
+					Every action tracked should be overwritable.
+				\end{block}
+
+				\begin{block}{Determining what the user does}
+					It requires:
+					\begin{itemize}
+						\item low-level information (sys-calls)
+						\item high-level information (plugins)
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Having a security model}
+			\begin{frame}
+				\begin{block}{Security model's requirement}
+					Should dynamically tell if the user is allowed to perform an action or not.\\
+					This involves the creation of domains and transitions.
+				\end{block}
+
+				\begin{block}{}
+					A security model is a finite-state machine where:
+					\begin{itemize}
+						\item State = Security Domain
+						\item Transition = a user-generated event
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Gluing the security components}
+			\begin{frame}
+				\begin{block}{Glue's requirement}
+					The security components should be drivable by the security model.\\
+					They are to enforce the security model's decision
+				\end{block}
+
+				\begin{block}{Example of a browsing desktop}
+					\begin{itemize}
+						\item The user wants to browse http://www.google.com using Firefox.
+						\item The finite state agrees with it.
+						\item The firewall should open www.google.com:80.
+						\item The MAC system should allow Firefox to connect to www.google.com:80.
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+	\section{Implementation}
+		% Je donne des détails sur la structure, le daemon, les protocoles
+
+	\section{Experimentation}
+		% Je montre ici notre exemple, comme dans le papier et je le commente
+
+	\section{Conclusion}
+		% En quoi c'est mieux, en quoi ça respecte ce qu'on disait en intro
+
+\end{document}

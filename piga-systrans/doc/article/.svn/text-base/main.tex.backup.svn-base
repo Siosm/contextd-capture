@@ -1,0 +1,286 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{url}
+
+%opening
+\title{Creating a Context-based Application-level Dynamic Confinement Model}
+
+\author{\IEEEauthorblockN{Jeremy Briffaut}
+\IEEEauthorblockA{ENSI de Bourges\\
+88 Boulevard Lahitolle\\
+18020 BOURGES CEDEX, FRANCE\\
+Email: jeremy.briffaut@ensi-bourges.fr}
+\and
+\IEEEauthorblockN{Martin Peres}
+\IEEEauthorblockA{ENSI de Bourges\\
+Email: martin.peres@ensi-bourges.fr\\
+Contact: http://mupuf.org/contact/}
+\and
+\IEEEauthorblockN{Christian Toinard}
+\IEEEauthorblockA{ENSI de Bourges\\
+88 Boulevard Lahitolle\\
+18020 BOURGES CEDEX, FRANCE\\
+Email: christian.toinard@ensi-bourges.fr}}
+
+\begin{document}
+
+\maketitle
+
+\begin{IEEEkeywords}
+	applications, daemon, integration, plugins, SELinux, firewalls.
+\end{IEEEkeywords}
+
+\begin{abstract}
+	Currently, application confinement models are mostly static. It means they cannot handle complex interactions where 
+	sometimes an operation is valid and sometimes not.
+	This is becoming a more and more common issue as desktop applications are growing in complexity to provide better-designed user interfaces.
+	Today, protection systems are almost everywhere. System protection tools like SELinux or PIGA-Protect are highly fine-grained 
+	protection systems which are located in the Linux kernel and provide a per-syscall validation process. 
+	Language or framework protections also exist for .NET or the Java (JSM).
+	However, all of them fail to deliver an application-level protection, they fail to provide a dynamic confinement model 
+	based on the current context of the protected application. This paper describes an attempt to deliver such a system.
+\end{abstract}
+
+\section{State of the art}
+
+\section{Model}
+	\subsection{Theory}
+		Nowadays, confinement models are mostly based on several security components like firewalls, mandatory access control or virtualization systems. 
+		However, they are all configured separatly, there are no systems to ``glue'' them all together coherently. Consequently, it is almost impossible to change the security model
+		according to the user's task. This means, the user have the same amount of rights when watching a movie or when he is paying his/her taxes on the internet.
+
+		For instance, a firewall is agnostic to a browser events. This means it cannot open and close ports according to the URL a user is visiting.
+		Also, a SELinux-based MAC policy is not changing to fit the application's current needs. A MAC policy is designed to fit every single need the application could have.
+
+		This is a direct violation of the principle of least privilege.
+
+		To overcome this limitation, the computer needs several set of permissions(domain) according to the different activities the user may have on it.
+
+		A domain is defined by the minimum amount of permissions to allow a user to carry out an activity. There should be as many domains as there are activities.
+
+		For instance, when a user wants to buy something on the internet, he will automatically transit to the domain \texttt{eshopping}. 
+		In this domain, he/she will be able to browse the website, read mails from this website, read his/her bank account number and send mails to this website.
+
+		A domain should be configured in order to apply the principle of least privilege. 
+		We offer a protection from end to end going from the lower layers of the kernel to the user-interface through the network.
+
+		A domain transition occurs when the user changes his/her activity. The change of activity can be detected easily by watching the mail or the URL the user is visiting. 
+		For instance, if the user leaves \url{http://www.ebay.com/} to go to \url{http://www.cnn.com/}, we can know for sure he/she is not shopping anymore. 
+		Thus, we can switch from the domain \texttt{eshopping} to the domain \texttt{web}.
+
+		A domain-based dynamic application confinement model can be represented as a finite-state machine where states would represent 
+		domains and where transitions would be possible applications requests.
+
+	\subsection{Architecture}
+		In order to achieve an application-level protection, one needs a system which receives application transition requests and 
+		match them with the finite-state machine.
+		If a request matches a transition rule, then the system should change its domain to comply with the new domain. 
+		Otherwise, the application which had sent the request shouldn't perform the concerned operation. 
+
+		This system should be composed of a privileged daemon, capable of switching from a domain to another, and of a
+		mean of communication between the daemon and the applications which require a dynamic confinement model.
+
+		It is a form of mandatory access control which can also grant privileges.
+
+		\subsubsection{Userspace communication}
+			\paragraph{Registration} To interact with the daemon, an application first has to register itself. The registration request is composed of a name (must be unique) and of a PID. 
+			The daemon checks the PID of the application and retrieves the path of the binary associated on the file system.
+			Given this, the daemon looks into its configuration file and tells whether the application is known and allowed to register. If the application's request is denied,
+			it will not be allowed for the application to communicate with the daemon.
+
+			\begin{figure}[h!]
+				\centering
+				\includegraphics[scale=0.6]{app_authentication.pdf}
+				\caption{Example of a registration process between Firefox and Contextd}
+				\label{app_registration}
+			\end{figure}
+
+			\paragraph{Context change} 
+			Whenever an application wants to switch to a new context of execution - ie. to do something else - this application should do a synchronous IPC request to the daemon.
+
+			The request is made of the name of the process, its PID (accessed using the IPC system) and application-defined relevant variables. 
+			For instance, a web-browser willing to reach \url{http://www.google.com} would send a request with these variables:
+			{\it protocol=http; host=www.google.com; port=80; path=/}.
+
+			The request will then be matched to the finite-state machine by the daemon and will either be accepted or rejected. When a request is rejected,
+			the application mustn't change its internal context or should go to a trash context that could explain the user why the action
+			he/she started failed.
+
+			\begin{figure}[h!]
+				\centering
+				\includegraphics[scale=0.6]{app_contextchanged.pdf}
+				\caption{Example of a request of Firefox to visit google.com}
+				\label{app_contextchanged}
+			\end{figure}
+
+			\paragraph{Integration} 
+			The daemon may also force applications to change their inner context. Whenever the daemon switch from one domain to another, it broadcasts
+			the name of the domain to registered applications. Applications should then test if their current context is compatible with the daemon's domain 
+			and either go to a trash context or keep doing the same thing.
+
+			For instance, let's say Firefox is browsing \url{http://www.ebay.com} while the system is in the domain \texttt{eshopping}. Firefox now receives a message from the daemon
+			telling a domain switch has occured from the domain \texttt{eshopping} to the domain \texttt{web}. Firefox now asks the daemon whether 
+			the \url{http://www.ebay.com} is acceptable in the \texttt{web} domain. The daemon answers it is not, Firefox has to shut down this page and show a message
+			telling the user the webpage has been hidden because it was infringing the current domain's rules. 
+
+			To achieve such a behaviour, applications need some modifications. These can be achieved either by using plugins or 
+			by directly modifying the source code of the application. The latter is of course the most secured but plugins don't really hurt the security
+			as long as they are mandatory for the application to execute and as long as they are owned by a privileged user(read-only).
+
+		\subsubsection{Contextd: The privileged daemon}
+			Its goal is to process the incoming application's request, apply them to the finite-state machine and decide what to do.
+			If it is an accepted application context - ie matches a transition in the finite-state machine - it changes the domain according to the matched transition.
+			Either way, the application which sent the request is warned whether its transition is allowed or not.
+
+			It is important that the confinement model is changed \emph{before} returning to the application. Otherwise, the application may not
+			be able to access resources needed by its new domain.
+
+			The domain switching is made by changing the parameters of several security components, may they be firewalls, mandatory access control systems or logging systems.
+			The daemon is statically-linked-plugin based and is designed around a notification API to ease the addition of new security components.
+
+			Contextd should have one plugin per security component. These plugins are notified (of domain changes, errors, debug messages and so on)
+			using the notification API. Plugins may also need a configuration file, this will be their responsability to handle it separately.
+
+			TODO: Maybe add an image here.
+
+\section{Implementation}
+
+	\subsection{Language}
+		Most of the communication languages used in user-space by Contextd, may they be configuration files or messages, are XML-based.
+		XML's tree-based structure allows a great disctinction between application-data and contextd-data which should avoid any problems of injection.
+
+		Also, XML parsers are common nowadays and programmers are used to it.
+		
+		The main configuration file can be found at /etc/context.d/transitions.xml.
+
+		\subsubsection{Creating domains}
+			Domains are represented by a name, a display name and an icon. The display name and the icon are meant for the user interface.
+
+			Converted to the XML syntax, this gives:
+			\begin{verbatim}
+				<domain name="mail" display_name="E-Mail" 
+					icon="/usr/share/icons/evolution.png"/>
+				<domain name="taxes" display_name="Taxes" 
+					icon="/usr/share/icons/money_coin.png"/>
+			\end{verbatim}
+
+		\subsubsection{Applications authentification}
+			To allow an application to send data to the daemon, contextd first needs to authenticate it. Here is the syntax to do so:
+			\begin{verbatim}
+				<program name="firefox" 
+				display_name="Firefox" icon="" 
+				full_path="/usr/bin/firefox"/>
+			\end{verbatim}
+
+			\paragraph*{full\_path} is the path of the executable to be considered as being \texttt{name}. 
+			In this example, the only authorized executable to be called firefox will be /usr/bin/firefox.
+
+		\subsubsection{Adding transitions}
+			The transition defination is splitted in two parts. The transition's attributes and the application-defined variables that will
+			start the transition.
+
+			The transition attributes are relative to the state machine (transit\_from, transit\_to), 
+			the application that can initiate the transition (app\_name) and to the user interface (prompt and notify).
+
+			The application-defined variables are the condition to make the transition effective. They are matched using regular expressions.
+			The names of these variables try to be as normalized as possible but you can define your own variables if you need it.
+
+			\begin{verbatim}
+				<rule app_name="firefox" 
+				transit_from="mail" transit_to="taxes" 
+				prompt="false" notify="false">
+				     <host>www\.impots\.gouv\.fr</host>
+				     <path>.*</path>
+				     <protocol>(http|https)</protocol>
+				</rule>
+			\end{verbatim}
+
+			This transition rule's definition should be read this way:
+			``if firefox asks to visit the url http(s)://www.impots.gouv.fr/.* and if the system is in the mail domain, then, 
+			the system will transit to the taxes domain.''
+
+			\paragraph*{transit\_form} a regular expression which should match the current domain name.
+
+			\paragraph*{transit\_to} the transition destination. This domain should be declared higher in the configuration file.
+
+			\paragraph*{prompt} should be set to true if you want the user to be prompt to accept or deny the transition.
+			This behaviour is close to Microsoft's UAC.
+
+			\paragraph*{notify} attributes defines whether the user should be warned of this transition or if it should be a silent one.
+
+			To be matched, this rules needs firefox to send at least the variables \texttt{host}=``www.impots.gouv.fr'', \texttt{path}=``.*'' and \texttt{protocol}=``(http|https)``.
+			This means, if firefox wants to visit \url{http://www.impots.gouv.fr/index.php} and the system in currently in the domain \texttt{mail}, 
+			then we will transit to the domain \texttt{taxes}.
+
+	\subsection{Interaction between the security components and the applications}
+		\subsubsection{Security components}
+			\paragraph*{IPTables} is the most common firewall on Linux desktops and servers. It is available for the 2.4 and the 2.6 Linux kernels and has been around for a while.
+			This is a simple and well-known stateful firewall. It can be administrated using a simple command line utility called iptables.
+
+			\paragraph*{SELinux} allow to define a fine-grained MAC policy down to the syscall. By using it, it is possible to deny a direct access to a particular ressource to a particular application
+			but you could fool it by using an intermediate operation. The administration can be done using modules. Modules can be hot-pluggled and unplugged using a simple command line.
+
+			\paragraph*{PIGA} sits on-top of SELinux and can guarantee both confidentiality and integrity.
+			So, contrary to SELinux alone, SELinux+PIGA can guarantee an application will never have access to a ressource, even with a lot of intermediate operations.
+			Some of the PIGA policies can be updated on the fly.
+
+			\paragraph*{Syslog-NG} is a common logging system on Linux. It allows to log application data, to sort them by urgency and category and to write them to different files.
+
+		\subsubsection{User applications}
+			\paragraph*{Firefox} is the second-most used web browser nowadays. It features a powerful and flexible plugin system. 
+			To implement the contextd support, one needs to first create a binary XPCOM component to interact with the daemon and a javascript part to get events from the browser. 
+
+			\paragraph*{Claws Mail} is a simple yet powerful GTK messaging client. It supports binary plugins and expose all its internals to its plugins. TODO: expliquer comment j'ai fais le plugin
+			To achieve the contextd support, claws-mail's core first needs some modifications. When this is done, a simple plugin is sufficient. Claws-mail patches have been proposed for inclusion mainstream.
+
+			\paragraph*{Open Office} is the most-used FLOSS office suite. It supports plugins but doesn't expose its internals. Thus, the source code should be modified directly.
+
+		\subsubsection{Interactions}
+			\begin{figure}[h]
+				\centering
+				\includegraphics[scale=0.5]{architecture.pdf}
+				\caption{The global architecture}
+				\label{architecture}
+			\end{figure}
+
+			When receiving a request, the daemon checks whether it should change the domain. If it is the case, it 
+
+\section{Examples}
+	\subsection{Secure a desktop computer}
+		\subsubsection{Contexte de l'ANR}
+
+		\subsubsection{Modèle retenu}
+
+		\subsubsection{Exemple d'utilisation}
+
+		ANR
+		
+		Trio SELinux, PIGA et Contextd (désactive/active des IPs).
+
+		Donner exemple des clés. Dans default, on peut pas lire/écrire directement sur les certificats mais on peut indirectement. PIGA permet d'empecher ça (garantir intégrité et confidentialité des certicats)
+		Contextd permet à Firefox d'y accéder quand le système est dans le domaine impot mais pas dans web ou default.
+
+		Gagné la 1ère manche du concours
+
+\section{Future}
+
+\section{Conclusion}
+	On dit que tout marche plutôt pas mal, que ce système à été inclus dans PIGA-OS qui est l'OS en tête du concours de l'ANR
+
+\section*{Acknowledgment}
+	I would like to thank Tux, for helping me to finish this article on time.
+	blabla
+
+\begin{thebibliography}{1}
+
+\bibitem{IEEEhowto:kopka}
+PIGA-Protect
+
+\bibitem{IEEEhowto:helloworld}
+Hello world
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,348 @@
+\appendix
+\addcontentsline{toc}{part}{Annexes}
+\chapter{Organisation du projet PIGA-SYSTRANS}
+	\label{PIGA_SYSTRANS tech}
+	
+	\paragraph*{}
+		Le projet PIGA-SYSTRANS est constitué de 3 parties:
+		\begin{itemize}
+   			\item Contextd: C'est le cœur du système. Le daemon va analyser les états internes des programmes et effectuer les actions décrites dans ses fichiers de règles;
+   			\item LibContext: Bibliothèque en C permettant de faciliter l'envoi de l'état interne d'un programme;
+   			\item Context-Notify: Propose une interface graphique d'interaction avec Contextd.
+   		\end{itemize}
+		
+	\paragraph*{}
+		Mon travail a consisté en l'écriture de contextd, libcontext et de la formalisation de l'écriture de règles de sécurité en XML. Le travail a ensuite consisté en la création de plugins pour Firefox et Claws-mail avec éventuellement un peu de patchage (pour claws-mail notamment).	
+		
+	\paragraph*{}
+		Ce projet, représentant environ 5000 lignes de code, a majoritairement été écrit en C/C++ et le framework Qt. On y trouve cependant aussi du XUL/Javascript et du C/GTK pour respectivement les plugins Firefox et Claws-mail.
+
+
+	\paragraph*{}
+		Pour un schéma des interactions, veuillez vous reporter à la figure \ref{schema_piga_systrans}.
+	
+	\section{Contextd}
+		\paragraph*{}
+			Contextd a une architecture orientée plugin. Ceux-ci sont liés statiquement et sont désactivables un à un par l'utilisation de defines à la compilation. Ces plugins permettent une meilleure séparation du code ce qui simplifie donc la maintenance et les potentiels effets de bord. De plus, le daemon est donc devenu event-driven.
+		
+		\paragraph*{}	
+			Son cœur est composé de 3 fonctions majeures:
+			\begin{itemize}
+   				\item La daemonisation: Le programme doit se daemoniser au démarrage pour tourner en tâche de fond.
+   				\item L'écoute et l'émission d'appels et signaux D-Bus sur le bus système com.piga.contextd.
+   				\item L'interprétation des règles et leur mise en correspondance avec les données utilisateur.
+   			\end{itemize}
+   			
+   		\paragraph*{}
+   			Une fois la mise en correspondance des données utilisateurs effectuée, des événements sont envoyés et broadcastés à tous les plugins. Pour plus d'informations sur les événements envoyés, vous pouvez vous reporter au dossier \emph{srccontextd/src/plugins}.
+   			
+   		\paragraph*{}
+   			Voici la liste des différents plugins:
+   			\begin{itemize}
+   				\item iptables-blocker: Ajoute/enlève dynamiquement des règles dans le pare-feu iptables de façon à laisser un programme accéder à un site pour lequel contextd a validé l'accès.
+   				\item killer: Envoi un signal (généralement un SIG\_KILL) à un programme lorsqu'il rentre dans un état que l'on considère invalide.
+   				\item logger: Loggue tout les événements dans syslog-ng.
+   				\item notify: Affiche à l'écran des notifications qu'il juge importante en utilisant libnotify.
+   				\item selinux: Charge des modules SELinux dynamiquement par application en fonction du contexte global.
+   			\end{itemize}
+   			   			
+   		\paragraph*{}
+   			L'écriture des règles est détaillé à l'adresse \emph{https://www.sds-project.fr/trac/PIGA-SYSTRANS/wiki/doc\_contextd}.
+   					
+	\section{libcontext}
+		\paragraph*{}
+			Libcontext facilite la communication entre les applications et contextd. La communication utilise l'IPC D-Bus. Libcontext se connecte sur le bus system com.piga.contextd et a ensuite accès aux différentes méthodes exportées par le daemon.
+			
+		\paragraph*{}
+			Pour envoyer son état interne, il faut en premier s'enregistrer sur le daemon puis ensuite appeler une fonction à paramètres infinie. Ces paramètres permettent de définir des couples "nom/valeur". La liste se termine par le couple "NULL/NULL".\\
+			Si vous cherchez un exemple d'utilisation, vous pouvez regarder le fichier \emph{plugins/claws\-mail/piga\_context/src/piga\_context.c}.
+			
+		\paragraph*{}
+			Pour utiliser libcontext, vous devez en premier linker avec. Pour ce faire, vous pouvez utiliser pkgconfig qui vous donnera les flags à ajouter à gcc : \emph{pkg-config --cflags --libs context}.
+			
+		\paragraph*{}
+			Pour plus de détails sur l'API, veuillez consulter l'annexe \ref{PIGA_SYSTRANS Libcontext Interface}.
+		
+	\section{Context-notify}
+		\paragraph*{}
+			Context-notify permet d'apporter une plus grande interaction entre l'utilisateur et le daemon.
+			
+		\paragraph*{}
+			Il est composé de deux parties:
+			\begin{itemize}
+   				\item La fenêtre de changement manuel de context (voir figure \ref{context-notify change context});
+   				\item La popup de demande d'autorisation de transition de context (voir figure \ref{context-notify autorisation}).
+   			\end{itemize}
+			
+		\begin{figure}[!h]
+			\includegraphics[width=11cm]{images/contextnotifydlg.png}
+			\caption{Fenêtre de changement manuel de contexte}
+			\label{context-notify change context}
+		\end{figure}
+		
+		\begin{figure}[!h]
+			\includegraphics[width=7cm]{images/contextnotifypopup.png}
+			\caption{Demande d'autorisation de transition}
+			\label{context-notify autorisation}
+		\end{figure}
+
+	%Figure qui montre tout le userspace
+	\begin{figure}[!h]
+		\includegraphics[width=17cm]{images/userspace.png}
+		\caption{Schéma des interactions dans PIGA-SYSTRANS}
+		\label{schema_piga_systrans}
+	\end{figure}
+		
+\chapter{Les plugins}
+	\label{PIGA_SYSTRANS plugins}
+	
+	\paragraph*{}
+		Pour l'intégration de PIGA-SYSTRANS dans les applications, l'utilisation de plugins a semblé la meilleure option car elle est la plus pérenne/demande peu de temps à maintenir.
+		
+	\paragraph*{}
+		Chaque plugin réalise deux tâches essentielles:
+		\begin{itemize}
+   			\item Transmettre l'état actuel du programme;
+   			\item Changer dynamiquement l'affichage en fonction du contexte actuel et de ses droits;
+   		\end{itemize}
+	
+	\section{Firefox}
+		\paragraph*{}
+			Le plugin Firefox réalise les deux tâches essentielles mais il se charge aussi de vider le cache lors d'un changement de contexte.
+			
+		\paragraph*{}
+			Il est composé de deux parties:
+			\begin{itemize}
+   				\item Un plugin binaire XPCOM, écrit en C. Il permet d'établir le dialogue avec le daemon;
+   				\item Un plugin Javascript. Il se charge de récupérer les événements utilisateur, de modifier l'interface graphique et de vider le cache lors des changements de contexte.
+   			\end{itemize}
+   			
+   		\begin{figure}[!h]
+			\includegraphics[width=13cm]{images/firefox.png}
+			\caption{Exemple d'une modification faite à Firefox}
+		\end{figure}
+	
+	\section{Claws-mail}
+		\paragraph*{}
+			Le plugin Claws-mail a été écrit en C/GTK. Cependant, contrairement à Firefox, il a nécessité des modifications dans le code de Claws-mail.
+			
+		\paragraph*{}
+			En effet, Claws-mail n'avait aucun hook lors de l'ouverture d'un email et manquait aussi d'un système d'affichage d'erreur personnalisé à la place d'un email. Cela a été ma première tâche.
+			
+		\paragraph*{}
+			Ces modifications ont été faites avec l'aval de l'équipe de Claws-mail. Pour ce faire, j'ai travaillé avec eux via IRC en leur expliquant premièrement ce que j'allais faire puis en leur soumettant des versions de test pour qu'ils puissent les pré-valider.\\
+			Ce travail a été très intéressant et a été l'occasion de produire mon premier patch pour un programme autre que le mien. Je voudrais aussi saluer le professionnalisme de l'équipe, pourtant petite, qui montre bien que le logiciel libre n'est pas du travail d'amateur.
+			
+		\paragraph*{}
+			Le patch final, qui fait environ 200 lignes, se trouve à l'adresse \emph{plugins/claws\-mail/mail\_pre\_open\_hook.patch}. Il sera proposé à la communauté pour approbation finale quand il aura été validé de notre coté.
+			
+		\begin{figure}[!h]
+			\includegraphics[width=13cm]{images/clawsmail.png}
+			\caption{Exemple d'une modification faite à Claws-mail}
+		\end{figure}
+	
+	\section{Open Office}
+		\paragraph*{}
+			Je n'ai malheureusement pas eu le temps d'aller plus loin que la recherche d'informations sur les plugins UNO.
+			
+		\paragraph*{}
+			Ce plugin n'a donc pas pu être développé.
+	
+\chapter{Libcontext's Interface}
+	\label{PIGA_SYSTRANS Libcontext Interface}
+	\input{doxygen/libcontext_8h.tex}
+
+\chapter{CTS 2010 paper}
+	\label{PIGA_SYSTRANS paper}
+	\includepdf[pages=1-6]{images/cts2010-ensib.pdf}
+
+\chapter{SELAudit: README}
+	\label{SELAudit}
+
+\subsection*{Description}
+\paragraph*{}
+SELAudit is a tool designed to help SELinux administrator in writing SELinux policies.
+
+\paragraph*{}
+It's goal is to automate the most boring part of the process and leave the *real* job to
+the administrator of the system.
+
+\subsection*{What does it do?}
+\paragraph*{}
+The scope of this tool is just to automate the creation of the initial module (template-based) 
+and then entering an auditing loop to audit almost all the rules needed to make the application
+work.
+
+\subsection*{How to make it work?}
+
+\paragraph*{}
+To do so, you are requiered to first launch selaudit.py in the role sysadm\_r (connect as root and then, newrole -r sysadm\_r).
+Selaudit.py takes at least two arguments. The first one is the module name you wish to create.
+The second is the filepath of the application that needs to be audited.
+You can give some more arguments to selaudit.py. You will find a list at "selaudit.py -h".
+
+\paragraph*{}
+When prompted to launch selaudit\_user.sh, you are required to launch the specified command line as user (or staff, depending on the application).
+This program is a shell script that launches the application you want to audit in loop. 
+
+\paragraph*{}
+The first execution will be executed in permissive mode unless you specified the option -no\_fc\_audit.
+This pass aims to get the interactions the application has on the filesystem. 
+Theses interactions are then logged into the fc file of the policy.
+Make sure to use all the functionalities of the application before quitting it.
+
+\paragraph*{}
+The next executions are then executed in enforcing mode. This mode is used to learn the allow rules of the type enforcement.
+Just try to use the application as much as possible, and, when you are not able to execute the action you are willing, exit the
+application and wait for another instance to spawn. 
+
+\paragraph*{}
+WARNING: The learning process takes some time, please be patient and try every use case you want to support in the application.
+
+\paragraph*{}
+When an execution doesn't generate any rules, you should be asked whether you tested all the use-cases you want to support.
+If this is the case, just answer yes. It should tell you where the policy has been written.
+If you didn't test everything, just answer No and it will continue learning.
+
+\paragraph*{}
+If by any chance, you want to interrupt the learning process, just press ctrl+c.
+
+\paragraph*{}
+WARNING: Please remove the learning policy whenever you have finished learning.
+TODO: We should unload this policy for you
+
+\subsection*{Dependencies}
+\begin{itemize}
+	\item python 3.1+
+	\item ply (tested with ply-3.3)
+	\item bash (may work with sh)
+	\item brain (homo-selinux+)
+\end{itemize}
+\subsection*{Installation}
+\paragraph*{}
+First, extract the archive wherever you would like it to remain.
+Then, execute the Makefile: \# make install
+
+\paragraph*{}
+Note: You can uninstall the whole stuff by running: \# make uninstall
+
+\subsection*{About}
+If you have any questions, please drop me a line at martin.peres@ensi-bourges.fr
+
+\chapter{SELTag: README}
+	\label{SELTag}
+\subsection*{Description}
+\paragraph*{}
+SELTag is a tool designed to help SELinux administrator in auditing SELinux policies.
+
+\paragraph*{}
+It's goal is to tag applications with some system requierements by reading their SELinux policies.
+This helps administrators when auditing policies. Also, an xml-based regexp-based configuration file 
+has been written that allow auditers to create new tags easily.
+
+\subsection*{How to use it?}
+\subsubsection*{How to tag an application?}
+\paragraph*{}
+Just run:
+\begin{verbatim}
+\$ seltag_app.py policy.tmp policy.fc
+\end{verbatim}
+
+\paragraph*{}
+policy.tmp is the file generated by the SELinux Makefile that allows you to load a policy. 
+It is generally located in directory called tmp.
+
+\paragraph*{}
+policy.fc is the FC file of the policy you want to audit.
+
+\subsubsection*{How to compare applications' tags?}
+\paragraph*{}
+Just run:
+\begin{verbatim}
+\$ seltag_compare.py policy1.tmp policy1.fc policy2.tmp policy2.fc
+\end{verbatim}
+ 
+\paragraph*{}
+policy1 is the policy of the program you want to compare to.\\
+policy2 is the policy of the program compared to the policy1.
+
+\subsection*{What the heck is this configuration file format?}
+\paragraph*{}
+First of all, you'll find the configuration file located in "tagging/setltag.conf".
+
+\paragraph*{}
+First, let's analyse an SELinux allow rule:
+\begin{verbatim}
+        allow user_firefox_t xauth_home_t:file { getattr open read };
+\end{verbatim}
+
+\begin{itemize}
+ \item Source: user\_firefox\_t
+ \item Destination\: xauth\_home\_t\:file
+ \item Attributes\: getattr, open and read
+\end{itemize}
+
+\paragraph*{}
+Let's analyse a tagging rule:
+\begin{verbatim}
+        <tag tags="gui xserver">
+                <te src=".*" dst="xauth_home_t:file" attributes="getattr open read" />
+                <te src=".*" dst="xserver_port_t:tcp_socket" attributes="name_connect" />
+        </tag>
+\end{verbatim}
+
+\paragraph*{}
+This rule should be read this way: \\
+"I will tag the application with the tags "gui" and "xserver" if there is in the TE file an allow rule for the source ".*"
+and "xauth\_home\_t:file" as destination and having the attributes "getattr", "open" and "read" 
+and also if there is in the TE file an allow rule for the source ".*"
+and "xserver\_port\_t:tcp\_socket" as destination and having the attribute "name\_connect".
+
+\paragraph*{}
+Please note that you are allowed to define several way to tag an application with a tag:
+\begin{verbatim}
+        <tag tags="network">
+                <te src=".*" dst=".*_port_t:(tcp|udp|unix_dgram|unix_stream|netlink_route)_socket" attributes="name_connect" />
+        </tag>
+        <tag tags="network">
+                <te src=".*" dst=".*_packet_t:packet"/>
+        </tag>
+\end{verbatim}
+
+\paragraph*{}
+You can also use the fc file to tag the application:
+\begin{verbatim}
+        <tag tags="app_home">
+                <fc path="((/(home|root))|HOME_DIR)/.*" type=".*" context="(^.*home_t)"/>
+        </tag>
+\end{verbatim}
+
+Please also note that it is possible to tag an application with a commented line in the fc file (generated by selaudit.py):
+\begin{verbatim}
+        <tag tags="gtk-2.0">
+                <fc path="/usr/lib/libgtk-x11-2\\\.0\\\.so[^/]*" type="--" context=".*lib_t" evenIfCommented="true" />
+        </tag>
+\end{verbatim}
+
+\begin{verbatim}
+        <tag tags="qt">
+                <fc path="/usr/lib/qt4/lib(QtCore|QtGui)\\\.so[^/]*" type="--" context=".*lib_t" evenIfCommented="true" />
+        </tag>
+\end{verbatim}
+ 
+\subsection*{Dependencies}
+\begin{itemize}
+ \item python 3.1+
+ \item brain (homo-selinux+, homo-regexp+)
+\end{itemize}
+
+\subsection*{Installation}
+\paragraph*{}
+First, extract the archive wherever you would like it to remain.
+Then, execute the Makefile: \# make install
+
+\paragraph*{}
+Note: You can uninstall the whole stuff by running: \# make uninstall
+
+\subsection*{About}
+If you have any questions, please drop me a line at martin.peres@ensi-bourges.fr

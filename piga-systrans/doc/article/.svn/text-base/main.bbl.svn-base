@@ -1,0 +1,66 @@
+\begin{thebibliography}{1}
+
+\bibitem{TELECOM_BRETAGNE-7660}
+Samiha AYED, Nora CUPPENS, and Frederic CUPPENS.
+\newblock Deploying security policy in intra and inter workflows management
+  systems.
+\newblock In {\em ARES 2009 : Third International Conference on Availability,
+  Reliability and Security, 16-19 March, Fukuoka, Japan}. LUSSI - DÃ©pt.
+  Logique des Usages, Sciences Sociales et de l'Information (Institut TELECOM ;
+  TELECOM Bretagne), 2009.
+
+\bibitem{BBLT09}
+M.~Blanc, J.~Briffaut, J.-F. Lalande, and C.~Toinard.
+\newblock Enforcement of security properties for dynamic mac policies.
+\newblock In IARIA, editor, {\em Third International Conference on Emerging
+  Security Information, Systems and Technologies}, pages 114--120,
+  Athens/Vouliagmeni, Greece, June 2009. IEEE Computer Society Press.
+
+\bibitem{SHPCS09}
+J.~Briffaut, J.~Rouzaud-Cornabas, C.~Toinard, and Y.~Zemali.
+\newblock A new approach to enforce the security properties of a clustered
+  high-interaction honeypot.
+\newblock In Ratan~Kumar Guha and Luca Spalazzi, editors, {\em Workshop on
+  Security and High Performance Computing Systems}, pages 184--192, Leipzig,
+  Germany, June 2009. IEEE Computer Society.
+
+\bibitem{10.1109/CSFW.2002.1021825}
+Riccardo Focardi and Sabina Rossi.
+\newblock Information flow security in dynamic contexts.
+\newblock {\em Computer Security Foundations Workshop, IEEE}, 0:307, 2002.
+
+\bibitem{firefox_ccr_2009}
+Stefan Frei, Thomas Duebendorfer, and Bernhard Plattner.
+\newblock Firefox (in) security update dynamics exposed.
+\newblock {\em SIGCOMM Comput. Commun. Rev.}, 39(1):16--22, 2009.
+
+\bibitem{GM}
+J.~Goguen and J.~Meseguer.
+\newblock Security policies and security models.
+\newblock In {\em Proc. 1982 IEEE symp. Security and Privacy}, pages 11--20,
+  Oakland, CA, 1982. IEEE.
+
+\bibitem{LAHMADI:2009:INRIA-00404853:1}
+{A}bdelkader {L}ahmadi and {O}livier {F}estor.
+\newblock {S}ec{S}ip: {A} {S}tateful {F}irewall for {SIP}-based {N}etworks.
+\newblock In {\em 11th {IFIP}/{IEEE} {I}nternational {S}ymposium on
+  {I}ntegrated {N}etwork {M}anagement - {IM} 2009}, {L}ong {I}sland
+  {\'E}tats-{U}nis d'{A}m{\'e}rique, 2009.
+\newblock {D}.: {S}oftware, {K}.: {C}omputing {M}ilieux, {K}.: {C}omputing
+  {M}ilieux/{K}.6: {MANAGEMENT} {OF} {COMPUTING} {AND} {INFORMATION}
+  {SYSTEMS}/{K}.6.5: {S}ecurity and {P}rotection.
+
+\bibitem{4223222}
+Ninghui Li, Ziqing Mao, and Hong Chen.
+\newblock Usable mandatory integrity protection for operating systems.
+\newblock In {\em Security and Privacy, 2007. SP '07. IEEE Symposium on}, pages
+  164--178, May 2007.
+
+\bibitem{1542244}
+Ziqing Mao, Ninghui Li, Hong Chen, and Xuxian Jiang.
+\newblock Trojan horse resistant discretionary access control.
+\newblock In {\em SACMAT '09: Proceedings of the 14th ACM symposium on Access
+  control models and technologies}, pages 237--246, New York, NY, USA, 2009.
+  ACM.
+
+\end{thebibliography}
