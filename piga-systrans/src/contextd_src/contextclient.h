@@ -7,10 +7,10 @@
 #include "program.h"
 #include "plugins/abstractcontextdplugin.h"
 
-#include <QMutex>
-#include <QString>
-#include <QMap>
-#include <QReadWriteLock>
+#include <QtCore/QMutex>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtCore/QReadWriteLock>
 
 class ContextClient
 {

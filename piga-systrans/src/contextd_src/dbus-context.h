@@ -2,9 +2,9 @@
 #define DBUSCONTEXT_H
 
 #include "contextclient.h"
-#include <QDBusContext>
-#include <QMap>
-#include <QDBusConnectionInterface>
+#include <QtDBus/QDBusContext>
+#include <QtCore/QMap>
+#include <QtDBus/QDBusConnectionInterface>
 
 class DBusContext: public QObject, public QDBusContext
 {

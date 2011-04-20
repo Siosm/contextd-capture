@@ -8,9 +8,9 @@
 #include "../../../program.h"
 #include "../../../domain.h"
 
-#include <QMap>
-#include <QPair>
-#include <QReadWriteLock>
+#include <QtCore/QMap>
+#include <QtCore/QPair>
+#include <QtCore/QReadWriteLock>
 
 class ContextdPluginSELinux : public AbstractContextdPlugin, public XMLSP::Parser
 {

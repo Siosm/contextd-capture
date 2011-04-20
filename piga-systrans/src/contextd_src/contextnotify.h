@@ -1,7 +1,7 @@
 #ifndef CONTEXTNOTIFY_H
 #define CONTEXTNOTIFY_H
 
-#include <QString>
+#include <QtCore/QString>
 
 class ContextNotify
 {

@@ -1,11 +1,11 @@
 #ifndef CONTEXTHOLDER_H
 #define CONTEXTHOLDER_H
 
-#include <QObject>
+#include <QtCore/QObject>
 #include "../abstractcontextdplugin.h"
 #include "domain.h"
 
-#include <QReadWriteLock>
+#include <QtCore/QReadWriteLock>
 
 class DomainHolder : public QObject, public AbstractContextdPlugin
 {

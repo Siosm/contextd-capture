@@ -1,9 +1,9 @@
 #ifndef CONTEXTDPLUGINEVENT_H
 #define CONTEXTDPLUGINEVENT_H
 
-#include <QMap>
-#include <QMutex>
-#include <QString>
+#include <QtCore/QMap>
+#include <QtCore/QMutex>
+#include <QtCore/QString>
 
 typedef QString EventType;
 

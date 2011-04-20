@@ -3,7 +3,7 @@
 
 #include "xmlsp.h"
 
-#include <QMap>
+#include <QtCore/QMap>
 
 class XMLContext2Map : public XMLSP::Parser
 {

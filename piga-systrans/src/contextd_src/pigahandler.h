@@ -1,9 +1,9 @@
 #ifndef PIGATRACESENDER_H
 #define PIGATRACESENDER_H
 
-#include <QObject>
+#include <QtCore/QObject>
 #include <QtNetwork/QLocalSocket>
-#include <QString>
+#include <QtCore/QString>
 
 #include "contextclient.h"
 #include "transition.h"

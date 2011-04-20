@@ -1,15 +1,15 @@
 #ifndef TRANSITIONRULES_H
 #define TRANSITIONRULES_H
 
-#include <QReadWriteLock>
+#include <QtCore/QReadWriteLock>
 #include "../xmlsp.h"
 #include "transition.h"
 #include "context.h"
 #include "program.h"
-#include <QMap>
-#include <QVector>
-#include <QString>
-#include <QMutex>
+#include <QtCore/QMap>
+#include <QtCore/QVector>
+#include <QtCore/QString>
+#include <QtCore/QMutex>
 
 class TransitionRules : /*public QObject,*/ private XMLSP::Parser
 {

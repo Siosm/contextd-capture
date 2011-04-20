@@ -4,10 +4,10 @@
 #include "plugins/contextdpluginevent.h"
 #include "plugins/abstractcontextdplugin.h"
 
-#include <QObject>
-#include <QVector>
-#include <QList>
-#include <QReadWriteLock>
+#include <QtCore/QObject>
+#include <QtCore/QVector>
+#include <QtCore/QList>
+#include <QtCore/QReadWriteLock>
 
 class EventDispatcher : public QObject
 {
