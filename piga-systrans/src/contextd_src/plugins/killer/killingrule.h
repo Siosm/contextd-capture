@@ -1,8 +1,8 @@
 #ifndef KILLINGRULE_H
 #define KILLINGRULE_H
 
-#include <QMap>
-#include <QString>
+#include <QtCore/QMap>
+#include <QtCore/QString>
 #include "xmlsp.h"
 
 class KillingRule : public XMLSP::Parser

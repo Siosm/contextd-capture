@@ -2,9 +2,9 @@
 #define DBUSCALLBACKE_H
 
 #include "libcontext.h"
-#include <QObject>
-#include <QMutex>
-#include <QDBusError>
+#include <QtCore/QObject>
+#include <QtCore/QMutex>
+#include <QtDBus/QDBusError>
 
 
 class DBusCallBack : public QObject

@@ -7,9 +7,9 @@
 #include <sstream>
 #include <stdio.h>
 
-#include <QDomDocument>
-#include <QFile>
-#include <QDomNode>
+#include <QtXml/QDomDocument>
+#include <QtCore/QFile>
+#include <QtXml/QDomNode>
 
 //Events
 #include "../../eventdispatcher.h"

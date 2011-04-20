@@ -1,7 +1,7 @@
 #include "killingrule.h"
 
-#include <QRegExp>
-#include <QList>
+#include <QtCore/QRegExp>
+#include <QtCore/QList>
 
 KillingRule::KillingRule()
 {

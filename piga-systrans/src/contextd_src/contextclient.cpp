@@ -4,8 +4,8 @@
 
 #include "pigahandler.h"
 
-#include <QFile>
-#include <QStringList>
+#include <QtCore/QFile>
+#include <QtCore/QStringList>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,8 +1,8 @@
 #include "dbuscallback.h"
 #include "context-common.h"
 
-#include <QDBusMessage>
-#include <QDBusPendingReply>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusPendingReply>
 
 unsigned int DBusCallBack::nb=0;
 QMutex DBusCallBack::mutex;

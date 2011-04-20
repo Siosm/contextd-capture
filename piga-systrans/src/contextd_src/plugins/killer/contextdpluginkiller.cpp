@@ -7,8 +7,8 @@
 #include <sstream>
 
 #include <signal.h>
-#include <QRegExp>
-#include <QDir>
+#include <QtCore/QRegExp>
+#include <QtCore/QDir>
 
 #include <syslog.h>
 

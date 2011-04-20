@@ -1,14 +1,14 @@
 #ifndef CONTEXTD_COMMUNICATOR_H
 #define CONTEXTD_COMMUNICATOR_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 #include "../context-common.h"
 #include "contextd_interface.h"
 #include "libcontext.h"
 
 //#include "../contextd_interface.h"
-#include<QDBusInterface>
+#include<QtDBus/QDBusInterface>
 
 class Contextd_Communicator : public QObject
 {

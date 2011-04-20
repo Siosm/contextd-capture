@@ -14,10 +14,10 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <qprocess.h>
+#include <QtCore/QProcess>
 
-#include <QStringList>
-#include <QFileInfo>
+#include <QtCore/QStringList>
+#include <QtCore/QFileInfo>
 
 QReadWriteLock ContextdPluginSELinux::rwlock;
 

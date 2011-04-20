@@ -7,10 +7,10 @@
 #include "../contextdplugintransitiondemandevent.h"
 #include "../contextdpluginrestartevent.h"
 
-#include <QDir>
-#include <QString>
-#include <QStringList>
-#include <QFile>
+#include <QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QFile>
 
 #define XSERVER_NAME "/usr/bin/Xorg"
 #define REFRESH_RATE 500

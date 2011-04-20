@@ -5,8 +5,8 @@
 #include "../../contextclient.h"
 #include "../../../xmlsp.h"
 
-#include <QList>
-#include <QReadWriteLock>
+#include <QtCore/QList>
+#include <QtCore/QReadWriteLock>
 #include "killingrule.h"
 
 class ContextdPluginKiller : public AbstractContextdPlugin, public XMLSP::Parser

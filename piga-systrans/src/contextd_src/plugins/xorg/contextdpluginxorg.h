@@ -3,7 +3,7 @@
 
 #include "../abstractcontextdplugin.h"
 
-#include <QThread>
+#include <QtCore/QThread>
 
 class ContextdPluginXorg : public QThread, public AbstractContextdPlugin
 {

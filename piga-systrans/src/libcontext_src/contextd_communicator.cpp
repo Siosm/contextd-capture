@@ -3,8 +3,8 @@
 #include "dbuscallback.h"
 #include "contextd_interface.h"
 
-#include <QDBusError>
-#include <QCoreApplication>
+#include <QtDBus/QDBusError>
+#include <QtCore/QCoreApplication>
 
 #include <sys/time.h>
 #include <signal.h>

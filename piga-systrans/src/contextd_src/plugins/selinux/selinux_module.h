@@ -1,7 +1,7 @@
 #ifndef SELINUX_MODULE_H
 #define SELINUX_MODULE_H
 
-#include <QString>
+#include <QtCore/QString>
 
 class SELinux_Module
 {
