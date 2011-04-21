@@ -76,13 +76,10 @@ int calculate_path(struct dentry *dentry, char *path, size_t len)
 				path[pos] = '/';
 				strncpy(path + pos + 1, dentry->d_name.name, size);
 				return pos + size + 1;
-			} else {
-				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
+	return -1;
 }
 
 int file_path(struct file *file, char *path)
@@ -141,13 +138,18 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	char *	fullpath = NULL;
 
 	if(prog_is_monitored()){
-		fullpath = vmalloc(PATH_MAX + 1);
+		fullpath = kmalloc(PATH_MAX + 1, GFP_NOFS);
+		if(fullpath == NULL){
+			printk(KERN_INFO "AuditSec: mkdir: pid: %d, execname: %s, mode: %d NO MEM",
+				   current_pid, current->comm, mode);
+			return -EFAULT;
+		}
 		dir_path(dentry, fullpath);
 		if(*daemon_launched()){
 			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
-				vfree(fullpath);
+				kfree(fullpath);
 				return -EFAULT;
 			}
 
@@ -163,27 +165,27 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
-				vfree(fullpath);
+				kfree(fullpath);
 
 				ret = down_trylock(auditsec_question_lock());
 				up(auditsec_hook_lock());
 				return -EFAULT;
 			}
 
-			vfree(fullpath);
+			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 			return answer;
 		}else{
 			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d REFUSED : daemon not launched",
 				   fullpath, current_pid, current->comm, mode);
-			vfree(fullpath);
+			kfree(fullpath);
 			return -EFAULT;
 		}
 	}else{
 		/*printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
 				fullpath, current_pid, current->comm, mode);
-			vfree(fullpath);*/
+			kfree(fullpath);*/
 	}
 	return 0;
 }
@@ -228,13 +230,18 @@ int auditsec_file_permission(struct file *file, int mask)
 	char *	fullpath = NULL;
 
 	if(prog_is_monitored()){
-		fullpath = vmalloc(PATH_MAX + 1);
+		fullpath = kmalloc(PATH_MAX + 1, GFP_NOFS);
+		if(fullpath == NULL){
+			printk(KERN_INFO "AuditSec: file access: pid: %d, execname: %s, mask: %d NO MEM",
+					current_pid, current->comm, mask);
+			return -EFAULT;
+		}
 		file_path(file, fullpath);
 		if(*daemon_launched()){
 			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
-				vfree(fullpath);
+				kfree(fullpath);
 				return -EFAULT;
 			}
 
@@ -249,27 +256,27 @@ int auditsec_file_permission(struct file *file, int mask)
 			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
-				vfree(fullpath);
+				kfree(fullpath);
 
 				ret = down_trylock(auditsec_question_lock());
 				up(auditsec_hook_lock());
 				return -EFAULT;
 			}
 
-			vfree(fullpath);
+			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 			return answer;
 		}else{
 			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
 				fullpath, task_pid_nr(current), current->comm, mask);
-			vfree(fullpath);
+			kfree(fullpath);
 			return -EFAULT;
 		}
 	}else{
 		/*printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
 				fullpath, task_pid_nr(current), current->comm, mask);
-			vfree(fullpath);*/
+			kfree(fullpath);*/
 	}
 	return 0;
 }
@@ -384,8 +391,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 		}
 	}else{
 		/*printk(KERN_INFO "AuditSecu: socket bind: pid: %d, execname: %s",
-				task_pid_nr(current), current->comm);
-			vfree(fullpath);*/
+				task_pid_nr(current), current->comm);*/
 	}
 	return 0;
 }
@@ -429,8 +435,7 @@ int auditsec_socket_connect(struct socket *sock, struct sockaddr *address, int a
 		}
 	}else{
 		/*printk(KERN_INFO "AuditSecu: socket connect: pid: %d, execname: %s",
-				task_pid_nr(current), current->comm);
-			vfree(fullpath);*/
+				task_pid_nr(current), current->comm);*/
 	}
 	return 0;
 }
