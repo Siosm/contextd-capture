@@ -1,0 +1,287 @@
+\documentclass{beamer}
+\usepackage[francais]{babel}
+\usepackage[utf8]{inputenc}
+\usetheme{Antibes}
+
+% À chaque nouvelle section, on dit où on est
+\AtBeginSection[ ]
+{
+ \begin{frame}<beamer>
+   \frametitle{Plan}
+   \tableofcontents[currentsection]
+  \end{frame}
+} 
+
+\title{SELAudit : Outil d'aide à la création de politiques SELinux }
+\subtitle{Stage 2A, 2010}
+\author{M.~Peres}
+\institute{ENSI de Bourges}
+
+\begin{document}
+
+	% page de garde
+	\begin{frame}
+		\titlepage
+	\end{frame}
+
+	% Ajoute le logo à toutes les autres pages
+	\logo{\includegraphics[height=1.0cm]{figures/ensib_logo.png}}
+
+	\section{Introduction}
+		\subsection{SELinux}
+		\begin{frame}
+			\begin{block}{SELinux}
+				SELinux est un Linux security module (LSM), qui permet de définir une politique de 
+				contrôle d'accès obligatoire aux éléments d'un système basé sur Linux.
+				\begin{itemize}
+					\item Développé par la NSA et intégré à Linux en 2001
+					\item Système de type Contrôle d'accès Mandataire (MAC)
+					\item Implémente le modèle Bell-Lapadula
+					\item Role-Based Access Control (RBAC)
+					\item Fonctionne avec des types (type enforcement)
+				\end{itemize}
+			\end{block}
+
+		\end{frame}
+
+		\begin{frame}
+			\begin{block}{Label SELinux}
+				Un label SELinux est de la forme user\_u:role\_r:type\_t.
+			\end{block}
+			\begin{block}{Politique SELinux}
+				Une politique SELinux est composée de :
+				\begin{itemize}
+					\item Un fichier FC : Définit les labels à donner aux fichiers
+					\item Un fichier TE : Définit les interactions possibles entres les différents types
+					\item Un fichier IF : Permet la définition de macros qui sont ensuite utilisées dans le fichier TE
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+		\begin{frame}
+			\begin{block}{Avantages}
+				\begin{itemize}
+					\item C'est le système MAC le plus fin
+					\item Il est activable/desactivable globalement ou plus localement (limité à quelques types)
+					\item Il est principalement utilisé par Red Hat, Fedora, Gentoo Hardened
+					\item Il est stable et est intégré de base dans le noyau
+				\end{itemize}
+			\end{block}
+
+			\begin{block}{Inconvénients}
+				\begin{itemize}
+					\item Procédure de création de politique très longue (due à sa finesse)
+					\item Nécessite beaucoup de connaissances et de motivation
+					\item Manque important de documentation
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+		\subsection{Problématiques du stage}
+		\begin{frame}
+			Le stage s'est déroulé en deux temps :
+
+			\begin{block}{Outil d'aide à la création de politique}
+				\begin{itemize}
+					\item Pour augmenter la sécurité du système, il faut faire des politiques pour toutes les applications
+					\item C'est une tâche longue et complexe
+					\item Il faut l'automatiser au maximum et simplifier l'audit
+				\end{itemize}
+			\end{block}
+
+			\begin{block}{Outil de tagging et comparaison de politiques}
+				\begin{itemize}
+					\item Lire attentivement une politique SELinux est difficile
+					\item Il faut pouvoir créer des alertes intelligibles
+					\item Création de programmes et d'un ``langage'' de tagging de politique
+				\end{itemize}
+			\end{block}
+		\end{frame}
+
+	\section{Automatisation de la création de politique}
+		\subsection*{Concept}
+			\begin{frame}
+				\begin{block}{}
+					L'apprentissage d'une politique s'effectue en 4 temps :
+					\begin{itemize}
+						\item Création d'une politique de base typant l'application
+						\item Analyse des interactions avec le système de fichier avec strace en SELinux en mode permissif
+						\item Apprentissage du TE en surveillant audit2allow périodiquement
+						\item Analyse et simplification de la politique par l'administrateur
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Implémentation}
+			\begin{frame}
+				\begin{block}{Création de la politique de base}
+					\begin{itemize}
+						\item Utilisation d'un template de module
+						\item qui est instancié par les données saisies par l'administrateur au démarrage de l'audit
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+			\begin{frame}
+				\begin{block}{Analyse des interactions}
+					\begin{itemize}
+ 						\item Le domaine de l'application auditée est passé en mode permissif
+						\item Strace permet de suivre l'accès aux fichiers et ainsi d'aider l'administrateur à savoir quoi labbeller
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+			\begin{frame}
+				\begin{block}{Apprentissage du TE}
+					L'apprentissage du TE se fait à l'aide de 2 modules:
+					\begin{itemize}
+						\item Le premier est lancé en tant que sysadm\_r. Celui-çi se charge de l'analyse des logs SELinux, 
+							de l'ajout des règles nécessaires dans le fichier te et du rechargement de la politique
+						\item Le second est lancé avec les droits de l'utilisateur final, il ne fait qu'exécuter en boucle l'application en cours d'audit
+					\end{itemize}
+				\end{block}
+
+				\begin{block}{Protocole}
+					\begin{itemize}
+						\item L'administrateur lance l'audit puis exécute la boucle d'audit
+						\item Le module est régulièrement enrichi avec les traces générées
+						\item À chaque fois que l'application auditée se ferme, les fichiers/dossiers générés par cette instance 
+								sont supprimés pour remettre le système dans son état initial. L'application se relance ensuite toute seule
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Limites}
+			\begin{frame}
+				\begin{block}{Les limites de l'apprentissage du fichier TE}
+					L'apprentissage se faisant en boite noire :
+					\begin{itemize}
+						\item Légitimité des interactions ? Inconnue
+						\item On autorise donc tout
+						\item Oblige à la vérification et simplification à posteriori
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+			\begin{frame}
+				\begin{block}{Les limites de l'apprentissage du fichier FC}
+					Le labelling des fichiers ne se fait pas dynamiquement, il faut relabeller le système pour ça :
+					\begin{itemize}
+						\item Impossibilité de changer les labels à chaque interaction du programme avec le système
+						\item - Le fichier FC doit être écrit avant l'audit TE
+						\item -- Les fichiers étant déjà créés, on n'est donc plus à l'état initial. 
+							 Problème de la poule et de l'oeuf (news: ce serait la poule)
+					\end{itemize}
+				\end{block}
+
+				\begin{block}{Conclusion}
+					\begin{itemize} 
+						\item C'est à l'administrateur de faire le nécessaire
+						\item Un mode de reprise d'apprentissage a été créé pour l'aider dans cette tâche
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Conclusion}
+			\begin{frame}
+				\begin{block}{Conclusion}
+					\begin{itemize}
+						\item Création de politique grossière en quelques minutes au lieu de quelques heures
+						\item Nécessite toujours une vérification et une simplification par l'administrateur
+						\item Pour faire mieux, il faudrait modifier SELinux pour pouvoir tagger les fichiers dès leurs création
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+	\section{Outils d'analyse de politiques}
+		\subsection*{Concept}
+			\begin{frame}
+				\begin{block}{Généralités}
+					Un administrateur, à propos d'une application, doit connaître :
+					\begin{itemize}
+						\item Les interactions de celle-ci avec son environnement
+						\item Les potentielles failles de sécurité liées
+						\item Son type sémantique (navigateur, traitement de texte, etc ...)
+					\end{itemize}
+				\end{block}
+
+				\begin{block}{Problèmes}
+					\begin{itemize}
+						\item SELinux détaille parfaitement les interactions mais est dur à lire rapidement
+						\item Le type sémantique de l'application doit être reconnu par un humain
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+			\begin{frame}
+				\begin{block}{Proposition}
+					\begin{itemize}
+						\item Création d'un langage de définition d'alertes basées sur les règles SELinux
+						\item Classification automatique par degré de ressemblance avec des applications 
+								dont le type sémantique est déjà connu
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Implémentation}
+			\begin{frame}
+				\begin{block}{Langage de définition d'alertes}
+					\begin{itemize}
+						\item Basé sur XML et les expressions régulières (écriture d'alertes facile et rapide)
+						\item Travaille sur le fichier fc et te
+						\item Reconnait des comportements au point de vue SELinux 
+							(exemple: Une application se connecte à IRC tout en ayant accès à des données sensibles, fuite possible d'informations)
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Limites}
+			\begin{frame}
+				\begin{block}{Limites du langage}
+					\begin{itemize}
+						\item Se base uniquement sur SELinux et quelques traces strace
+						\item Ne peut donc pas générer de tag en fonction de chaîne d'interactions
+						\item Ne gère pas les statistiques d'utilisation des appels systèmes (pas de différenciation entre un besoin ponctuel ou récurrent)
+					\end{itemize}
+				\end{block}
+
+				\begin{block}{Limites de la classification}
+					\begin{itemize}
+						\item Les règles communes entre deux applications de même type sémantique sont trop faibles
+						\item Les tags aident à identifier et comparer les pré-requis système mais sont trop limités
+						\item La classification doit se baser sur des cas d'essais, des traces du fonctionnement, pas sur la liste des pré-requis
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+		\subsection*{Conclusion}
+			\begin{frame}
+				\begin{block}{Conclusion}
+					\begin{itemize}
+						\item Le système de tagging permet de placer des alertes et de voir si une application les génère
+						\item Permet de voir les pré-requis système de l'application
+						\item Ne permet pas en l'état de faire une classification fiable (trop de faux positifs)
+					\end{itemize}
+				\end{block}
+			\end{frame}
+
+	\section{Conclusion sur le stage}
+			\begin{frame}
+				\begin{block}{Technique \& Recherche}
+					\begin{itemize}
+						\item Meilleure compréhension des mécanismes de SELinux
+						\item Apprentissage du python
+						\item Amélioration d'un parser SELinux (Python Lex Yacc)
+						\item Développement par concepts
+					\end{itemize}
+				\end{block}
+
+				\begin{block}{Humain}
+					\begin{itemize}
+						\item Cadre agréable
+						\item Multiples discussions autour du projet
+						\item Échange de points de vue
+					\end{itemize}
+				\end{block}
+			\end{frame}
+\end{document}
