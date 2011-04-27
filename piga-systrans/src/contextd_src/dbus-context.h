@@ -2,21 +2,16 @@
 #define DBUSCONTEXT_H
 
 #include "contextclient.h"
+#include "abstractcontext.h"
+
 #include <QtDBus/QDBusContext>
 #include <QtCore/QMap>
 #include <QtDBus/QDBusConnectionInterface>
 
-#include "abstractcontext.h"
 
 class DBusContext: public AbstractContext, public QDBusContext
 {
 Q_OBJECT
-// private:
-	//There may be some concurrency here, we should have a look to DBusContext to know if functions are called simulteanously (I doubt it).
-// 	QMap<pid_t, ContextClient> clients;
-
-// 	QString getFullPathFromPID(pid_t pid);
-
 public:
 	DBusContext();
 
@@ -34,7 +29,7 @@ public slots:
 private slots:
 	void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext);
 
-	void onEvent(ContextdPluginEvent* event);
+// 	void onEvent(ContextdPluginEvent* event);
 
 signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);

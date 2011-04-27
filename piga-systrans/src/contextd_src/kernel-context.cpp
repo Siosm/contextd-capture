@@ -12,17 +12,11 @@
 
 #include "contextd_adaptator.h"
 
-KernelContext::KernelContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusConnection::systemBus(), this))*/
+KernelContext::KernelContext()
 {
+
 }
 
-QString KernelContext::getFullPathFromPID(pid_t pid)
-{
-	QString proc_path="/proc/%1/exe";
-	proc_path=proc_path.arg(pid);
-
-	return QFile::readLink(proc_path);
-}
 
 QString KernelContext::register_application(const QString &app_name, uint /*app_pid*/)
 {
@@ -52,6 +46,6 @@ void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain 
 {
 }
 
-void KernelContext::onEvent(ContextdPluginEvent* event)
-{
-}
+// void KernelContext::onEvent(ContextdPluginEvent* event)
+// {
+// }

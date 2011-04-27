@@ -41,13 +41,6 @@ DBusContext::DBusContext() : AbstractContext() /*: dbusInterface(new QDBusConnec
 	}
 }
 
-// QString DBusContext::getFullPathFromPID(pid_t pid)
-// {
-// 	QString proc_path="/proc/%1/exe";
-// 	proc_path=proc_path.arg(pid);
-//
-// 	return QFile::readLink(proc_path);
-// }
 
 QString DBusContext::register_application(const QString &app_name, uint /*app_pid*/)
 {
@@ -204,10 +197,10 @@ void DBusContext::onGlobalContextChanged(Domain previousGlobalContext, Domain gl
 	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
 }
 
-void DBusContext::onEvent(ContextdPluginEvent* event)
-{
-	if(event->type()==ContextdPluginRestartEvent().type())
-	{
-		DomainHolder::instance().resetToDefaultDomain();
-	}
-}
+// void DBusContext::onEvent(ContextdPluginEvent* event)
+// {
+// 	if(event->type()==ContextdPluginRestartEvent().type())
+// 	{
+// 		DomainHolder::instance().resetToDefaultDomain();
+// 	}
+// }

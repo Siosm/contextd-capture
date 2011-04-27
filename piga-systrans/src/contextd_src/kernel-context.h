@@ -2,18 +2,14 @@
 #define KERNELCONTEXT_H
 
 #include "contextclient.h"
+#include "abstractcontext.h"
 
 #include <QtCore/QMap>
 
-class KernelContext: public QObject
+
+class KernelContext: public AbstractContext
 {
-	Q_OBJECT
-private:
-	//There may be some concurrency here, we should have a look to DBusContext to know if functions are called simulteanously (I doubt it).
-	QMap<pid_t, ContextClient> clients;
-
-	QString getFullPathFromPID(pid_t pid);
-
+Q_OBJECT
 public:
     KernelContext();
 
@@ -31,7 +27,7 @@ public slots:
 private slots:
 	void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext);
 
-	void onEvent(ContextdPluginEvent* event);
+// 	void onEvent(ContextdPluginEvent* event);
 
 signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);

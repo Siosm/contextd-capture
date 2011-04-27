@@ -1,10 +1,6 @@
 #include "abstractcontext.h"
-
-
-AbstractContext::AbstractContext()
-{
-	clients = QMap<pid_t, ContextClient>();
-}
+#include "plugins/contextdpluginrestartevent.h"
+#include "plugins/domainholder/domainholder.h"
 
 
 QString AbstractContext::getFullPathFromPID(pid_t pid)
@@ -13,4 +9,13 @@ QString AbstractContext::getFullPathFromPID(pid_t pid)
 	proc_path=proc_path.arg(pid);
 
 	return QFile::readLink(proc_path);
+}
+
+
+void AbstractContext::onEvent(ContextdPluginEvent* event)
+{
+	if(event->type()==ContextdPluginRestartEvent().type())
+	{
+		DomainHolder::instance().resetToDefaultDomain();
+	}
 }
