@@ -84,7 +84,7 @@ IF(BUILD_LIB)
 
 	INCLUDE_DIRECTORIES(${LIBCONTEXT_SRC_DIR})
 	INCLUDE_DIRECTORIES(${QT_INCLUDES})
-	
+
 	FILE(GLOB_RECURSE libcontext_source "${LIBCONTEXT_SRC_DIR}/*.cpp")
 	SET(libcontext_moc	"${LIBCONTEXT_SRC_DIR}/contextd_communicator.h"
 						"${LIBCONTEXT_SRC_DIR}/dbuscallback.h")
@@ -94,7 +94,7 @@ IF(BUILD_LIB)
 	ADD_LIBRARY(context SHARED ${libcontext_source})
 	TARGET_LINK_LIBRARIES(context ${QT_LIBRARIES})
 	SET_TARGET_PROPERTIES(context PROPERTIES COMPILE_FLAGS "-pthread" SOVERSION 0.2.0)
-	
+
 	INSTALL(TARGETS context DESTINATION ${SYSTRANS_LIB_PATH})
 	INSTALL(FILES "${LIBCONTEXT_SRC_DIR}/libcontext.h" DESTINATION ${SYSTRANS_INCLUDE_PATH})
 	INSTALL(FILES "${LIBCONTEXT_SRC_DIR}/context.pc" DESTINATION ${SYSTRANS_PKGCFG_PATH})
@@ -110,7 +110,7 @@ IF(BUILD_NOTIFY)
 
 	INCLUDE_DIRECTORIES(${NOTIFY_SRC_DIR})
 	INCLUDE_DIRECTORIES(${QT_INCLUDES})
-	
+
 	PKG_SEARCH_MODULE(notify libnotify)
 	IF(NOT notify_FOUND)
 		SET(CONTEXTNOTIFY_LIBNOTIFY OFF)
@@ -234,7 +234,7 @@ IF(BUILD_EDITOR)
 						"${EDITOR_SRC_DIR}/colors.cpp"
 						"${EDITOR_SRC_DIR}/captiondialog.cpp"
 						)
-						
+
 	SET(editor_moc		"${EDITOR_SRC_DIR}/transitioninfodock.h"
 						"${EDITOR_SRC_DIR}/ruledialog.h"
 						"${EDITOR_SRC_DIR}/mruletreewidget.h"
@@ -275,9 +275,9 @@ IF(BUILD_EDITOR)
 						)
 
 	QT4_WRAP_CPP(editor_source ${editor_moc})
-	
+
 	QT4_ADD_RESOURCES(editor_source "${EDITOR_SRC_DIR}/Icons.qrc")
-	
+
 	SET(editor_uis    	"${EDITOR_SRC_DIR}/abstractruledialog.ui"
 						"${EDITOR_SRC_DIR}/domaininfodock.ui"
 						"${EDITOR_SRC_DIR}/domainloopstreewidget.ui"
@@ -316,7 +316,7 @@ IF(BUILD_DAEMON)
 	SET(QT_USE_QTGUI FALSE)
 	SET(QT_USE_QTNETWORK TRUE)
         SET(QT_USE_QTDBUS true)
-	INCLUDE(${QT_USE_FILE})	
+	INCLUDE(${QT_USE_FILE})
 
 	SET(DAEMON_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/contextd_src")
 	SET(PLUGINS_SRC_DIR "${DAEMON_SRC_DIR}/plugins")

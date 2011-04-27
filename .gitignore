@@ -4,3 +4,4 @@ build
 *.kdev4
 .kdev4
 piga-systrans-build-desktop
+*.pro.user*
