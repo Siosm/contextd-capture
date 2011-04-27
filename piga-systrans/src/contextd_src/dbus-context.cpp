@@ -15,7 +15,7 @@
 
 #include "contextd_adaptator.h"
 
-DBusContext::DBusContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusConnection::systemBus(), this))*/
+DBusContext::DBusContext() : AbstractContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusConnection::systemBus(), this))*/
 {
 	if (!QDBusConnection::systemBus().isConnected())
 	{
@@ -41,28 +41,30 @@ DBusContext::DBusContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusC
 	}
 }
 
-QString DBusContext::getFullPathFromPID(pid_t pid)
-{
-	QString proc_path="/proc/%1/exe";
-	proc_path=proc_path.arg(pid);
-
-	return QFile::readLink(proc_path);
-}
+// QString DBusContext::getFullPathFromPID(pid_t pid)
+// {
+// 	QString proc_path="/proc/%1/exe";
+// 	proc_path=proc_path.arg(pid);
+//
+// 	return QFile::readLink(proc_path);
+// }
 
 QString DBusContext::register_application(const QString &app_name, uint /*app_pid*/)
 {
 	QString dbus_id=message().service();
+	pid_t pid=0;
 
-	//You can't register two applications using the same dbus_id
-	if(!clients.contains(dbus_id))
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
+
+	//You can't register two applications using the same pid !
+	if(pid != 0 && !clients.contains(pid))
 	{
-		pid_t pid=0;
-
-		//Get the pid
-		QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
-		if(res.isValid())
-			pid=res.value();
-
 		//Get the exe full path
 		QString full_path=getFullPathFromPID(pid);
 
@@ -72,7 +74,7 @@ QString DBusContext::register_application(const QString &app_name, uint /*app_pi
 		if(transRules.isProgramAllowed(app_name, full_path))
 		{
 			Program program=transRules.getProgramByName(app_name);
-			clients[dbus_id]=ContextClient(dbus_id, program, pid);
+			clients[pid]=ContextClient(dbus_id, program, pid);
 
 			EventDispatcher::instance().sendNotification("the application "+app_name+" has been successfuly registered.");
 
@@ -92,7 +94,17 @@ QString DBusContext::register_application(const QString &app_name, uint /*app_pi
 QString DBusContext::is_registered()
 {
 	QString dbus_id=message().service();
-	if(clients.contains(dbus_id))
+	pid_t pid=0;
+
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
+
+	if(clients.contains(pid))
 		return DBUS_SUCCESS;
 	else
 		return DBUS_ERROR_NOT_REGISTERED;
@@ -101,11 +113,20 @@ QString DBusContext::is_registered()
 QString DBusContext::domain_changed(const QString &xml_context)
 {
 	QString dbus_id=message().service();
+	pid_t pid=0;
+
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
 
 	//You have to be registered to use this function !
-	if(clients.contains(dbus_id))
+	if(clients.contains(pid))
 	{
-		return clients[dbus_id].updateState(xml_context);
+		return clients[pid].updateState(xml_context);
 	}
 	else
 		return DBUS_ERROR_NOT_REGISTERED;
@@ -114,11 +135,20 @@ QString DBusContext::domain_changed(const QString &xml_context)
 QString DBusContext::required_domain(const QString &xml_context)
 {
 	QString dbus_id=message().service();
+	pid_t pid=0;
+
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
 
 	//You have to be registered to use this function !
-	if(clients.contains(dbus_id))
+	if(clients.contains(pid))
 	{
-		return clients[dbus_id].required_domain(xml_context);
+		return clients[pid].required_domain(xml_context);
 	}
 	else
 		return DBUS_ERROR_NOT_REGISTERED;
@@ -127,9 +157,18 @@ QString DBusContext::required_domain(const QString &xml_context)
 QString DBusContext::current_domain()
 {
 	QString dbus_id=message().service();
+	pid_t pid=0;
+
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
 
 	//You have to be registered to use this function !
-	if(clients.contains(dbus_id))
+	if(clients.contains(pid))
 		return DomainHolder::instance().currentDomain().name();
 	else
 		return DBUS_ERROR_NOT_REGISTERED;
@@ -138,10 +177,19 @@ QString DBusContext::current_domain()
 QString DBusContext::register_for_domain_changes_updates()
 {
 	QString dbus_id=message().service();
+	pid_t pid=0;
+
+	//Get the pid
+	QDBusReply<uint> res=QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid=res.value();
+	}else{
+		return DBUS_ERROR;
+	}
 
 	//You have to be registered to use this function !
-	if(clients.contains(dbus_id))
-		return clients[dbus_id].registerForContextChangesUpdates();
+	if(clients.contains(pid))
+		return clients[pid].registerForContextChangesUpdates();
 	else
 		return DBUS_ERROR_NOT_REGISTERED;
 }

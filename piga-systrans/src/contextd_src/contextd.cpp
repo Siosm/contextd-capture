@@ -3,6 +3,7 @@
 #include <QtDBus/QtDBus>
 
 #include "dbus-context.h"
+#include "kernel-context.h"
 #include "misc.h"
 #include "config-daemon.h"
 
@@ -279,6 +280,7 @@ int main(int argc, char **argv)
 
 	//Start DBUS
 	DBusContext dbus;
+	KernelContext kernel;
 
 	//Log the startup
 	EventDispatcher::instance().sendNotification("Contextd started");

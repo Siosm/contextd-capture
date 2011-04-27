@@ -1,24 +1,21 @@
-#ifndef DBUSCONTEXT_H
-#define DBUSCONTEXT_H
+#ifndef KERNELCONTEXT_H
+#define KERNELCONTEXT_H
 
 #include "contextclient.h"
-#include <QtDBus/QDBusContext>
+
 #include <QtCore/QMap>
-#include <QtDBus/QDBusConnectionInterface>
 
-#include "abstractcontext.h"
-
-class DBusContext: public AbstractContext, public QDBusContext
+class KernelContext: public QObject
 {
-Q_OBJECT
-// private:
+	Q_OBJECT
+private:
 	//There may be some concurrency here, we should have a look to DBusContext to know if functions are called simulteanously (I doubt it).
-// 	QMap<pid_t, ContextClient> clients;
+	QMap<pid_t, ContextClient> clients;
 
-// 	QString getFullPathFromPID(pid_t pid);
+	QString getFullPathFromPID(pid_t pid);
 
 public:
-	DBusContext();
+    KernelContext();
 
 public slots:
 	QString register_application(const QString &app_name, uint app_pid);
@@ -40,4 +37,4 @@ signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);
 };
 
-#endif
+#endif // KERNELCONTEXT_H

@@ -329,6 +329,8 @@ IF(BUILD_DAEMON)
 	SET(daemon_source	"${DAEMON_SRC_DIR}/contextclient.cpp"
 						"${DAEMON_SRC_DIR}/contextd.cpp"
 						"${DAEMON_SRC_DIR}/dbus-context.cpp"
+						"${DAEMON_SRC_DIR}/kernel-context.cpp"
+						"${DAEMON_SRC_DIR}/abstractcontext.cpp"
 						"${DAEMON_SRC_DIR}/eventdispatcher.cpp"
 						"${DAEMON_SRC_DIR}/pigahandler.cpp"
 						"${DAEMON_SRC_DIR}/contextnotify.cpp"
@@ -352,6 +354,8 @@ IF(BUILD_DAEMON)
 						)
 
 	SET(daemon_moc		"${DAEMON_SRC_DIR}/dbus-context.h"
+						"${DAEMON_SRC_DIR}/kernel-context.h"
+						"${DAEMON_SRC_DIR}/abstractcontext.h"
 						"${DAEMON_SRC_DIR}/eventdispatcher.h"
 						"${DAEMON_SRC_DIR}/pigahandler.h"
 						"${DAEMON_SRC_DIR}/contextd_adaptator.h"
