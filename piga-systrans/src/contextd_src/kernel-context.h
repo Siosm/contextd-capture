@@ -4,14 +4,34 @@
 #include "contextclient.h"
 #include "abstractcontext.h"
 
+#include "auditsec_lsm/auditsec_info.h"
+#include "auditsec_lsm/syscall.h"
+
+#include "malloc.h"
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+
 #include <QtCore/QMap>
+
+#define KERNEL_SUCCESS "Kernel: action ok"
+#define KERNEL_ERROR "Kernel: error"
 
 
 class KernelContext: public AbstractContext
 {
 Q_OBJECT
+private:
+	struct auditsec_info * usai;
+	char exec_path[PATH_MAX];
+
+	long auditsec_register(int);
+	long auditsec_question(struct auditsec_info *);
+	long auditsec_answer(int);
+
 public:
     KernelContext();
+	~KernelContext();
 
 public slots:
 	QString register_application(const QString &app_name, uint app_pid);

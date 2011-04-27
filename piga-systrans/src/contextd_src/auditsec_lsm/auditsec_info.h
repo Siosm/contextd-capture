@@ -15,6 +15,20 @@
 #define NAME_MAX 255
 #define TASK_COMM_LEN 16
 
+// system calls for x64 : 299, 300, 301
+// system calls for i386 : 337, 338, 339
+#ifdef __x86_64
+#define __NR_sys_auditsec_reg 299
+#define __NR_sys_auditsec_question 300
+#define __NR_sys_auditsec_answer 301
+#endif /* __x86_64 */
+
+#ifdef __i686
+#define __NR_sys_auditsec_reg 337
+#define __NR_sys_auditsec_question 338
+#define __NR_sys_auditsec_answer 339
+#endif /* __x86_64 */
+
 
 enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR};
 
