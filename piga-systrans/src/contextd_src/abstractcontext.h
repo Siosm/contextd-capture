@@ -35,7 +35,7 @@ public slots:
 protected slots:
 	virtual void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext) = 0;
 
-	virtual void onEvent(ContextdPluginEvent* event);
+	void onEvent(ContextdPluginEvent* event);
 
 signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);

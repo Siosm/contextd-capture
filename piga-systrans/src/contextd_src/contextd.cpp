@@ -278,7 +278,7 @@ int main(int argc, char **argv)
 	if (!piga)
 		PigaHandler::instance().disable();
 
-	//Start DBUS
+	//Start DBUS & Kernel LSM listening
 	DBusContext dbus;
 	KernelContext kernel;
 
