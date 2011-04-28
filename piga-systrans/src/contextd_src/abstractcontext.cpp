@@ -2,6 +2,8 @@
 #include "plugins/contextdpluginrestartevent.h"
 #include "plugins/domainholder/domainholder.h"
 
+QMap< pid_t, ContextClient > AbstractContext::clients;
+
 
 QString AbstractContext::getFullPathFromPID(pid_t pid)
 {

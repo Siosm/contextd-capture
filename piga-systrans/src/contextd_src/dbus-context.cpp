@@ -15,7 +15,7 @@
 
 #include "contextd_adaptator.h"
 
-DBusContext::DBusContext() : AbstractContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusConnection::systemBus(), this))*/
+DBusContext::DBusContext() /*: dbusInterface(new QDBusConnectionInterface(QDBusConnection::systemBus(), this))*/
 {
 	if (!QDBusConnection::systemBus().isConnected())
 	{

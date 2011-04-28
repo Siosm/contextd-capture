@@ -12,7 +12,7 @@ class AbstractContext : public QObject
 Q_OBJECT
 protected:
 	//There is some concurrency here. Use the lock!
-	QMap<pid_t, ContextClient> clients;
+	static QMap<pid_t, ContextClient> clients;
 	QReadWriteLock lock;
 
 	QString getFullPathFromPID(pid_t pid);
@@ -31,7 +31,7 @@ public slots:
 protected slots:
 	virtual void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext) = 0;
 
-	virtual void onEvent(ContextdPluginEvent* event);
+	void onEvent(ContextdPluginEvent* event);
 
 signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);
