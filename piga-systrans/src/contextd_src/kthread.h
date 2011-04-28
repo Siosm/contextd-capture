@@ -27,7 +27,7 @@ private:
 	QString toXMLEntities(QString str);
 
 signals:
-	QString register_application(const QString &app_name, uint app_pid);
+	void register_application(const QString &app_name, uint app_pid);
 
 	QString domain_changed(const QString &xml_context);
 	QString required_domain(const QString &xml_context);
