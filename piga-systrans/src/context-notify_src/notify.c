@@ -22,7 +22,7 @@ int sendNotification(const char* title, const char* message, int timeout, int pr
 		  #ifdef OLD_LIBNOTIFY
 		  notification = notify_notification_new(title, message, img, NULL);
 		  #else
-		  notification = notify_notification_new(title, message, img, NULL);
+		  notification = notify_notification_new(title, message, img);
 		  #endif /* OLD_LIBNOTIFY */
 	  else
 		  notify_notification_update (notification, title, message, img);

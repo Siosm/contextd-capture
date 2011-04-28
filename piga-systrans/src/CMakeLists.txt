@@ -23,6 +23,8 @@ OPTION(CONTEXTD_PLUGIN_IPTABLES "Build Contextd using the iptables plugin" ON)
 OPTION(CONTEXTD_PLUGIN_SELINUX "Build Contextd using the selinux plugin" ON)
 OPTION(CONTEXTD_PLUGIN_XORG "Build Contextd using the xorg plugin" ON)
 
+OPTION(OLD_LIBNOTIFY "Build context-notify with the old version of libnotify" ON)
+
 OPTION(USE_PIGAHANDLER "Build contextd with PIGA's support" ON)
 
 OPTION(CONTEXTNOTIFY_LIBNOTIFY "Build Context-notify with libnotify support" ON)
@@ -53,6 +55,11 @@ IF(NOT DEBUG)
 ELSE(NOT DEBUG)
 	ADD_DEFINITIONS(-g)
 ENDIF(NOT DEBUG)
+
+IF(OLD_LIBNOTIFY)
+	ADD_DEFINITIONS(-DOLD_LIBNOTIFY)
+# 	SET_TARGET_PROPERTIES(myProgram COMPILE_DEFINITIONS OLD_LIBNOTIFY 1)
+ENDIF(OLD_LIBNOTIFY)
 
 SET(COMMON_SOURCE		"${CMAKE_CURRENT_SOURCE_DIR}/abstractrule.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/configuration.cpp"
