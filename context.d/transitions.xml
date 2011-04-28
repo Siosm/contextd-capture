@@ -362,12 +362,12 @@
 		</rule>
 
 
-		<!-- Daemon to be tested -->
+		<!-- progtest to be tested -->
 		<!-- Loop -->
-		<loop app_name="daemon" notify="true" prompt="false" display_name="Loop">
+		<loop app_name="testprog" notify="true" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
-					<fullpath></fullpath>
+<!--					<fullpath></fullpath>-->
 <!-- 					<execname>progtest</execname> -->
 				</mrule>
 			</matching>
@@ -382,10 +382,10 @@
 		</loop>
 		
 		<!--Impots-->
-		<rule app_name="daemon" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+		<rule app_name="testprog" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>
+<!--					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>-->
 <!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>
@@ -398,10 +398,10 @@
 		</rule>
 		
 		<!--Ecommerce-->
-		<rule app_name="daemon" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
+		<rule app_name="testprog" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>
+<!--					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>-->
 <!-- 					<execname>/usr/bin/progtest</execname> -->
 				</mrule>
 			</matching>

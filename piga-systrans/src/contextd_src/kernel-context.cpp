@@ -154,6 +154,8 @@ QString KernelContext::required_domain(const QString &xml_context)
 
 	//Get the pid
 	pid = _usai->pid;
+	
+	std::cout<<"Registering"<<std::endl;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))

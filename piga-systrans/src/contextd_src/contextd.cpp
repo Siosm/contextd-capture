@@ -290,6 +290,7 @@ int main(int argc, char **argv)
 	DomainHolder::resetToDefaultDomain();
 
 	//Start the event loop
+	kernel.kernelT->start();
 	app.exec();
 
 	// Finish up
