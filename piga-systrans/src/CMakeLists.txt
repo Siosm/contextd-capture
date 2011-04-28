@@ -346,6 +346,7 @@ IF(BUILD_DAEMON)
 						"${DAEMON_SRC_DIR}/contextnotify.cpp"
 						"${DAEMON_SRC_DIR}/xmlcontext2map.cpp"
 						"${DAEMON_SRC_DIR}/contextd_adaptator.cpp"
+						"${DAEMON_SRC_DIR}/kthread.cpp"
 						"${PLUGINS_SRC_DIR}/abstractcontextdplugin.cpp"
 						"${PLUGINS_SRC_DIR}/contextdpluginnotifyevent.cpp"
 						"${PLUGINS_SRC_DIR}/contextdpluginreloadevent.cpp"
@@ -361,7 +362,6 @@ IF(BUILD_DAEMON)
 						"${PLUGINS_SRC_DIR}/selinux/contextdpluginselinux.cpp"
 						"${PLUGINS_SRC_DIR}/selinux/selinux_module.cpp"
 						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.cpp"
-						"${AUDITSEC_SRC_DIR}/kthread.cpp"
 						)
 
 	SET(daemon_moc		"${DAEMON_SRC_DIR}/dbus-context.h"
@@ -370,11 +370,11 @@ IF(BUILD_DAEMON)
 						"${DAEMON_SRC_DIR}/eventdispatcher.h"
 						"${DAEMON_SRC_DIR}/pigahandler.h"
 						"${DAEMON_SRC_DIR}/contextd_adaptator.h"
+						"${DAEMON_SRC_DIR}/kthread.h"
 						"${PLUGINS_SRC_DIR}/domainholder/domainholder.h"
 						"${PLUGINS_SRC_DIR}/iptable-blocker/rulelist.h"
 						"${PLUGINS_SRC_DIR}/iptable-blocker/synchttp.h"
 						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.h"
-						"${AUDITSEC_SRC_DIR}/kthread.h"
 						)
 
 	IF(NOT CONTEXTD_PLUGIN_LOGGER)

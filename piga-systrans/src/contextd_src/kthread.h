@@ -2,10 +2,14 @@
 #define KTHREAD_H
 
 #include <QtCore/QThread>
+#include <QtCore/QString>
 
-#include "../kernel-context.h"
-#include "auditsec_info.h"
-#include "syscall.h"
+#include "kernel-context.h"
+#include "auditsec_lsm/auditsec_info.h"
+#include "auditsec_lsm/syscall.h"
+
+
+class KernelContext;
 
 
 class KThread : public QThread
@@ -17,6 +21,10 @@ private:
 public:
 	KThread(KernelContext *);
 	void run();
+
+private:
+	QString xmlContext(char *, ...);
+	QString toXMLEntities(QString str);
 
 signals:
 	QString register_application(const QString &app_name, uint app_pid);

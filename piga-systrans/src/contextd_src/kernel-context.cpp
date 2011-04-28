@@ -15,7 +15,7 @@
 
 KernelContext::KernelContext()
 {
-	usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
+	_usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
 
 	qDebug("Trying to register with the kernel");
 	if(auditsec_register(1) != 1){
@@ -46,7 +46,7 @@ void KernelContext::start()
 
 auditsec_info* KernelContext::usai()
 {
-
+	return _usai;
 }
 
 
@@ -73,9 +73,11 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 	pid_t pid=0;
 
 	//Get the pid
-	pid = usai->pid;
+	pid = _usai->pid;
 
 	EventDispatcher::instance().sendNotification("Trying to register program from kernel-context class.");
+
+	QWriteLocker _lock(&lock);
 
 	//You can't register two applications using the same pid !
 	if((pid != 0) && !clients.contains(pid))
@@ -111,7 +113,9 @@ QString KernelContext::is_registered()
 	pid_t pid=0;
 
 	//Get the pid
-	pid = usai->pid;
+	pid = _usai->pid;
+
+	QReadLocker _lock(&lock);
 
 	if(clients.contains(pid))
 		return KERNEL_SUCCESS;
@@ -124,14 +128,22 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	pid_t pid=0;
 
 	//Get the pid
-	pid = usai->pid;
+	pid = _usai->pid;
+
+	QReadLocker _lock(&lock);
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
 	{
-		return clients[pid].updateState(xml_context);
+		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
+			auditsec_answer(true);
+			return CONTEXT_ACCEPT;
+		}else{
+			auditsec_answer(false);
+			return KERNEL_ERROR;
+		}
 	} else {
-// 		auditsec_answer(false);
+		auditsec_answer(false);
 		return KERNEL_ERROR;
 	}
 }
@@ -141,7 +153,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 	pid_t pid=0;
 
 	//Get the pid
-	pid = usai->pid;
+	pid = _usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -156,7 +168,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 QString KernelContext::current_domain()
 {
 	pid_t pid=0;
-	pid = usai->pid;
+	pid = _usai->pid;
 
 	//Get the pid
 
@@ -170,7 +182,7 @@ QString KernelContext::current_domain()
 QString KernelContext::register_for_domain_changes_updates()
 {
 	pid_t pid=0;
-	pid = usai->pid;
+	pid = _usai->pid;
 
 	//Get the pid
 
@@ -186,6 +198,14 @@ void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain 
 	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
 }
 
+
 // void KernelContext::onEvent(ContextdPluginEvent* event)
 // {
 // }
+
+
+bool KernelContext::is_registered_k(pid_t pid)
+{
+	QReadLocker _lock(&lock);
+	return clients.contains(pid);
+}

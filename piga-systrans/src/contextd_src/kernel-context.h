@@ -6,7 +6,7 @@
 
 #include "auditsec_lsm/auditsec_info.h"
 #include "auditsec_lsm/syscall.h"
-#include "auditsec_lsm/kthread.h"
+#include "kthread.h"
 
 #include "malloc.h"
 #include <unistd.h>
@@ -20,18 +20,17 @@
 #define KERNEL_ERROR "Kernel: error"
 
 
+class KThread;
+
+
 class KernelContext: public AbstractContext
 {
 Q_OBJECT
 private:
-	struct auditsec_info * usai;
+	struct auditsec_info * _usai;
 	char exec_path[PATH_MAX];
 
 	KThread * kernelT;
-
-	long auditsec_register(int);
-	long auditsec_question(struct auditsec_info *);
-	long auditsec_answer(int);
 
 public:
     KernelContext();
@@ -39,6 +38,12 @@ public:
 
 	void start();
 	struct auditsec_info * usai();
+
+	bool is_registered_k(pid_t);
+
+	long auditsec_register(int);
+	long auditsec_question(struct auditsec_info *);
+	long auditsec_answer(int);
 
 public slots:
 	QString register_application(const QString &app_name, uint app_pid);

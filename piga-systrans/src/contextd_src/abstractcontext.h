@@ -13,7 +13,7 @@ Q_OBJECT
 protected:
 	//There is some concurrency here. Use the lock!
 	static QMap<pid_t, ContextClient> clients;
-	QReadWriteLock lock;
+	static QReadWriteLock lock;
 
 	QString getFullPathFromPID(pid_t pid);
 

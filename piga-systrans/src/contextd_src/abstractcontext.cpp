@@ -4,6 +4,8 @@
 
 QMap< pid_t, ContextClient > AbstractContext::clients;
 
+QReadWriteLock AbstractContext::lock;
+
 
 QString AbstractContext::getFullPathFromPID(pid_t pid)
 {
