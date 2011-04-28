@@ -4,7 +4,12 @@
 
 KThread::KThread(KernelContext * kc) : KC(kc)
 {
-
+	connect(this, SIGNAL(register_application(const QString, uint)), kc, SLOT(register_application(const QString, uint)));
+	connect(this, SIGNAL(domain_changed(const QString &xml_context)), kc, SLOT(domain_changed(const QString &xml_context)));
+	connect(this, SIGNAL(required_domain(const QString &xml_context)), kc, SLOT(required_domain(const QString &xml_context)));
+	connect(this, SIGNAL(current_domain()), kc, SLOT(current_domain()));
+	connect(this, SIGNAL(is_registered()), kc, SLOT(is_registered()));
+	connect(this, SIGNAL(register_for_domain_changes_updates()), kc, SLOT(register_for_domain_changes_updates()));
 }
 
 
