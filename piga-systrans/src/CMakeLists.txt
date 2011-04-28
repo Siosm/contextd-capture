@@ -361,6 +361,7 @@ IF(BUILD_DAEMON)
 						"${PLUGINS_SRC_DIR}/selinux/contextdpluginselinux.cpp"
 						"${PLUGINS_SRC_DIR}/selinux/selinux_module.cpp"
 						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.cpp"
+						"${AUDITSEC_SRC_DIR}/kthread.cpp"
 						)
 
 	SET(daemon_moc		"${DAEMON_SRC_DIR}/dbus-context.h"
@@ -373,6 +374,7 @@ IF(BUILD_DAEMON)
 						"${PLUGINS_SRC_DIR}/iptable-blocker/rulelist.h"
 						"${PLUGINS_SRC_DIR}/iptable-blocker/synchttp.h"
 						"${PLUGINS_SRC_DIR}/xorg/contextdpluginxorg.h"
+						"${AUDITSEC_SRC_DIR}/kthread.h"
 						)
 
 	IF(NOT CONTEXTD_PLUGIN_LOGGER)

@@ -22,6 +22,8 @@ KernelContext::KernelContext()
 		qFatal("FAILED to register with the kernel.");
 	}
 	qDebug("The daemon is registered with the kernel.");
+
+	kernelT = new KThread(this);
 }
 
 
@@ -33,6 +35,18 @@ KernelContext::~KernelContext()
 	}else{
 		qDebug("The kernel is ok.");
 	}
+}
+
+
+void KernelContext::start()
+{
+	kernelT->start();
+}
+
+
+auditsec_info* KernelContext::usai()
+{
+
 }
 
 
@@ -60,7 +74,7 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 
 	//Get the pid
 	pid = usai->pid;
-	
+
 	EventDispatcher::instance().sendNotification("Trying to register program from kernel-context class.");
 
 	//You can't register two applications using the same pid !
