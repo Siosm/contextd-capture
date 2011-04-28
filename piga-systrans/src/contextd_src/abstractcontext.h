@@ -12,10 +12,14 @@ class AbstractContext : public QObject
 Q_OBJECT
 protected:
 	//There is some concurrency here. Use the lock!
-	QMap<pid_t, ContextClient> clients;
+	static QMap<pid_t, ContextClient> clients;
 	QReadWriteLock lock;
 
 	QString getFullPathFromPID(pid_t pid);
+
+public:
+	AbstractContext();
+
 
 public slots:
 	virtual QString register_application(const QString &app_name, uint app_pid) = 0;
