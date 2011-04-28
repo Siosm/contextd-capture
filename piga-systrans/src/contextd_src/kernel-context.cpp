@@ -36,7 +36,7 @@ KernelContext::~KernelContext()
 }
 
 
-long int KernelContext::auditsec_answer(int state)
+long int KernelContext::auditsec_register(int state)
 {
 	return syscall(__NR_sys_auditsec_reg, state);
 }
@@ -48,7 +48,7 @@ long int KernelContext::auditsec_question(auditsec_info* user_as_i)
 }
 
 
-long int KernelContext::auditsec_register(int answer)
+long int KernelContext::auditsec_answer(int answer)
 {
 	return syscall(__NR_sys_auditsec_answer, answer);
 }
@@ -59,9 +59,12 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 	pid_t pid=0;
 
 	//Get the pid
+	pid = usai->pid;
+	
+	EventDispatcher::instance().sendNotification("Trying to register program from kernel-context class.");
 
 	//You can't register two applications using the same pid !
-	if(pid != 0 && !clients.contains(pid))
+	if((pid != 0) && !clients.contains(pid))
 	{
 		//Get the exe full path
 		QString full_path=getFullPathFromPID(pid);
@@ -94,6 +97,7 @@ QString KernelContext::is_registered()
 	pid_t pid=0;
 
 	//Get the pid
+	pid = usai->pid;
 
 	if(clients.contains(pid))
 		return KERNEL_SUCCESS;
@@ -106,6 +110,7 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	pid_t pid=0;
 
 	//Get the pid
+	pid = usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -122,6 +127,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 	pid_t pid=0;
 
 	//Get the pid
+	pid = usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -136,6 +142,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 QString KernelContext::current_domain()
 {
 	pid_t pid=0;
+	pid = usai->pid;
 
 	//Get the pid
 
@@ -149,6 +156,7 @@ QString KernelContext::current_domain()
 QString KernelContext::register_for_domain_changes_updates()
 {
 	pid_t pid=0;
+	pid = usai->pid;
 
 	//Get the pid
 
@@ -161,6 +169,7 @@ QString KernelContext::register_for_domain_changes_updates()
 
 void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext)
 {
+	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
 }
 
 // void KernelContext::onEvent(ContextdPluginEvent* event)
