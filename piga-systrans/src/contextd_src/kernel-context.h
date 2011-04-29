@@ -30,12 +30,11 @@ private:
 	struct auditsec_info * _usai;
 	char exec_path[PATH_MAX];
 
+	KThread * kernelT;
 
 public:
     KernelContext();
 	~KernelContext();
-
-	KThread * kernelT;
 
 	void start();
 	struct auditsec_info * usai();
