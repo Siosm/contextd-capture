@@ -27,20 +27,24 @@ KernelContext::KernelContext()
 }
 
 
-KernelContext::~KernelContext()
+void KernelContext::start()
 {
+	kernelT->start();
+}
+
+
+void KernelContext::stop()
+{
+	kernelT->_keep_going = false;
+
+	kernelT->wait();
+
 	qDebug("Stopping daemon and telling the kenel.");
 	if(auditsec_register(0) != 0){
 		qCritical("The kernel state may NOT be ok. You should reboot.");
 	}else{
 		qDebug("The kernel is ok.");
 	}
-}
-
-
-void KernelContext::start()
-{
-	kernelT->start();
 }
 
 
@@ -70,14 +74,10 @@ long int KernelContext::auditsec_answer(int answer)
 
 QString KernelContext::register_application(const QString &app_name, uint /*app_pid*/)
 {
-	pid_t pid=0;
-
-	//Get the pid
-	pid = _usai->pid;
-
-	EventDispatcher::instance().sendNotification("Trying to register program from kernel-context class.");
-
 	QWriteLocker _lock(&lock);
+	pid_t pid = _usai->pid;
+
+	EventDispatcher::instance().sendNotification("KernelContext: Trying to register " + app_name);
 
 	//You can't register two applications using the same pid !
 	if((pid != 0) && !clients.contains(pid))
@@ -93,13 +93,11 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 			Program program=transRules.getProgramByName(app_name);
 			clients[pid]=ContextClient(0, program, pid);
 
-			EventDispatcher::instance().sendNotification("the application "+app_name+" has been successfuly registered (kernel).");
+			EventDispatcher::instance().sendNotification("KernelContext: " + app_name + " has been successfuly registered.");
 
 			return KERNEL_SUCCESS;
-		}
-		else
-		{
-			EventDispatcher::instance().sendError("The program "+full_path+" cannot be identified as "+ app_name +" (kernel).");
+		}else{
+			EventDispatcher::instance().sendError("KernelContext: " + full_path + " cannot be identified as "+ app_name +".");
 
 			return KERNEL_ERROR;
 		}
@@ -108,14 +106,11 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 		return KERNEL_ERROR;
 }
 
+
 QString KernelContext::is_registered()
 {
-	pid_t pid=0;
-
-	//Get the pid
-	pid = _usai->pid;
-
 	QReadLocker _lock(&lock);
+	pid_t pid = _usai->pid;
 
 	if(clients.contains(pid))
 		return KERNEL_SUCCESS;
@@ -123,14 +118,11 @@ QString KernelContext::is_registered()
 		return KERNEL_ERROR;
 }
 
+
 QString KernelContext::domain_changed(const QString &xml_context)
 {
-	pid_t pid=0;
-
-	//Get the pid
-	pid = _usai->pid;
-
 	QReadLocker _lock(&lock);
+	pid_t pid = _usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -148,14 +140,13 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	}
 }
 
+
 QString KernelContext::required_domain(const QString &xml_context)
 {
-	pid_t pid=0;
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai->pid;
 
-	//Get the pid
-	pid = _usai->pid;
-
-	qDebug("Registering");
+	qDebug("KernelContext: required_domain");
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -167,12 +158,11 @@ QString KernelContext::required_domain(const QString &xml_context)
 	}
 }
 
+
 QString KernelContext::current_domain()
 {
-	pid_t pid=0;
-	pid = _usai->pid;
-
-	//Get the pid
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -181,12 +171,11 @@ QString KernelContext::current_domain()
 		return KERNEL_ERROR;
 }
 
+
 QString KernelContext::register_for_domain_changes_updates()
 {
-	pid_t pid=0;
-	pid = _usai->pid;
-
-	//Get the pid
+	QWriteLocker _lock(&lock);
+	pid_t pid = _usai->pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -195,19 +184,8 @@ QString KernelContext::register_for_domain_changes_updates()
 		return KERNEL_ERROR;
 }
 
+
 void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext)
 {
 	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
-}
-
-
-// void KernelContext::onEvent(ContextdPluginEvent* event)
-// {
-// }
-
-
-bool KernelContext::is_registered_k(pid_t pid)
-{
-	QReadLocker _lock(&lock);
-	return clients.contains(pid);
 }

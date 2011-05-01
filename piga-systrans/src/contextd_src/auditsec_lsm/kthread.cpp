@@ -1,49 +1,47 @@
 #include "kthread.h"
 #include "stdarg.h"
 
+#include <QtCore/QDebug>
+
 
 KThread::KThread(KernelContext * kc) : KC(kc)
 {
-	connect(this, SIGNAL(register_application(const QString, uint)), kc, SLOT(register_application(const QString, uint)));
-	connect(this, SIGNAL(domain_changed(const QString &xml_context)), kc, SLOT(domain_changed(const QString &xml_context)));
-	connect(this, SIGNAL(required_domain(const QString &xml_context)), kc, SLOT(required_domain(const QString &xml_context)));
-	connect(this, SIGNAL(current_domain()), kc, SLOT(current_domain()));
-	connect(this, SIGNAL(is_registered()), kc, SLOT(is_registered()));
-	connect(this, SIGNAL(register_for_domain_changes_updates()), kc, SLOT(register_for_domain_changes_updates()));
+	_keep_going = true;
 }
 
 
 void KThread::run()
 {
-	while(KC->auditsec_question(KC->usai()) == 0){
-		if(KC->is_registered_k(KC->usai()->pid) == false){
-			emit(register_application(KC->usai()->execname, 0));
-		}
+	while(_keep_going && (KC->auditsec_question(KC->usai()) == 0)){
+		if(KC->is_registered() == KERNEL_SUCCESS)
+			KC->register_application(KC->usai()->execname, 0);
+
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
-				emit(domain_changed(xmlContext(
-					//"pid", usai->pid,
+				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
 					//"filename", usai->auditsec_struct.file.name,
-					 NULL, NULL)));
+					NULL, NULL));
+
 				#ifdef DEBUG
 				read_execpath(usai->pid, exec_path);
-				std::cout << "AuditSec, file access: " << usai->auditsec_struct.file.fullpath
-				<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid << ", execname: "
-				<< exec_path /*<< ", mask: " << usai->auditsec_struct.file.mask*/ << std::endl;
+				qDebug() << "file access: " << usai->auditsec_struct.file.fullpath
+				<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid
+				<< ", execname: " << exec_path
+				/*<< ", mask: " << usai->auditsec_struct.file.mask*/;
 				#endif /* DEBUG */
 				break;
 
 			case AUDITSEC_DIR:
-				emit(domain_changed(xmlContext(
-					//"pid", usai->pid,
+				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
-					NULL, NULL)));
+					NULL, NULL));
+
 				#ifdef DEBUG
 				read_execpath(usai->pid, exec_path);
-				std::cout << "AuditSec, mkdir: " << usai->auditsec_struct.dir.fullpath
-				<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname /*<< ", mode: "
-				<< usai->auditsec_struct.dir.mode*/ << std::endl;
+				qDebug(); << "mkdir: " << usai->auditsec_struct.dir.fullpath
+				<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname
+				/*<< ", mode: " << usai->auditsec_struct.dir.mode*/;
 				#endif /* DEBUG */
 				break;
 

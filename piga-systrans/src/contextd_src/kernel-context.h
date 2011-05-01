@@ -16,8 +16,8 @@
 #include <QtCore/QMap>
 #include <QtCore/QThread>
 
-#define KERNEL_SUCCESS "Kernel: action ok"
-#define KERNEL_ERROR "Kernel: error"
+#define KERNEL_SUCCESS "KernelContext: success"
+#define KERNEL_ERROR "KernelContext: error"
 
 
 class KThread;
@@ -33,13 +33,11 @@ private:
 	KThread * kernelT;
 
 public:
-    KernelContext();
-	~KernelContext();
+	KernelContext();
 
 	void start();
+	void stop();
 	struct auditsec_info * usai();
-
-	bool is_registered_k(pid_t);
 
 	long auditsec_register(int);
 	long auditsec_question(struct auditsec_info *);
@@ -58,8 +56,6 @@ public slots:
 
 private slots:
 	void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext);
-
-// 	void onEvent(ContextdPluginEvent* event);
 
 signals:
 	void globalContextChanged(const QString &previous_context, const QString &new_context);

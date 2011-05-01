@@ -290,8 +290,9 @@ int main(int argc, char **argv)
 	DomainHolder::resetToDefaultDomain();
 
 	//Start the event loop
-	kernel.kernelT->start();
+	kernel.start();
 	app.exec();
+	kernel.stop();
 
 	// Finish up
 	EventDispatcher::instance().sendNotification("Contextd terminated correctly\n\n");

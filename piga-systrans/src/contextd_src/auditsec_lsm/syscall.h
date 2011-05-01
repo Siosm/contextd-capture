@@ -8,8 +8,6 @@
 #include "auditsec_info.h"
 
 
-
-
 long auditsec_register(int);
 long auditsec_question(struct auditsec_info *);
 long auditsec_answer(int);
