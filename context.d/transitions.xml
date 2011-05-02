@@ -107,12 +107,12 @@
 			<transitions>
 				<allow>
 					<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
-					<transit from_domain="mail" prompt="true" /> 
+					<transit from_domain="mail" prompt="true" />
 					<transit from_domain="default" />
 				</allow>
 			</transitions>
 		</rule>
-		
+
 		<!--Ecommerce-->
 		<rule app_name="claws-mail" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
 			<matching>
@@ -126,12 +126,12 @@
 			<transitions>
 				<allow>
 					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" /> 
+					<transit from_domain="mail" />
 					<transit from_domain="default" />
 				</allow>
 			</transitions>
 		</rule>
-		
+
 		<!-- Fetch mail -->
 		<rule app_name="claws-mail" to_domain="mail" notify="false" prompt="true" display_name="domaine non confine">
 			<matching>
@@ -146,7 +146,7 @@
 				</allow>
 			</transitions>
 		</rule>
-		
+
 	<!--Firefox-->
 		<!-- Allow to go to the error page -->
 		<loop app_name="firefox" notify="false" prompt="false" display_name="Allow to open the error page">
@@ -166,7 +166,7 @@
 				<loop_domain name="impots" />
 			</domains>
 		</loop>
-		
+
 		<!--Impots-->
 		<rule app_name="firefox" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
@@ -183,12 +183,12 @@
 				</allow>
 			</transitions>
 		</rule>
-		
+
 		<!--Ecommerce-->
 		<rule app_name="firefox" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-				<!--	 <host>(((rover|www|annonces|pages)\.ebay\.fr|(rover\.ebay|(include|pics)\.ebaystatic)\.com))|(https://((signin|scgi)\.ebay\.fr|(rover\.ebay|srx\.fr\.ebayrtm|(secureinclude|securepics)\.ebaystatic)\.com))</host>--> 
+				<!--	 <host>(((rover|www|annonces|pages)\.ebay\.fr|(rover\.ebay|(include|pics)\.ebaystatic)\.com))|(https://((signin|scgi)\.ebay\.fr|(rover\.ebay|srx\.fr\.ebayrtm|(secureinclude|securepics)\.ebaystatic)\.com))</host>-->
 				<host>(ebay\.(fr|com))|((.*\.ebayrtm\.com)|(www\.ebay-automobile|(((art-antiquite|stores|immobilier)\.)?shop|www|search\.stores|rtm|search\.avis-membres|module|annonces-immobilier|rover|depot-vente-partenaire|immobilier|cgi[0-9]|cgi|developpeur|offer|attr-search|annonces-aide|annonces|pages|search|listings|automobile-voiture|deals|contact|rssplayer|my)\.ebay)\.fr|(((www)\.)?monoutillage|(login|static|www)\.sanook|imagehost\.vendio|(fairway|rover|sofe|pics)\.ebay|fr\.ebayobjects|(rtm|thumbs[0-9]|pics|q|p|thumbs|include)\.ebaystatic|images\.neteven|lh4\.ggpht|www\.ebaydevcon|.*\.ebayimg)\.com|(shop|www|pages)\.ebay\.at|search\.stores\.ebay\.co\.uk|(shop|pages)\.ebay\.in|(shop|pages)\.ebay\.ie|static\.ebayanuncios\.es)</host>
 					<path>.*</path>
 					<protocol>(http|https)</protocol>
@@ -211,13 +211,13 @@
 			<transitions>
 				<allow>
 					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" to_domain="ecommerce" prompt="true" /> 
-					<transit from_domain="default" to_domain="ecommerce" prompt="true" /> 
+					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
 				</allow>
 			</transitions>
 		</rule>
 
- 
+
 		<!-- Web-flash-->
 		<rule app_name="firefox" to_domain="web-flash" notify="false" prompt="true" display_name="web-flash domain">
 			<matching>
@@ -367,8 +367,7 @@
 		<loop app_name="testprog" notify="true" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
-<!--					<fullpath></fullpath>-->
-<!-- 					<execname>progtest</execname> -->
+					<fullpath></fullpath>
 				</mrule>
 			</matching>
 			<domains>
@@ -380,13 +379,12 @@
 				<loop_domain name="impots" />
 			</domains>
 		</loop>
-		
+
 		<!--Impots-->
 		<rule app_name="testprog" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-<!--					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>-->
-<!-- 					<execname>/usr/bin/progtest</execname> -->
+					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
@@ -396,20 +394,19 @@
 				</allow>
 			</transitions>
 		</rule>
-		
+
 		<!--Ecommerce-->
 		<rule app_name="testprog" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-<!--					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>-->
-<!-- 					<execname>/usr/bin/progtest</execname> -->
+					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
 				<allow>
 					<transit from_domain="ecommerce" notify="true" prompt="false"/>
-					<transit from_domain="mail" to_domain="ecommerce" prompt="true" /> 
-					<transit from_domain="default" to_domain="ecommerce" prompt="true" /> 
+					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
 				</allow>
 			</transitions>
 		</rule>

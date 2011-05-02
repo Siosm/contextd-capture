@@ -33,6 +33,17 @@ void KernelContext::start()
 }
 
 
+KernelContext::~KernelContext()
+{
+	qDebug("Stopping daemon and telling the kenel.");
+	if(auditsec_register(0) != 0){
+		qCritical("The kernel state may NOT be ok. You should reboot.");
+	}else{
+		qDebug("The kernel is ok.");
+	}
+}
+
+
 void KernelContext::stop()
 {
 	kernelT->_keep_going = false;

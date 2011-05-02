@@ -34,6 +34,7 @@ private:
 
 public:
 	KernelContext();
+    ~KernelContext();
 
 	void start();
 	void stop();
