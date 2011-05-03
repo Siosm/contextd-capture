@@ -53,6 +53,7 @@
 #include <linux/sched.h>
 #include <linux/limits.h>
 #include <linux/semaphore.h>
+#include <linux/jiffies.h>
 
 #include "include/struct.h"
 #include "include/share.h"
@@ -146,7 +147,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		}
 		dir_path(dentry, fullpath);
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
 				kfree(fullpath);
@@ -162,7 +163,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
 				kfree(fullpath);
@@ -238,7 +239,7 @@ int auditsec_file_permission(struct file *file, int mask)
 		}
 		file_path(file, fullpath);
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);
@@ -253,7 +254,7 @@ int auditsec_file_permission(struct file *file, int mask)
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);
@@ -360,7 +361,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 
 	if(prog_is_monitored()){
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket bind: pid: %d, execname: %s, HOOK TIMEOUT",
 					current_pid, current->comm);
 				return -EFAULT;
@@ -372,7 +373,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket bind: pid: %d, execname: %s, ANSWER TIMEOUT",
 					current_pid, current->comm);
 
@@ -404,7 +405,7 @@ int auditsec_socket_connect(struct socket *sock, struct sockaddr *address, int a
 
 	if(prog_is_monitored()){
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket connect: pid: %d, execname: %s, HOOK TIMEOUT",
 					current_pid, current->comm);
 				return -EFAULT;
@@ -416,7 +417,7 @@ int auditsec_socket_connect(struct socket *sock, struct sockaddr *address, int a
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 5000) != 0){// 5000j=10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket connect: pid: %d, execname: %s, ANSWER TIMEOUT",
 					current_pid, current->comm);
 

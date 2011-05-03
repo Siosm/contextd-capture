@@ -42,7 +42,7 @@ asmlinkage long sys_auditsec_reg(int state)
 			printk(KERN_INFO "AuditSec: The daemon is now considered launched");
 		}
 		return 1;
-		
+
 	}else if(state == 0){
 		if(*daemon_launched()){
 			*daemon_launched() = false;
@@ -52,7 +52,7 @@ asmlinkage long sys_auditsec_reg(int state)
 		}
 		return 0;
 	}
-	
+
 	printk(KERN_INFO "AuditSec: No action performed");
 	return -EFAULT;
 }
@@ -64,13 +64,16 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 		printk(KERN_INFO "AuditSec: The daemon is not launched");
 		return -EFAULT;
 	}
-	
+
 	if(down_interruptible(auditsec_question_lock()) != 0)
+		printk(KERN_INFO "AuditSec: Can't get the question lock or interrupted");
 		return -EFAULT;
 
 	// FIXME faire des tests sur le pointeur donné par le process en userspace
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
+			printk(KERN_INFO "AuditSec: pid: %d, execname: %s COPIED",
+				   user_as_i->pid, user_as_i->execname);
 			return 0;
 		}
 	}
@@ -78,7 +81,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	*auditsec_answer() = false;
 	up(auditsec_answer_lock());
 	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace.", task_pid_nr(current));
-	
+
 	return -EFAULT;
 }
 
@@ -89,8 +92,9 @@ asmlinkage long sys_auditsec_answer(int answer)
 		printk(KERN_INFO "AuditSec: The daemon is not launched");
 		return -EFAULT;
 	}
-	
+
 	*auditsec_answer() = answer;
+	printk(KERN_INFO "AuditSec: %d", *auditsec_answer());
 	up(auditsec_answer_lock());
 
 	return 0;
