@@ -61,7 +61,7 @@ void KernelContext::stop()
 }
 
 
-auditsec_info* KernelContext::usai()
+struct auditsec_info * KernelContext::usai()
 {
 	return _usai;
 }
