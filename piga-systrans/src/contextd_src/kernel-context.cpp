@@ -17,7 +17,7 @@
 
 KernelContext::KernelContext()
 {
-	_usai = (struct auditsec_info *) malloc(sizeof(struct auditsec_info));
+	_usai = struct auditsec_info;
 
 	qDebug("Trying to register with the kernel");
 	if(auditsec_register(1) != 1){
@@ -63,7 +63,7 @@ void KernelContext::stop()
 
 struct auditsec_info * KernelContext::usai()
 {
-	return _usai;
+	return &_usai;
 }
 
 

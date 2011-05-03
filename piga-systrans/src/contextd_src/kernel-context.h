@@ -22,7 +22,7 @@ class KernelContext: public AbstractContext
 {
 Q_OBJECT
 private:
-	struct auditsec_info * _usai;
+	struct auditsec_info _usai;
 	char exec_path[PATH_MAX];
 
 	KThread * kernelT;

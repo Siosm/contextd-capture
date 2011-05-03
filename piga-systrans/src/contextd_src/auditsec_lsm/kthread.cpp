@@ -6,6 +6,7 @@
 
 KThread::KThread(KernelContext * kc) : KC(kc)
 {
+	KC = kc;
 	_keep_going = true;
 }
 
@@ -14,7 +15,7 @@ void KThread::run()
 {
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
 		qDebug() << "Boucle: " << KC->usai()->execname;
-		if(KC->is_registered() == KERNEL_SUCCESS)
+		if(KC->is_registered() != KERNEL_SUCCESS)
 			KC->register_application(KC->usai()->execname, 0);
 
 		switch (KC->usai()->type){
