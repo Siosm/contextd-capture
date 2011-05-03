@@ -8,11 +8,6 @@
 #include "auditsec_lsm/syscall.h"
 #include "kthread.h"
 
-#include "malloc.h"
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-
 #include <QtCore/QMap>
 #include <QtCore/QThread>
 
@@ -39,10 +34,6 @@ public:
 	void start();
 	void stop();
 	struct auditsec_info * usai();
-
-	long auditsec_register(int);
-	long auditsec_question(struct auditsec_info *);
-	long auditsec_answer(int);
 
 public slots:
 	QString register_application(const QString &app_name, uint app_pid);

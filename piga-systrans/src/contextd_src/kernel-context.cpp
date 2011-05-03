@@ -9,7 +9,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <malloc.h>
 
+#include "auditsec_lsm/auditsec_info.h"
 #include "contextd_adaptator.h"
 
 
@@ -62,24 +64,6 @@ void KernelContext::stop()
 auditsec_info* KernelContext::usai()
 {
 	return _usai;
-}
-
-
-long int KernelContext::auditsec_register(int state)
-{
-	return syscall(__NR_sys_auditsec_reg, state);
-}
-
-
-long int KernelContext::auditsec_question(auditsec_info* user_as_i)
-{
-	return syscall(__NR_sys_auditsec_question, user_as_i);
-}
-
-
-long int KernelContext::auditsec_answer(int answer)
-{
-	return syscall(__NR_sys_auditsec_answer, answer);
 }
 
 

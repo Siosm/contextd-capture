@@ -1,11 +1,13 @@
 #ifndef __AUDITSEC_INFO_H__
 #define __AUDITSEC_INFO_H__
 
+#ifdef __cplusplus
+extern "C" {
+	#endif
 
 /*
  * Defines structs and static values for system calls
  **/
-
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -69,5 +71,9 @@ struct auditsec_info {
 		struct auditsec_dir dir;
 	} auditsec_struct;
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
