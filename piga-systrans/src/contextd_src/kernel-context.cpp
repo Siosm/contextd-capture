@@ -17,7 +17,6 @@
 
 KernelContext::KernelContext()
 {
-	_usai = struct auditsec_info;
 
 	qDebug("Trying to register with the kernel");
 	if(auditsec_register(1) != 1){
@@ -67,16 +66,17 @@ struct auditsec_info * KernelContext::usai()
 }
 
 
-QString KernelContext::register_application(const QString &app_name, uint /*app_pid*/)
+QString KernelContext::register_application(char * app_name)
 {
 	QWriteLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
-	EventDispatcher::instance().sendNotification("KernelContext: Trying to register " + app_name);
+	qDebug() << "KernelContext: Trying to register " << app_name;
 
 	//You can't register two applications using the same pid !
 	if((pid != 0) && !clients.contains(pid))
 	{
+		qDebug() << "KernelContext: up to register";
 		//Get the exe full path
 		QString full_path=getFullPathFromPID(pid);
 
@@ -88,7 +88,7 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 			Program program=transRules.getProgramByName(app_name);
 			clients[pid]=ContextClient(0, program, pid);
 
-			EventDispatcher::instance().sendNotification("KernelContext: " + app_name + " has been successfuly registered.");
+			qDebug() << "KernelContext: " << app_name << " has been successfuly registered.";
 
 			return KERNEL_SUCCESS;
 		}else{
@@ -105,7 +105,7 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 QString KernelContext::is_registered()
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	if(clients.contains(pid))
 		return KERNEL_SUCCESS;
@@ -117,19 +117,24 @@ QString KernelContext::is_registered()
 QString KernelContext::domain_changed(const QString &xml_context)
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
+			
+	qDebug() << "Domain changed: pid =" << _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
 	{
 		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
+			qDebug() << "Domain changed: context accepted";
 			auditsec_answer(true);
 			return CONTEXT_ACCEPT;
 		}else{
+			qDebug() << "Domain changed: context refused";
 			auditsec_answer(false);
 			return KERNEL_ERROR;
 		}
 	} else {
+		qDebug() << "Domain changed: context refused (default behavior)";
 		auditsec_answer(false);
 		return KERNEL_ERROR;
 	}
@@ -139,7 +144,7 @@ QString KernelContext::domain_changed(const QString &xml_context)
 QString KernelContext::required_domain(const QString &xml_context)
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	qDebug("KernelContext: required_domain");
 
@@ -157,7 +162,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 QString KernelContext::current_domain()
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -170,7 +175,7 @@ QString KernelContext::current_domain()
 QString KernelContext::register_for_domain_changes_updates()
 {
 	QWriteLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))

@@ -161,7 +161,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			strncpy(k_auditsec_info()->auditsec_struct.dir.name, dentry->d_name.name, NAME_MAX + 1);
 			k_auditsec_info()->auditsec_struct.dir.mode = mode;
 			// TODO Add fields to this struct (se_context)
-
+			
 			up(auditsec_question_lock());
 			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
@@ -246,15 +246,16 @@ int auditsec_file_permission(struct file *file, int mask)
 				return -EFAULT;
 			}
 
+			get_task_comm(k_auditsec_info()->execname, current);
 			k_auditsec_info()->pid = current_pid;
 			k_auditsec_info()->type = AUDITSEC_FILE;
 			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
 			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
 			k_auditsec_info()->auditsec_struct.file.mask = mask;
-			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
+			//if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
+			if(down(auditsec_answer_lock()) != 0){
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);

@@ -49,7 +49,7 @@ struct auditsec_dir {
 
 struct auditsec_info {
 	pid_t		pid;
-	char *		execname;
+	char		execname[TASK_COMM_LEN];
 	//FIXME Add SELinux context to this struct
 	enum		auditsec_type type;
 	union

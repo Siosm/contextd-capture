@@ -384,7 +384,7 @@
 		<rule app_name="testprog" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<fullpath>(/home/user/impots|((/usr)?/lib))</fullpath>
+					<fullpath>.*</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
@@ -399,7 +399,7 @@
 		<rule app_name="testprog" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<fullpath>(/home/user/ecommerce|((/usr)?/lib))</fullpath>
+					<fullpath>.*</fullpath>
 				</mrule>
 			</matching>
 			<transitions>

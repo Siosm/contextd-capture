@@ -6,7 +6,7 @@
 
 #include "auditsec_lsm/auditsec_info.h"
 #include "auditsec_lsm/syscall.h"
-#include "kthread.h"
+#include "auditsec_lsm/kthread.h"
 
 #include <QtCore/QMap>
 #include <QtCore/QThread>
@@ -36,7 +36,7 @@ public:
 	struct auditsec_info * usai();
 
 public slots:
-	QString register_application(const QString &app_name, uint app_pid);
+	QString register_application(char * app_name);
 
 	QString domain_changed(const QString &xml_context);
 	QString required_domain(const QString &xml_context);

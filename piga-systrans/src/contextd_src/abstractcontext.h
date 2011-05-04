@@ -18,7 +18,8 @@ protected:
 	QString getFullPathFromPID(pid_t pid);
 
 public slots:
-	virtual QString register_application(const QString &app_name, uint app_pid) = 0;
+//	virtual QString register_application(const QString &app_name, uint app_pid) = 0;
+//	virtual QString register_application(char * app_name) = 0;
 
 	virtual QString domain_changed(const QString &xml_context) = 0;
 	virtual QString required_domain(const QString &xml_context) = 0;

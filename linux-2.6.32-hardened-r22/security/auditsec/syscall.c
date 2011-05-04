@@ -65,9 +65,10 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 		return -EFAULT;
 	}
 
-	if(down_interruptible(auditsec_question_lock()) != 0)
+	if(down_interruptible(auditsec_question_lock()) != 0){
 		printk(KERN_INFO "AuditSec: Can't get the question lock or interrupted");
 		return -EFAULT;
+	}
 
 	// FIXME faire des tests sur le pointeur donné par le process en userspace
 	if(likely(user_as_i != NULL)){
