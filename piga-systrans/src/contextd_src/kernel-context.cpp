@@ -17,7 +17,6 @@
 
 KernelContext::KernelContext()
 {
-
 	qDebug("Trying to register with the kernel");
 	if(auditsec_register(1) != 1){
 		qFatal("FAILED to register with the kernel.");
@@ -119,8 +118,6 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	QReadLocker _lock(&lock);
 	pid_t pid = _usai.pid;
 			
-	qDebug() << "Domain changed: pid =" << _usai.pid;
-
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
 	{
