@@ -6,7 +6,6 @@
 
 KThread::KThread(KernelContext * kc) : KC(kc)
 {
-	KC = kc;
 	_keep_going = true;
 }
 
@@ -22,15 +21,15 @@ void KThread::run()
 			case AUDITSEC_FILE:
 				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
-					//"filename", usai->auditsec_struct.file.name,
+					//"filename", KC->usai()->auditsec_struct.file.name,
 					NULL, NULL));
 
 				#ifdef DEBUG
-				read_execpath(usai->pid, exec_path);
-				qDebug() << "file access: " << usai->auditsec_struct.file.fullpath
-				<< "/" << usai->auditsec_struct.file.name << ", pid: " << usai->pid
+				read_execpath(KC->usai()->pid, exec_path);
+				qDebug() << "file access: " << KC->usai()->auditsec_struct.file.fullpath
+				<< "/" << KC->usai()->auditsec_struct.file.name << ", pid: " << KC->usai()->pid
 				<< ", execname: " << exec_path
-				/*<< ", mask: " << usai->auditsec_struct.file.mask*/;
+				/*<< ", mask: " << KC->usai()->auditsec_struct.file.mask*/;
 				#endif /* DEBUG */
 				break;
 
@@ -40,10 +39,10 @@ void KThread::run()
 					NULL, NULL));
 
 				#ifdef DEBUG
-				read_execpath(usai->pid, exec_path);
-				qDebug(); << "mkdir: " << usai->auditsec_struct.dir.fullpath
-				<< ", pid: " << usai->pid << ", execname: " << exec_path << usai->execname
-				/*<< ", mode: " << usai->auditsec_struct.dir.mode*/;
+				read_execpath(KC->usai()->pid, exec_path);
+				qDebug(); << "mkdir: " << KC->usai()->auditsec_struct.dir.fullpath
+				<< ", pid: " << KC->usai()->pid << ", execname: " << exec_path << KC->usai()->execname
+				/*<< ", mode: " << KC->usai()->auditsec_struct.dir.mode*/;
 				#endif /* DEBUG */
 				break;
 

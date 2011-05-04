@@ -17,8 +17,6 @@
 
 KernelContext::KernelContext()
 {
-	_usai = struct auditsec_info;
-
 	qDebug("Trying to register with the kernel");
 	if(auditsec_register(1) != 1){
 		qFatal("FAILED to register with the kernel.");
@@ -70,7 +68,7 @@ struct auditsec_info * KernelContext::usai()
 QString KernelContext::register_application(const QString &app_name, uint /*app_pid*/)
 {
 	QWriteLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	EventDispatcher::instance().sendNotification("KernelContext: Trying to register " + app_name);
 
@@ -105,7 +103,7 @@ QString KernelContext::register_application(const QString &app_name, uint /*app_
 QString KernelContext::is_registered()
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	if(clients.contains(pid))
 		return KERNEL_SUCCESS;
@@ -117,7 +115,7 @@ QString KernelContext::is_registered()
 QString KernelContext::domain_changed(const QString &xml_context)
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -139,7 +137,7 @@ QString KernelContext::domain_changed(const QString &xml_context)
 QString KernelContext::required_domain(const QString &xml_context)
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	qDebug("KernelContext: required_domain");
 
@@ -157,7 +155,7 @@ QString KernelContext::required_domain(const QString &xml_context)
 QString KernelContext::current_domain()
 {
 	QReadLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
@@ -170,7 +168,7 @@ QString KernelContext::current_domain()
 QString KernelContext::register_for_domain_changes_updates()
 {
 	QWriteLocker _lock(&lock);
-	pid_t pid = _usai->pid;
+	pid_t pid = _usai.pid;
 
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
