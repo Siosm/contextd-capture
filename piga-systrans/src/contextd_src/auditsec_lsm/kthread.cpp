@@ -46,6 +46,10 @@ void KThread::run()
 				/*<< ", mode: " << KC->usai()->auditsec_struct.dir.mode*/;
 				#endif /* DEBUG */
 				break;
+			
+			case AUDITSEC_SOCKET:
+				qDebug() << "Case socket";
+				break;
 
 			default:
 				qCritical("KernelContext: can't determine struct type !");

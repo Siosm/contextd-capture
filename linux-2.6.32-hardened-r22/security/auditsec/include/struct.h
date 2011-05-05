@@ -18,9 +18,12 @@
 // #include <net/ip.h>		/* for local_port_range[] */
 #include <linux/net.h>
 #include <linux/socket.h>
+#include <linux/in.h>
+#include <linux/in6.h>
 
 
 enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR};
+enum socket_type {AUDITSEC_IPV4, AUDITSEC_IPV6};
 
 
 struct auditsec_file {
@@ -33,9 +36,12 @@ struct auditsec_file {
 
 struct auditsec_socket {
 	//FIXME Fill this struct
-	struct socket	sock;
-	struct sockaddr address;
-	int				port;
+	enum		socket_type type;
+	union 
+	{
+		struct sockaddr_in  addr4; // Adresse ip V4
+		struct sockaddr_in6  addr6; // Adresse ip V6
+	} addr;
 };
 
 

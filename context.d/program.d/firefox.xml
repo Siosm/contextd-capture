@@ -1,4 +1,4 @@
-<program name="firefox" display_name="Firefox" icon="/usr/share/pixmaps/firefox.png" full_path="/usr/lib/mozilla-firefox/firefox">
+<program name="firefox" display_name="Firefox" icon="/usr/share/pixmaps/firefox.png" full_path="/usr/lib/firefox/firefox">
 	<actions>
 		<action name="open_url" display_name="Open an URL" description="" />
 		<action name="open_path" display_name="Open path" description="" />

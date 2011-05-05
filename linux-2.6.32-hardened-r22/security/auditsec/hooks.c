@@ -358,25 +358,43 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 {
 	int		answer = -1;
 	int		ret = 0;
+	struct sock * sk = sock->sk;
 	pid_t 	current_pid = task_pid_nr(current);
 
 	if(prog_is_monitored()){
 		if(*daemon_launched()){
 			if(down_timeout(auditsec_hook_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: socket bind: pid: %d, execname: %s, HOOK TIMEOUT",
+				printk(KERN_INFO "AuditSec: socket bind/connect: pid: %d, execname: %s, HOOK TIMEOUT",
 					current_pid, current->comm);
 				return -EFAULT;
 			}
-
+			
+			printk(KERN_INFO "AuditSec: socket bind/connect: pid: %d, execname: %s",
+					current_pid, current->comm);
+			
 			get_task_comm(k_auditsec_info()->execname, current);
 			k_auditsec_info()->pid = current_pid;
 			k_auditsec_info()->type = AUDITSEC_SOCKET;
-			// TODO Add fields to this struct (sock & sockaddr)
+			// IP
+			if (sk->sk_family == PF_INET) {
+				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV4;
+				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr4, address, sizeof(struct sockaddr_in));
+				if (addrlen < sizeof(struct sockaddr_in)) {
+					return -EINVAL;
+				}
+			} else {
+				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV6;
+				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr6, address, sizeof(struct sockaddr_in6));
+				//k_auditsec_info()->auditsec_struct.socket.addr.addr6 = (struct sockaddr_in6) *address;
+				if (addrlen < SIN6_LEN_RFC2133) {
+					return -EINVAL;
+				}
+			}
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
 			if(down_timeout(auditsec_answer_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: socket bind: pid: %d, execname: %s, ANSWER TIMEOUT",
+				printk(KERN_INFO "AuditSec: socket bind/connect: pid: %d, execname: %s, ANSWER TIMEOUT",
 					current_pid, current->comm);
 
 				ret = down_trylock(auditsec_question_lock());
@@ -388,7 +406,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			up(auditsec_hook_lock());
 			return answer;
 		}else{
-			printk(KERN_INFO "AuditSecu: socket bind: pid: %d, execname: %s, REFUSED : daemon not launched",
+			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);
 			return -EFAULT;
 		}
@@ -401,47 +419,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 
 int auditsec_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-	int		answer = -1;
-	int		ret = 0;
-	pid_t 	current_pid = task_pid_nr(current);
-
-	if(prog_is_monitored()){
-		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: socket connect: pid: %d, execname: %s, HOOK TIMEOUT",
-					current_pid, current->comm);
-				return -EFAULT;
-			}
-
-			get_task_comm(k_auditsec_info()->execname, current);
-			k_auditsec_info()->pid = current_pid;
-			k_auditsec_info()->type = AUDITSEC_SOCKET;
-			// TODO Add fields to this struct (sock & sockaddr)
-			// TODO Add fields to this struct (se_context)
-
-			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: socket connect: pid: %d, execname: %s, ANSWER TIMEOUT",
-					current_pid, current->comm);
-
-				ret = down_trylock(auditsec_question_lock());
-				up(auditsec_hook_lock());
-				return -EFAULT;
-			}
-
-			answer = (*auditsec_answer() == 0);
-			up(auditsec_hook_lock());
-			return answer;
-		}else{
-			printk(KERN_INFO "AuditSecu: socket connect: pid: %d, execname: %s, REFUSED : daemon not launched",
-				task_pid_nr(current), current->comm);
-			return -EFAULT;
-		}
-	}else{
-		/*printk(KERN_INFO "AuditSecu: socket connect: pid: %d, execname: %s",
-				task_pid_nr(current), current->comm);*/
-	}
-	return 0;
+	return auditsec_socket_bind(sock, address, addrlen);
 }
 
 int auditsec_socket_listen(struct socket *sock, int backlog)
