@@ -20,6 +20,7 @@ void KThread::run()
 
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
+				qDebug() << "KThread : File: " << KC->usai()->auditsec_struct.file.fullpath;
 				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
 					//"filename", KC->usai()->auditsec_struct.file.name,

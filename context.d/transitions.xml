@@ -35,7 +35,7 @@
 		<nokill_program full_path="/usr/bin/gnome-keyring-daemon" />
 		<nokill_program full_path="/usr/bin/dbus-daemon" />
 		<nokill_program full_path="/usr/bin/dbus-launch" />
-		<!-- Tmp daemon process -->
+		<!-- Tmp debug test process -->
 		<nokill_program full_path="/root/systemtap/testprog/testprog" />
 		<!-- Debug -->
 		<nokill_program full_path="/usr/sbin/hald" />
@@ -391,6 +391,7 @@
 					<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
 					<transit from_domain="ecommerce" notify="false" prompt="true"/>
 					<transit from_domain="default" /> <!--les params sont modifiables ici-->
+					<transit from_domain="ecommerce" notify="true" prompt="true"/>
 				</allow>
 			</transitions>
 		</rule>
@@ -406,6 +407,7 @@
 				<allow>
 					<transit from_domain="ecommerce" notify="false" prompt="false"/>
 					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
 					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
 					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
 				</allow>
