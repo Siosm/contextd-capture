@@ -347,7 +347,7 @@ IF(BUILD_DAEMON)
 						"${DAEMON_SRC_DIR}/xmlcontext2map.cpp"
 						"${DAEMON_SRC_DIR}/contextd_adaptator.cpp"
 						"${AUDITSEC_SRC_DIR}/kthread.cpp"
-						"${AUDITSEC_SRC_DIR}/syscall.cpp"
+						"${AUDITSEC_SRC_DIR}/syscall.c"
 						"${PLUGINS_SRC_DIR}/abstractcontextdplugin.cpp"
 						"${PLUGINS_SRC_DIR}/contextdpluginnotifyevent.cpp"
 						"${PLUGINS_SRC_DIR}/contextdpluginreloadevent.cpp"

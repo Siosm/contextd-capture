@@ -13,10 +13,10 @@ KThread::KThread(KernelContext * kc) : KC(kc)
 void KThread::run()
 {
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
-		qDebug() << "Boucle: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
-		if(KC->is_registered() == KERNEL_ERROR)
+		qDebug() << "KernelContext: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
+		if(KC->is_registered() == KERNEL_ERROR){
 			KC->register_application(KC->usai()->execname);
-
+		}
 
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
@@ -49,11 +49,12 @@ void KThread::run()
 				break;
 
 			default:
-				qCritical("AuditSec, can't determine struct type !");
+				qCritical("KernelContext: can't determine struct type !");
 				auditsec_answer(false);
 				break;
 		}
 	}
+	qDebug("KernelContext: loop end.");
 }
 
 

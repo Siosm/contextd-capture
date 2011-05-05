@@ -36,7 +36,8 @@ public:
 	struct auditsec_info * usai();
 
 public slots:
-	QString register_application(char * app_name);
+	QString register_application(const QString &app_name, uint app_pid);
+	QString register_application(const QString &app_name);
 
 	QString domain_changed(const QString &xml_context);
 	QString required_domain(const QString &xml_context);
