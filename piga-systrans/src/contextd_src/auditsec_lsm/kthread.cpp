@@ -49,6 +49,7 @@ void KThread::run()
 			
 			case AUDITSEC_SOCKET:
 				qDebug() << "Case socket";
+				auditsec_answer(true);
 				break;
 
 			default:
