@@ -123,16 +123,16 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	{
 		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
 			qDebug() << "Domain changed: context accepted";
-			auditsec_answer(true);
+			auditsec_answer(1);
 			return CONTEXT_ACCEPT;
 		}else{
 			qDebug() << "Domain changed: context refused";
-			auditsec_answer(false);
+			auditsec_answer(0);
 			return KERNEL_ERROR;
 		}
 	} else {
 		qDebug() << "Domain changed: context refused (default behavior)";
-		auditsec_answer(false);
+		auditsec_answer(0);
 		return KERNEL_ERROR;
 	}
 }

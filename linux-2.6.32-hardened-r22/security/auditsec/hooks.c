@@ -175,6 +175,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 
 			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
+			*auditsec_answer() = 1;
 			up(auditsec_hook_lock());
 			return answer;
 		}else{
@@ -253,9 +254,10 @@ int auditsec_file_permission(struct file *file, int mask)
 			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
 			k_auditsec_info()->auditsec_struct.file.mask = mask;
 
+			printk(KERN_INFO "AuditSec: file access: %s (%d)", fullpath, strlen(fullpath));
+
 			up(auditsec_question_lock());
-			//if(down_timeout(auditsec_answer_lock(), 5 * HZ) != 0){// 5s timeout. Is it too much ?
-			if(down(auditsec_answer_lock()) != 0){
+			if(down_timeout(auditsec_answer_lock(), 60 * HZ) != 0){// 5s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);
@@ -267,8 +269,9 @@ int auditsec_file_permission(struct file *file, int mask)
 
 			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
+			*auditsec_answer() = 1;
 			up(auditsec_hook_lock());
-			return answer;
+			return answer == 1 ? -EFAULT : 0;
 		}else{
 			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
 				fullpath, task_pid_nr(current), current->comm, mask);
