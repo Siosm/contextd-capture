@@ -36,7 +36,6 @@
 		<nokill_program full_path="/usr/bin/dbus-daemon" />
 		<nokill_program full_path="/usr/bin/dbus-launch" />
 		<!-- Tmp daemon process -->
-		<nokill_program full_path="/root/systemtap/daemon/daemon" />
 		<nokill_program full_path="/usr/bin/progtest" />
 		<!-- Debug -->
 		<nokill_program full_path="/usr/sbin/hald" />
@@ -367,7 +366,7 @@
 		<loop app_name="testprog" notify="true" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
-					<fullpath></fullpath>
+					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
 				</mrule>
 			</matching>
 			<domains>
@@ -384,12 +383,13 @@
 		<rule app_name="testprog" to_domain="impots" notify="true" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<fullpath>.*</fullpath>
+					<fullpath>(/usr/lib/.*|/lib/.*|/home/user/impots/.*|de)</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
 				<allow>
 					<transit from_domain="impots" notify="true" prompt="false"/> <!--les params sont modifiables ici-->
+					<transit from_domain="ecommerce" notify="false" prompt="true"/>
 					<transit from_domain="default" /> <!--les params sont modifiables ici-->
 				</allow>
 			</transitions>
@@ -399,7 +399,7 @@
 		<rule app_name="testprog" to_domain="ecommerce" notify="true" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<fullpath>.*</fullpath>
+					<fullpath>(/usr/lib/.*|/lib/.*|/home/user/ecommerce/.*|de)</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
@@ -407,6 +407,7 @@
 					<transit from_domain="ecommerce" notify="true" prompt="false"/>
 					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
 					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
 				</allow>
 			</transitions>
 		</rule>
