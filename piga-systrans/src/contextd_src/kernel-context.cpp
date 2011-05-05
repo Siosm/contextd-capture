@@ -65,7 +65,7 @@ struct auditsec_info * KernelContext::usai()
 }
 
 
-QString KernelContext::register_application(char * app_name)
+QString KernelContext::register_application(const QString& app_name, uint app_pid)
 {
 	QWriteLocker _lock(&lock);
 	pid_t pid = _usai.pid;
@@ -75,7 +75,6 @@ QString KernelContext::register_application(char * app_name)
 	//You can't register two applications using the same pid !
 	if((pid != 0) && !clients.contains(pid))
 	{
-		qDebug() << "KernelContext: up to register";
 		//Get the exe full path
 		QString full_path=getFullPathFromPID(pid);
 
@@ -87,7 +86,7 @@ QString KernelContext::register_application(char * app_name)
 			Program program=transRules.getProgramByName(app_name);
 			clients[pid]=ContextClient(0, program, pid);
 
-			qDebug() << "KernelContext: " << app_name << " has been successfuly registered.";
+			EventDispatcher::instance().sendNotification("KernelContext: " + app_name + " has been successfuly registered.");
 
 			return KERNEL_SUCCESS;
 		}else{
@@ -98,6 +97,12 @@ QString KernelContext::register_application(char * app_name)
 	}
 	else
 		return KERNEL_ERROR;
+}
+
+
+QString KernelContext::register_application(const QString& app_name)
+{
+	return register_application(app_name, 0);
 }
 
 
@@ -117,21 +122,21 @@ QString KernelContext::domain_changed(const QString &xml_context)
 {
 	QReadLocker _lock(&lock);
 	pid_t pid = _usai.pid;
-			
+
 	//You have to be registered to use this function !
 	if(clients.contains(pid))
 	{
 		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
-			qDebug() << "Domain changed: context accepted";
+			qDebug() << "KernelContext: domain_changed: accepted";
 			auditsec_answer(true);
 			return CONTEXT_ACCEPT;
 		}else{
-			qDebug() << "Domain changed: context refused";
+			qDebug() << "KernelContext: domain_changed: refused";
 			auditsec_answer(false);
 			return KERNEL_ERROR;
 		}
 	} else {
-		qDebug() << "Domain changed: context refused (default behavior)";
+		qDebug() << "KernelContext: domain_changed: non registered";
 		auditsec_answer(false);
 		return KERNEL_ERROR;
 	}
