@@ -4,6 +4,7 @@
 
 #include "dbus-context.h"
 #include "kernel-context.h"
+#include "clientscleaner.h"
 #include "misc.h"
 #include "config-daemon.h"
 
@@ -281,6 +282,7 @@ int main(int argc, char **argv)
 	//Start DBUS & Kernel LSM listening
 	DBusContext dbus;
 	KernelContext kernel;
+	ClientsCleaner cc(kernel.getClients());
 
 	//Log the startup
 	EventDispatcher::instance().sendNotification("Contextd started");
@@ -289,10 +291,16 @@ int main(int argc, char **argv)
 	DomainHolder::instance().setDefaultDomain(Configuration::instance().defaultDomain());
 	DomainHolder::resetToDefaultDomain();
 
-	//Start the event loop
+	//Start other loops (Kernel & Cleaner)
 	kernel.start();
+	cc.start();
+
+	//Start the event loop
 	app.exec();
+
+	//Stop Kernel & Cleaner loop
 	kernel.stop();
+	cc.terminate();
 
 	// Finish up
 	EventDispatcher::instance().sendNotification("Contextd terminated correctly\n\n");
