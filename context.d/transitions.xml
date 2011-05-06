@@ -380,22 +380,7 @@
 		</loop>
 
 		<!--Impots-->
-		<!--		<rule app_name="testprog" to_domain="impots" notify="false" prompt="false" display_name="domaine impots">
-			<matching>
-				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="impots" notify="false" prompt="false"/>
-					<transit from_domain="ecommerce" notify="false" prompt="true"/>
-					<transit from_domain="default" /> 
-					<transit from_domain="ecommerce" notify="true" prompt="true"/>
-				</allow>
-			</transitions>
-		</rule>-->
-		<rule app_name="testprog" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
+		<rule app_name="testprog" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> 
 			<matching>
 				<mrule>
 					<fullpath>(/home/user/impots/.*)</fullpath>
@@ -403,31 +388,15 @@
 			</matching>
 			<transitions>
 				<allow>
-					<transit from_domain="impots" notify="false" prompt="false"/> <!--les params sont modifiables ici-->
+					<transit from_domain="impots" notify="false" prompt="false"/>
 					<transit from_domain="ecommerce" notify="false" prompt="true"/>
-					<transit from_domain="default" /> <!--les params sont modifiables ici-->
+					<transit from_domain="default" />
 					<transit from_domain="ecommerce" notify="true" prompt="true"/>
 				</allow>
 			</transitions>
 		</rule>
 
 		<!--Ecommerce-->
-		<!--		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="false" display_name="domaine ecommerce">
-			<matching>
-				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
-				</mrule>
-			</matching>
-			<transitions>
-				<allow>
-					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
-					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
-					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
-					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
-				</allow>
-			</transitions>
-		</rule> -->
 		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
