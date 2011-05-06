@@ -363,7 +363,7 @@
 
 		<!-- progtest to be tested -->
 		<!-- Loop -->
-		<loop app_name="testprog" notify="true" prompt="false" display_name="Loop">
+		<loop app_name="testprog" notify="false" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
 					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
@@ -380,10 +380,25 @@
 		</loop>
 
 		<!--Impots-->
+		<!--		<rule app_name="testprog" to_domain="impots" notify="false" prompt="false" display_name="domaine impots">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="false" prompt="false"/>
+					<transit from_domain="ecommerce" notify="false" prompt="true"/>
+					<transit from_domain="default" /> 
+					<transit from_domain="ecommerce" notify="true" prompt="true"/>
+				</allow>
+			</transitions>
+		</rule>-->
 		<rule app_name="testprog" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> <!--params par defaut ici (sauf pour from_domain qui n'est pas parametrable)-->
 			<matching>
 				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|/home/user/impots/.*|de)</fullpath>
+					<fullpath>(/home/user/impots/.*)</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
@@ -397,10 +412,26 @@
 		</rule>
 
 		<!--Ecommerce-->
+		<!--		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="false" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="false" prompt="false"/>
+					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
+				</allow>
+			</transitions>
+		</rule> -->
 		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
 			<matching>
 				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|/home/user/ecommerce/.*|de)</fullpath>
+					<fullpath>(/home/user/ecommerce/.*)</fullpath>
 				</mrule>
 			</matching>
 			<transitions>
@@ -413,4 +444,5 @@
 				</allow>
 			</transitions>
 		</rule>
+	
 </PIGA_Transitions>

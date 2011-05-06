@@ -13,11 +13,12 @@ KThread::KThread(KernelContext * kc) : KC(kc)
 void KThread::run()
 {
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
+		qDebug() << "";
 		qDebug() << "KernelContext: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
 		if(KC->is_registered() == KERNEL_ERROR){
 			KC->register_application(KC->usai()->execname);
 		}
-
+		qDebug() << "KernelContext: file " << KC->usai()->auditsec_struct.file.fullpath;
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
 				qDebug() << "KThread : File: " << KC->usai()->auditsec_struct.file.fullpath;
