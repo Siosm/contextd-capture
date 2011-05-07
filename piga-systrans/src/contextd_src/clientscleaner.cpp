@@ -18,7 +18,8 @@ void ClientsCleaner::run()
 		QStringList pidList = proc.entryList();
 		QMap<pid_t, ContextClient>::const_iterator mapItr = _clients->constBegin();
 		while(mapItr != _clients->constEnd()){
-			if(pidList.contains(QString(mapItr.key()))){
+			qDebug() << "Looking for pid: " << mapItr.key() << ".";
+			if(pidList.contains(QString("%1").arg(mapItr.key()))){
 				_clients->remove(mapItr.key());
 				qDebug() << "Removing pid: " << mapItr.key() << ".";
 			}
