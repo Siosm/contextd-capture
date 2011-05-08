@@ -61,6 +61,10 @@ int opensocket (char * host, int port)
 		close(sd);
 		return -1;
 	}
+
+	write(sd, "toto", 4);
+
+	sleep(2);
 	
 	close(sd);
 	return 0;
@@ -68,19 +72,18 @@ int opensocket (char * host, int port)
 
 int main(int argc, char ** argv)
 {
-	if (argc < 2) {
-		openfile("/home/user/impots/test");
-		sleep(2);
-		openfile("/home/user/ecommerce/test");
-		sleep(2);
-		openfile("/home/user/impots/test");
+	if (argc == 1) {
+		for (int i=0; i < 2; i++) {
+			openfile("/home/user/impots/test");
+			openfile("/home/user/ecommerce/test");
+		}
 		return 1;
 
 	} else if (argc == 3) {
 		return opensocket(argv[1], atoi(argv[2]));
+	} else  {
+		std::cout << "Usage (System): " << argv[0] << std::endl;
+		std::cout << "Usage (Network): " << argv[0] << " @dest port" << std::endl;
+		return -1;
 	}
-
-	std::cout << "Usage (System): " << argv[0] << std::endl;
-	std::cout << "Usage (Network): " << argv[0] << " @dest port" << std::endl;
-	return -1;
 }

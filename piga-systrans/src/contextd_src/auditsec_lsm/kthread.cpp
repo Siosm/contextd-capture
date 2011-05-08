@@ -1,6 +1,7 @@
 #include "kthread.h"
 #include "stdarg.h"
 #include <netinet/in.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
@@ -15,6 +16,10 @@ KThread::KThread(KernelContext * kc) : KC(kc)
 
 void KThread::run()
 {
+	QString address;
+	struct sockaddr_in addr_;
+	struct hostent * hote = NULL;
+
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
 		qDebug() << "";
 		qDebug() << "KernelContext: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
@@ -54,8 +59,18 @@ void KThread::run()
 			
 			case AUDITSEC_SOCKET:
 				qDebug() << "Case socket";
-				qDebug() << "KThread: IP: " << inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
-				auditsec_answer(false);
+				address = inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
+				
+				addr_.sin_addr.s_addr = inet_addr(address.toStdString().c_str());
+				
+				hote = gethostbyaddr((char *) &addr_.sin_addr, 4, AF_INET);
+				
+				if (hote == NULL)
+					qDebug() << "KThread: IP: " << address;
+				else
+					qDebug() << "KThread: IP: " << address << " " << hote->h_name;
+				
+				auditsec_answer(true);
 				break;
 
 			default:

@@ -348,7 +348,7 @@
 		<loop app_name="testprog" notify="false" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
+					<fullpath>(/usr/lib/.*|/lib/.*|de|s|/etc/resolv.conf|/etc/nsswitch.conf|/etc/host.conf|/etc/hosts)</fullpath>
 				</mrule>
 			</matching>
 			<domains>
