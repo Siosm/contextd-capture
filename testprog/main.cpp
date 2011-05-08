@@ -69,10 +69,11 @@ int opensocket (char * host, int port)
 int main(int argc, char ** argv)
 {
 	if (argc < 2) {
-		for(int i = 0; i < 2 ; ++i){
-			openfile("/home/user/impots/test");
-			openfile("/home/user/ecommerce/test");
-		}
+		openfile("/home/user/impots/test");
+		sleep(2);
+		openfile("/home/user/ecommerce/test");
+		sleep(2);
+		openfile("/home/user/impots/test");
 		return 1;
 
 	} else if (argc == 3) {

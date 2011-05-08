@@ -270,9 +270,12 @@ int auditsec_file_permission(struct file *file, int mask)
 
 			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
-			*auditsec_answer() = 1;
 			up(auditsec_hook_lock());
-			return answer == 1 ? -EFAULT : 0;
+	
+			if (answer == 0) printk(KERN_INFO "Auditsec : operation authorized");
+			else printk(KERN_INFO "Auditsec : operation denied");
+
+			return answer == 0 ? 0 : -EFAULT;
 		}else{
 			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
 				fullpath, task_pid_nr(current), current->comm, mask);

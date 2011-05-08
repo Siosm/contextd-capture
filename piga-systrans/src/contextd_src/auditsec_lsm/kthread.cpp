@@ -1,5 +1,8 @@
 #include "kthread.h"
 #include "stdarg.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <QtCore/QDebug>
 
@@ -18,7 +21,7 @@ void KThread::run()
 		if(KC->is_registered() == KERNEL_ERROR){
 			KC->register_application(KC->usai()->execname);
 		}
-		qDebug() << "KernelContext: file " << KC->usai()->auditsec_struct.file.fullpath;
+
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
 				qDebug() << "KThread : File: " << KC->usai()->auditsec_struct.file.fullpath;
@@ -51,12 +54,13 @@ void KThread::run()
 			
 			case AUDITSEC_SOCKET:
 				qDebug() << "Case socket";
-				auditsec_answer(true);
+				qDebug() << "KThread: IP: " << inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
+				auditsec_answer(false);
 				break;
 
 			default:
 				qCritical("KernelContext: can't determine struct type !");
-				auditsec_answer(false);
+				auditsec_answer(0);
 				break;
 		}
 	}

@@ -128,16 +128,18 @@ QString KernelContext::domain_changed(const QString &xml_context)
 	{
 		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
 			qDebug() << "KernelContext: domain_changed: accepted";
+			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
 			auditsec_answer(true);
 			return CONTEXT_ACCEPT;
 		}else{
 			qDebug() << "KernelContext: domain_changed: refused";
+			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
 			auditsec_answer(false);
 			return KERNEL_ERROR;
 		}
 	} else {
 		qDebug() << "KernelContext: domain_changed: non registered";
-		auditsec_answer(false);
+		auditsec_answer(true);
 		return KERNEL_ERROR;
 	}
 }

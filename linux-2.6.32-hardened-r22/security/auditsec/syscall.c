@@ -95,7 +95,7 @@ asmlinkage long sys_auditsec_answer(int answer)
 	}
 
 	*auditsec_answer() = answer;
-	printk(KERN_INFO "AuditSec: %d", *auditsec_answer());
+	printk(KERN_INFO "AuditSec: answer = %d ; affectation = %d", answer, *auditsec_answer());
 	up(auditsec_answer_lock());
 
 	return 0;

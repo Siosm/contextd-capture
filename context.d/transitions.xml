@@ -264,9 +264,6 @@
 	<!-- Context Notify : Manual transitions-->
 		<rule app_name="context-notify" to_domain="impots" notify="false" prompt="false" display_name="impots">
 			<matching>
-<!--				<mrule>
-					<context>impots</context>
-				</mrule>-->
 				<mrule>
 					<domain>impots</domain>
 				</mrule>
@@ -279,9 +276,6 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="ecommerce" notify="false" prompt="false" display_name="ecommerce">
 			<matching>
-<!--				<mrule>
-					<context>ecommerce</context>
-				</mrule>-->
 				<mrule>
 					<domain>ecommerce</domain>
 				</mrule>
@@ -295,9 +289,6 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="mail" notify="false" prompt="false" display_name="mail">
 			<matching>
-<!--				<mrule>
-					<context>mail</context>
-				</mrule>-->
 				<mrule>
 					<domain>mail</domain>
 				</mrule>
@@ -310,9 +301,6 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="web-flash" notify="false" prompt="false" display_name="web-flash">
 			<matching>
-<!--				<mrule>
-					<context>web-flash</context>
-				</mrule>-->
 				<mrule>
 					<domain>web-flash</domain>
 				</mrule>
@@ -326,9 +314,6 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="web" notify="false" prompt="false" display_name="web">
 			<matching>
-<!--				<mrule>
-					<context>web</context>
-				</mrule>-->
 				<mrule>
 					<domain>web</domain>
 				</mrule>
@@ -341,9 +326,6 @@
 		</rule>
 		<rule app_name="context-notify" to_domain="default" notify="false" prompt="false" display_name="impots">
 			<matching>
-<!--				<mrule>
-					<context>impots</context>
-				</mrule>-->
 				<mrule>
 					<domain>default</domain>
 				</mrule>
@@ -389,9 +371,8 @@
 			<transitions>
 				<allow>
 					<transit from_domain="impots" notify="false" prompt="false"/>
-					<transit from_domain="ecommerce" notify="false" prompt="true"/>
+					<!--<transit from_domain="ecommerce" to_domain="impots" notify="false" prompt="true"/>-->
 					<transit from_domain="default" />
-					<transit from_domain="ecommerce" notify="true" prompt="true"/>
 				</allow>
 			</transitions>
 		</rule>
@@ -406,10 +387,9 @@
 			<transitions>
 				<allow>
 					<transit from_domain="ecommerce" notify="false" prompt="false"/>
-					<transit from_domain="mail" to_domain="ecommerce" prompt="true" />
-					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
+					<!--<transit from_domain="mail" to_domain="ecommerce" prompt="true" />-->
 					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
-					<transit from_domain="impots" to_domain="ecommerce" prompt="true" />
+					<!--<transit from_domain="impots" to_domain="ecommerce" prompt="true" />-->
 				</allow>
 			</transitions>
 		</rule>
