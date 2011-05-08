@@ -76,7 +76,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
 // 			printk(KERN_INFO "AuditSec: pid: %d, execname: %s, file: %s (%d) COPIED",
-				   user_as_i->pid, user_as_i->execname, user_as_i->auditsec_struct.file.fullpath, strlen(user_as_i->auditsec_struct.file.fullpath));
+//				   user_as_i->pid, user_as_i->execname, user_as_i->auditsec_struct.file.fullpath, strlen(user_as_i->auditsec_struct.file.fullpath));
 			return 0;
 		}
 	}
