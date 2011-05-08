@@ -291,15 +291,21 @@ int main(int argc, char **argv)
 	DomainHolder::instance().setDefaultDomain(Configuration::instance().defaultDomain());
 	DomainHolder::resetToDefaultDomain();
 
-	//Start other loops (Kernel & Cleaner)
-	kernel.start();
-	cc.start();
+	//Sets other loops to wait for app.exec to start (Kernel & Cleaner)
+	QTimer * cleanerTimer = new QTimer();
+	cleanerTimer->setInterval(120000); // Check every 2 minutes = 120 000 milliseconds
+	QObject::connect(cleanerTimer, SIGNAL(timeout()), cleanerTimer, SLOT(start()));
+	QObject::connect(cleanerTimer, SIGNAL(timeout()), &cc, SLOT(start()));
+
+	QTimer::singleShot(0, cleanerTimer, SLOT(start()));
+	QTimer::singleShot(0, &kernel, SLOT(start()));
 
 	//Start the event loop
 	app.exec();
 
 	//Stop Kernel & Cleaner loop
 	kernel.stop();
+	cleanerTimer->stop();
 	cc.terminate();
 
 	// Finish up

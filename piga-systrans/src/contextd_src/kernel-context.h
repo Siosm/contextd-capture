@@ -31,13 +31,14 @@ public:
 	KernelContext();
     ~KernelContext();
 
-	void start();
 	void stop();
 	struct auditsec_info * usai();
 
 	QMap< pid_t, ContextClient > * getClients();
 
 public slots:
+	void start();
+
 	QString register_application(const QString &app_name, uint app_pid);
 	QString register_application(const QString &app_name);
 

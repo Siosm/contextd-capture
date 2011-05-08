@@ -4,25 +4,22 @@
 #include "clientscleaner.h"
 
 
-ClientsCleaner::ClientsCleaner(QMap<pid_t, ContextClient > * clients,QObject* parent): QThread(parent), _clients(clients)
+ClientsCleaner::ClientsCleaner(QMap<pid_t, ContextClient > * clients, QObject* parent): QThread(parent), _clients(clients)
 {
 }
 
 
 void ClientsCleaner::run()
 {
-	while(true){
-		wait(600);
-
-		QDir proc("/proc/");
-		QStringList pidList = proc.entryList();
-		QMap<pid_t, ContextClient>::const_iterator mapItr = _clients->constBegin();
-		while(mapItr != _clients->constEnd()){
-			qDebug() << "Looking for pid: " << mapItr.key() << ".";
-			if(pidList.contains(QString("%1").arg(mapItr.key()))){
-				_clients->remove(mapItr.key());
-				qDebug() << "Removing pid: " << mapItr.key() << ".";
-			}
+	qDebug("Cleaning clients");
+	QDir proc("/proc/");
+	QStringList pidList = proc.entryList();
+	QMap<pid_t, ContextClient>::const_iterator mapItr = _clients->constBegin();
+	while(mapItr != _clients->constEnd()){
+		qDebug() << "Looking for pid: " << mapItr.key() << ".";
+		if(pidList.contains(QString("%1").arg(mapItr.key()))){
+			_clients->remove(mapItr.key());
+			qDebug() << "Removing pid: " << mapItr.key() << ".";
 		}
 	}
 }
