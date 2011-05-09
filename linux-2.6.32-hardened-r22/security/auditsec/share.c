@@ -11,7 +11,7 @@
 int prog_is_monitored()
 {
 	int res = 1, i = 0;
-	static char monitored_prog[MONITORED_PROG_SIZE][TASK_COMM_LEN]={"firefox","testprog","libreoffice"};
+	static char monitored_prog[MONITORED_PROG_SIZE][TASK_COMM_LEN]={"firefox","testprog","soffice.bin"};
 
 	task_lock(current);
 	for(i=0; i<MONITORED_PROG_SIZE && res; ++i){

@@ -34,7 +34,7 @@ static void child_handler(int signum)
 {
 	QString pid_path=QString("/var/run/%1.pid").arg(DAEMON_NAME);
 
-	qDebug("Signal ")
+	qDebug("Signal handler");
 	switch(signum)
 	{
 		case SIGALRM:
