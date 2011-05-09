@@ -34,6 +34,7 @@ static void child_handler(int signum)
 {
 	QString pid_path=QString("/var/run/%1.pid").arg(DAEMON_NAME);
 
+	qDebug("Signal ")
 	switch(signum)
 	{
 		case SIGALRM:
@@ -48,7 +49,9 @@ static void child_handler(int signum)
 			auditsec_register(0);
 			exit(EXIT_FAILURE);
 			break;
-
+		case SIGKILL:
+			auditsec_register(0);
+			break;
 		case SIGTERM:
 			EventDispatcher::instance().sendNotification("Stopping the daemon");
 
@@ -115,6 +118,8 @@ static void daemonize( const char *daemon_name, bool foreground )
 		signal(SIGCHLD,child_handler);
 		signal(SIGUSR1,child_handler);
 		signal(SIGALRM,child_handler);
+		signal(SIGKILL,child_handler);
+		signal(SIGTERM,child_handler);
 
 		//Fork off the parent process
 		pid = fork();
@@ -156,7 +161,8 @@ static void daemonize( const char *daemon_name, bool foreground )
 	signal(SIGTTOU,SIG_IGN);
 	signal(SIGTTIN,SIG_IGN);
 	signal(SIGHUP, SIG_IGN); // Ignore hangup signal
-	signal(SIGTERM,SIG_DFL); // Die on SIGTERM
+	signal(SIGTERM,child_handler); // Die on SIGTERM
+	signal(SIGKILL,child_handler);
 
 
 	//Redirect standard files to /dev/null
