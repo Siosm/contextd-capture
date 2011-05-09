@@ -21,5 +21,6 @@ void ClientsCleaner::run()
 			_clients->remove(mapItr.key());
 			qDebug() << "Removing pid: " << mapItr.key() << ".";
 		}
+		++mapItr;
 	}
 }

@@ -177,7 +177,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			return answer == 0 ? 0 : -EFAULT;
+			return answer == 0 ? 0 : -EACCES;
 		}else{
 			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d REFUSED : daemon not launched",
 				   fullpath, current_pid, current->comm, mode);
@@ -270,7 +270,7 @@ int auditsec_file_permission(struct file *file, int mask)
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			return answer == 0 ? 0 : -EFAULT;
+			return answer == 0 ? 0 : -EACCES;
 		}else{
 			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
 				fullpath, task_pid_nr(current), current->comm, mask);
@@ -407,7 +407,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			return answer == 0 ? 0 : -EFAULT;
+			return answer == 0 ? 0 : -EACCES;
 		}else{
 			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);
