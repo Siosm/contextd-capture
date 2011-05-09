@@ -24,7 +24,7 @@ int prog_is_monitored(void);
 
 int * auditsec_answer(void);
 
-pid_t * contextd_pid();
+pid_t * contextd_pid(void);
 
 struct semaphore * auditsec_hook_lock(void);
 struct semaphore * auditsec_question_lock(void);
