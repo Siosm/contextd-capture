@@ -13,6 +13,7 @@
 #include "plugins/contextdpluginreloadevent.h"
 #include "eventdispatcher.h"
 #include "pigahandler.h"
+#include "auditsec_lsm/syscall.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,13 +36,23 @@ static void child_handler(int signum)
 
 	switch(signum)
 	{
-		case SIGALRM: exit(EXIT_FAILURE); break;
-		case SIGUSR1: exit(EXIT_SUCCESS); break;
-		case SIGCHLD: exit(EXIT_FAILURE); break;
+		case SIGALRM:
+			auditsec_register(0);
+			exit(EXIT_FAILURE);
+			break;
+		case SIGUSR1:
+			auditsec_register(0);
+			exit(EXIT_SUCCESS);
+			break;
+		case SIGCHLD:
+			auditsec_register(0);
+			exit(EXIT_FAILURE);
+			break;
 
 		case SIGTERM:
 			EventDispatcher::instance().sendNotification("Stopping the daemon");
 
+			auditsec_register(0);
 			remove(qPrintable(pid_path));
 
 			exit(EXIT_SUCCESS);
