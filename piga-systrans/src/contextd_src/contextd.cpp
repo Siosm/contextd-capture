@@ -34,25 +34,30 @@ static void child_handler(int signum)
 {
 	QString pid_path=QString("/var/run/%1.pid").arg(DAEMON_NAME);
 
-	qDebug("Signal handler");
 	switch(signum)
 	{
 		case SIGALRM:
+			qDebug("Signal handler: ALARM");
 			auditsec_register(0);
 			exit(EXIT_FAILURE);
 			break;
 		case SIGUSR1:
+			qDebug("Signal handler: USR1");
 			auditsec_register(0);
 			exit(EXIT_SUCCESS);
 			break;
 		case SIGCHLD:
+			qDebug("Signal handler: CHLD");
 			auditsec_register(0);
 			exit(EXIT_FAILURE);
 			break;
 		case SIGKILL:
+			qDebug("Signal handler: KILL");
 			auditsec_register(0);
+			exit(EXIT_FAILURE);
 			break;
 		case SIGTERM:
+			qDebug("Signal handler: TERM");
 			EventDispatcher::instance().sendNotification("Stopping the daemon");
 
 			auditsec_register(0);
