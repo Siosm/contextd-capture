@@ -59,6 +59,8 @@
 #include "include/share.h"
 
 
+#include <linux/module.h>
+
 int auditsec_info_len = sizeof(struct auditsec_info);
 
 int calculate_path(struct dentry *dentry, char *path, size_t len)
@@ -487,8 +489,28 @@ static struct security_operations audit_ops = {
 #endif
 };
 
+int auditsec_procfile_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		result = sprintf(buffer, "HelloWorld!\n");
+	}
+
+	return result;
+}
+					
+
+
+
 static __init int auditsec_init(void)
 {
+	struct proc_dir_entry * auditsec_procfile;
+
 	if (!security_module_enable(&audit_ops)) {
 		printk(KERN_INFO "AuditSec: Abort initialization.\n");
 		return 0;
@@ -505,6 +527,20 @@ static __init int auditsec_init(void)
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
+
+	auditsec_procfile = create_proc_entry("contextd", 0400, NULL);
+
+	if (auditsec_procfile == NULL) {
+		remove_proc_entry("contextd", NULL);
+		return -ENOMEM;
+	}
+
+	auditsec_procfile->read_proc    = auditsec_procfile_read;
+	auditsec_procfile->mode         = S_IFREG | S_IRUGO;
+	auditsec_procfile->uid          = 0;
+	auditsec_procfile->gid          = 0;
+	auditsec_procfile->size         = 0;
+
 
 	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
 
