@@ -18,9 +18,11 @@ void ClientsCleaner::run()
 	while(mapItr != _clients->constEnd()){
 		qDebug() << "Looking for pid: " << mapItr.key() << ".";
 		if(pidList.contains(QString("%1").arg(mapItr.key()))){
-			_clients->remove(mapItr.key());
 			qDebug() << "Removing pid: " << mapItr.key() << ".";
+			_clients->remove(mapItr.key());
+			mapItr = _clients->constBegin();
+		}else{
+			++mapItr;
 		}
-		++mapItr;
 	}
 }
