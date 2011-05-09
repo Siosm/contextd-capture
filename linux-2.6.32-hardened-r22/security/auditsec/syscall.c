@@ -25,36 +25,74 @@
 #include "include/struct.h"
 
 /**
- * Try to tell the kernel if the daemon is launched or not
+ * Try to tell the kernel if the daemon is launched or not, or
+ * register the process_name program to be watched by contextd
  *
  * Returns the daemon status:
  *		1 for launched
  * 		0 for off
- * 		-EFAULT if nothing performed
+ * 		-EFAULT if nothing performed or if an error occurred
  **/
-asmlinkage long sys_auditsec_reg(int state)
+asmlinkage long sys_auditsec_reg(int state, char * process_name)
 {
-	if((state == 1) && (*contextd_pid() == -1)){
-		if(*daemon_launched()){
-			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
-		}else{
-			*daemon_launched() = true;
-			printk(KERN_INFO "AuditSec: The daemon is now considered launched");
-		}
-		*contextd_pid() = task_pid_nr(current);
-		return 1;
-
-	}else if((state == 0) && (*contextd_pid() == task_pid_nr(current))){
-		if(*daemon_launched()){
-			*daemon_launched() = false;
-			printk(KERN_INFO "AuditSec: The daemon is now considered stopped");
-		}else{
+	// Contextd isn't registered yet
+	if(*contextd_pid() == -1){
+		if(state == 1){
+			if(process_name == NULL){
+				*contextd_pid() = task_pid_nr(current);
+				*daemon_launched() = true;
+				printk(KERN_INFO "AuditSec: The daemon is now considered launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: The daemon is not launched: can't register a program !");
+				return 0;
+			}
+		}else if(state == 0){
 			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already stopped");
+			return 0;
+		}else{
+			printk(KERN_INFO "AuditSec: Invalid state provided !");
+			return 0;
 		}
-		*contextd_pid() = -1;
-		return 0;
-	}
 
+	// Contextd is already registered
+	}else if(*contextd_pid() == task_pid_nr(current)){
+		if(state == 1){
+			if(process_name == NULL){
+				printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
+				if(register_prog(process_name)){
+					printk(KERN_INFO "AuditSec: Program registered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Program NOT registered: %s", process_name);
+					return -1;
+				}
+			}
+		}else if(state == 0){
+			if(process_name == NULL){
+				*contextd_pid() = -1;
+				*daemon_launched() = false;
+				printk(KERN_INFO "AuditSec: The daemon is now considered stopped. Program list emptied");
+				return 0;
+			}else{
+				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
+				if(unregister_prog(process_name)){
+					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Error: Program: %s", process_name);
+					return -1;
+				}
+			}
+		}
+
+	// Contextd is registered but access is denied to other process
+	}else{
+		printk(KERN_INFO "AuditSec: You're not contextd");
+	}
 	printk(KERN_INFO "AuditSec: No action performed");
 	return -EFAULT;
 }

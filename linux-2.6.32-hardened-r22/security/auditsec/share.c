@@ -24,6 +24,24 @@ int prog_is_monitored()
 }
 
 
+int register_prog(char * prog_name)
+{
+	return -1;
+}
+
+
+int unregister_prog(char * prog_name)
+{
+	return -1;
+}
+
+
+int clean_registered_prog(char * prog_name)
+{
+	return -1;
+}
+
+
 struct auditsec_info * k_auditsec_info()
 {
 	static struct auditsec_info	k_auditsec_info;

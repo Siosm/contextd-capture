@@ -21,6 +21,9 @@
 struct auditsec_info * k_auditsec_info(void);
 
 int prog_is_monitored(void);
+int register_prog(char *);
+int unregister_prog(char *);
+int clean_registered_prog(char *);
 
 int * auditsec_answer(void);
 
