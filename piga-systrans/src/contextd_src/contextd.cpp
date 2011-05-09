@@ -51,8 +51,8 @@ static void child_handler(int signum)
 			auditsec_register(0);
 			exit(EXIT_FAILURE);
 			break;
-		case SIGKILL:
-			qDebug("Signal handler: KILL");
+		case SIGINT:
+			qDebug("Signal handler: INT");
 			auditsec_register(0);
 			exit(EXIT_FAILURE);
 			break;
