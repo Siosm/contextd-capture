@@ -123,7 +123,7 @@ static void daemonize( const char *daemon_name, bool foreground )
 		signal(SIGCHLD,child_handler);
 		signal(SIGUSR1,child_handler);
 		signal(SIGALRM,child_handler);
-		signal(SIGKILL,child_handler);
+		signal(SIGINT,child_handler);
 		signal(SIGTERM,child_handler);
 
 		//Fork off the parent process
@@ -167,7 +167,7 @@ static void daemonize( const char *daemon_name, bool foreground )
 	signal(SIGTTIN,SIG_IGN);
 	signal(SIGHUP, SIG_IGN); // Ignore hangup signal
 	signal(SIGTERM,child_handler); // Die on SIGTERM
-	signal(SIGKILL,child_handler);
+	signal(SIGINT,child_handler);
 
 
 	//Redirect standard files to /dev/null
