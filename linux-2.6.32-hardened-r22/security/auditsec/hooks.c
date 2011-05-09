@@ -255,8 +255,6 @@ int auditsec_file_permission(struct file *file, int mask)
 			k_auditsec_info()->auditsec_struct.file.mask = mask;
 			// TODO Add fields to this struct (se_context)
 
-			printk(KERN_INFO "AuditSec: file access: %s (%d)", fullpath, strlen(fullpath));
-
 			up(auditsec_question_lock());
 			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
