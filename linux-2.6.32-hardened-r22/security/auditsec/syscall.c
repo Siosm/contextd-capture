@@ -34,22 +34,24 @@
  **/
 asmlinkage long sys_auditsec_reg(int state)
 {
-	if(state == 1){
+	if((state == 1) && (*contextd_pid() == -1)){
 		if(*daemon_launched()){
 			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
 		}else{
 			*daemon_launched() = true;
 			printk(KERN_INFO "AuditSec: The daemon is now considered launched");
 		}
+		*contextd_pid() = task_pid_nr(current);
 		return 1;
 
-	}else if(state == 0){
+	}else if((state == 0) && (*contextd_pid() == task_pid_nr(current))){
 		if(*daemon_launched()){
 			*daemon_launched() = false;
 			printk(KERN_INFO "AuditSec: The daemon is now considered stopped");
 		}else{
 			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already stopped");
 		}
+		*contextd_pid() = -1;
 		return 0;
 	}
 
@@ -73,7 +75,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	// FIXME faire des tests sur le pointeur donné par le process en userspace
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
-			printk(KERN_INFO "AuditSec: pid: %d, execname: %s, file: %s (%d) COPIED",
+// 			printk(KERN_INFO "AuditSec: pid: %d, execname: %s, file: %s (%d) COPIED",
 				   user_as_i->pid, user_as_i->execname, user_as_i->auditsec_struct.file.fullpath, strlen(user_as_i->auditsec_struct.file.fullpath));
 			return 0;
 		}
@@ -95,7 +97,7 @@ asmlinkage long sys_auditsec_answer(int answer)
 	}
 
 	*auditsec_answer() = answer;
-	printk(KERN_INFO "AuditSec: answer = %d ; affectation = %d", answer, *auditsec_answer());
+// 	printk(KERN_INFO "AuditSec: answer = %d ; affectation = %d", answer, *auditsec_answer());
 	up(auditsec_answer_lock());
 
 	return 0;

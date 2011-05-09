@@ -35,7 +35,6 @@ struct auditsec_file {
 
 
 struct auditsec_socket {
-	//FIXME Fill this struct
 	enum		socket_type type;
 	union 
 	{

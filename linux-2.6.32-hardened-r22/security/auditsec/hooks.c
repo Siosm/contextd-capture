@@ -147,7 +147,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		}
 		dir_path(dentry, fullpath);
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d HOOK TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
 				kfree(fullpath);
@@ -163,7 +163,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d ANSWER TIMEOUT",
 						fullpath, current_pid, current->comm, mode);
 				kfree(fullpath);
@@ -175,9 +175,9 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 
 			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
-			*auditsec_answer() = 1;
 			up(auditsec_hook_lock());
-			return answer;
+
+			return answer == 0 ? 0 : -EFAULT;
 		}else{
 			printk(KERN_INFO "AuditSec: mkdir: %s, pid: %d, execname: %s, mode: %d REFUSED : daemon not launched",
 				   fullpath, current_pid, current->comm, mode);
@@ -240,7 +240,7 @@ int auditsec_file_permission(struct file *file, int mask)
 		}
 		file_path(file, fullpath);
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);
@@ -258,7 +258,7 @@ int auditsec_file_permission(struct file *file, int mask)
 			printk(KERN_INFO "AuditSec: file access: %s (%d)", fullpath, strlen(fullpath));
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 5s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
 					fullpath, current_pid, current->comm, mask);
 				kfree(fullpath);
@@ -271,9 +271,6 @@ int auditsec_file_permission(struct file *file, int mask)
 			kfree(fullpath);
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
-	
-			if (answer == 0) printk(KERN_INFO "Auditsec : operation authorized");
-			else printk(KERN_INFO "Auditsec : operation denied");
 
 			return answer == 0 ? 0 : -EFAULT;
 		}else{
@@ -370,7 +367,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 
 	if(prog_is_monitored()){
 		if(*daemon_launched()){
-			if(down_timeout(auditsec_hook_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket bind/connect: pid: %d, execname: %s, HOOK TIMEOUT",
 					current_pid, current->comm);
 				return -EFAULT;
@@ -400,7 +397,7 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
-			if(down_timeout(auditsec_answer_lock(), 10 * HZ) != 0){// 10s timeout. Is it too much ?
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
 				printk(KERN_INFO "AuditSec: socket bind/connect: pid: %d, execname: %s, ANSWER TIMEOUT",
 					current_pid, current->comm);
 
@@ -411,7 +408,8 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
-			return answer;
+
+			return answer == 0 ? 0 : -EFAULT;
 		}else{
 			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);

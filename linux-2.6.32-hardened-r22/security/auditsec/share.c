@@ -38,6 +38,13 @@ int * auditsec_answer()
 }
 
 
+pid_t * contextd_pid()
+{
+	static pid_t conextd_pid = -1;
+	return &contextd_pid();
+}
+
+
 struct semaphore * auditsec_hook_lock()
 {
 	static DECLARE_MUTEX(auditsec_hook_lock);
