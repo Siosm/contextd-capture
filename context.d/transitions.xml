@@ -343,6 +343,56 @@
 		</rule>
 
 
+		<!-- Loop -->
+		<loop app_name="soffice.bin" notify="false" prompt="false" display_name="Loop">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
+				</mrule>
+			</matching>
+			<domains>
+				<loop_domain name="default" />
+				<loop_domain name="mail" />
+				<loop_domain name="web" />
+				<loop_domain name="web-flash" />
+				<loop_domain name="ecommerce" />
+				<loop_domain name="impots" />
+			</domains>
+		</loop>
+
+		<!--Impots-->
+		<rule app_name="soffice.bin" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> 
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/impots/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="false" prompt="false"/>
+					<!--<transit from_domain="ecommerce" to_domain="impots" notify="false" prompt="true"/>-->
+					<transit from_domain="default" />
+				</allow>
+			</transitions>
+		</rule>
+
+		<!--Ecommerce-->
+		<rule app_name="soffice.bin" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/ecommerce/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="false" prompt="false"/>
+					<!--<transit from_domain="mail" to_domain="ecommerce" prompt="true" />-->
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+					<!--<transit from_domain="impots" to_domain="ecommerce" prompt="true" />-->
+				</allow>
+			</transitions>
+		</rule>
+	
 		<!-- progtest to be tested -->
 		<!-- Loop -->
 		<loop app_name="testprog" notify="false" prompt="false" display_name="Loop">
