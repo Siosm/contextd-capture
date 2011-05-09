@@ -65,6 +65,12 @@ struct auditsec_info * KernelContext::usai()
 }
 
 
+QMap< pid_t, ContextClient > * KernelContext::getClients()
+{
+	return &clients;
+}
+
+
 QString KernelContext::register_application(const QString& app_name, uint app_pid)
 {
 	QWriteLocker _lock(&lock);

@@ -4,6 +4,7 @@
 
 #include "dbus-context.h"
 #include "kernel-context.h"
+#include "clientscleaner.h"
 #include "misc.h"
 #include "config-daemon.h"
 
@@ -281,6 +282,7 @@ int main(int argc, char **argv)
 	//Start DBUS & Kernel LSM listening
 	DBusContext dbus;
 	KernelContext kernel;
+	ClientsCleaner cc(kernel.getClients());
 
 	//Log the startup
 	EventDispatcher::instance().sendNotification("Contextd started");
@@ -289,10 +291,22 @@ int main(int argc, char **argv)
 	DomainHolder::instance().setDefaultDomain(Configuration::instance().defaultDomain());
 	DomainHolder::resetToDefaultDomain();
 
+	//Sets other loops to wait for app.exec to start (Kernel & Cleaner)
+	QTimer * cleanerTimer = new QTimer();
+	cleanerTimer->setInterval(120000); // Check every 2 minutes = 120 000 milliseconds
+	QObject::connect(cleanerTimer, SIGNAL(timeout()), cleanerTimer, SLOT(start()));
+	QObject::connect(cleanerTimer, SIGNAL(timeout()), &cc, SLOT(start()));
+
+	QTimer::singleShot(0, cleanerTimer, SLOT(start()));
+	QTimer::singleShot(0, &kernel, SLOT(start()));
+
 	//Start the event loop
-	kernel.start();
 	app.exec();
+
+	//Stop Kernel & Cleaner loop
 	kernel.stop();
+	cleanerTimer->stop();
+	cc.terminate();
 
 	// Finish up
 	EventDispatcher::instance().sendNotification("Contextd terminated correctly\n\n");
