@@ -527,10 +527,11 @@ static __init int auditsec_init(void)
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
-/*
+
 	auditsec_procfile = create_proc_entry("contextd", 0400, NULL);
 
 	if (auditsec_procfile == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc file");
 		remove_proc_entry("contextd", NULL);
 		return -ENOMEM;
 	}
@@ -541,7 +542,7 @@ static __init int auditsec_init(void)
 	auditsec_procfile->gid          = 0;
 	auditsec_procfile->size         = 0;
 
-*/
+
 	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
 
 	return 0;
