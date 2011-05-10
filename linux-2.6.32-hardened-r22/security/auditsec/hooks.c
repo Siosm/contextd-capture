@@ -548,7 +548,7 @@ int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned l
 		clean_prog_list();
 	}
 
-	return 0;
+	return count;
 }
 
 #define PROC_AUDITSEC_DIR "contextd"
