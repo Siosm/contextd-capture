@@ -63,7 +63,7 @@ struct auditsec_dir {
 	int			mode;
 };
 
-struct auditsec_ msg {
+struct auditsec_msg {
 	struct msghdr msg;
 	int size;
 };
