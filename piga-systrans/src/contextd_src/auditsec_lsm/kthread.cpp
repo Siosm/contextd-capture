@@ -45,6 +45,7 @@ void KThread::run()
 				break;
 
 			case AUDITSEC_DIR:
+				qDebug() << "KThread : Directory: " << KC->usai()->auditsec_struct.file.fullpath;
 				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
 					NULL, NULL));
@@ -58,7 +59,7 @@ void KThread::run()
 				break;
 			
 			case AUDITSEC_SOCKET:
-				qDebug() << "Case socket";
+				qDebug() << "KThread socket";
 				address = inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
 				
 				addr_.sin_addr.s_addr = inet_addr(address.toStdString().c_str());

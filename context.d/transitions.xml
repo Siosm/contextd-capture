@@ -26,6 +26,7 @@
 		<nokill_program full_path="/usr/bin/context-notify" />
 		<nokill_program full_path="/usr/bin/lxlauncher" />
 		<nokill_program full_path="/usr/bin/openbox" />
+		<nokill_program full_path="/usr/lib/libreoffice/program/soffice.bin" />
 		<nokill_program full_path="/usr/libexec/menu-cached" />
 		<nokill_program full_path="/usr/libexec/menu-cache-gen" />
 		<nokill_program full_path="/usr/bin/firefox" />
@@ -347,7 +348,7 @@
 		<loop app_name="soffice.bin" notify="false" prompt="false" display_name="Loop">
 			<matching>
 				<mrule>
-					<fullpath>(/usr/lib/.*|/lib/.*|de)</fullpath>
+					<fullpath>(/var/.*|/etc/fonts/.*|proc/|proc/mem|/proc/.*|/etc/localtime|/tmp/.*|/usr/lib/.*|/lib/.*|de|s|/etc/hosts|/etc/host.conf|/etc/nsswitch.conf|/etc/resolv.conf|/home/user/.Xauthority|/usr/share/.*|sysfs/devices/syste|p|/home/user/.libreoffice|/home/user|/home/user/.fontconfig/.*|/home/user/.libreoffice/.*|/etc/cups/.*|/bin/bash|/etc/services)</fullpath>
 				</mrule>
 			</matching>
 			<domains>
@@ -364,7 +365,7 @@
 		<rule app_name="soffice.bin" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> 
 			<matching>
 				<mrule>
-					<fullpath>(/home/user/impots/.*)</fullpath>
+					<fullpath>(/home/user/impots|/home/user/impots/.*)</fullpath>
 				</mrule>
 			</matching>
 			<transitions>

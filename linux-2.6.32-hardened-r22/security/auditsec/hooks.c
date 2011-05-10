@@ -389,7 +389,6 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			} else {
 				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV6;
 				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr6, address, sizeof(struct sockaddr_in6));
-				//k_auditsec_info()->auditsec_struct.socket.addr.addr6 = (struct sockaddr_in6) *address;
 				if (addrlen < SIN6_LEN_RFC2133) {
 					return -EINVAL;
 				}
