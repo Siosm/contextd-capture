@@ -1,12 +1,36 @@
 \section{\'Etat de l'art}
 
+Ce projet de deuximème année s'inscrit dans le contexte de la sécurité d'un système basé sur le noyau Linux. Plus que simplement le noyau et les applications, ce sont l'ensemble des intéractions entre tous ces éléments qui doivent être contrôlées.
+
+Il existe différents mécanismes qui permettent d'apporter des couches de sécurité à un tel système. Nous détaillerons donc les principes fondateurs de la sécurité pour enchaîner sur les solutions disponibles.
+
+Nous allons réduire les concepts d'utilisateurs et d'applications aux ``simples'' processus qui sont la base de toute intéraction avec un système. De même, les fichiers, sockets, les IPC sont autant d'éléments sur lesquel un processus peut agir et nous les regrouperons sous le terme d'objet.
+
 \subsection{Le principe de séparation des privilèges}
+
+Le principe de séparation des privilèges ou principe de moindre privilège est à la base des mécanismes de sécurité sur un système. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'ai pas accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
+
+L'application la plus courante de ce principe est la séparation entre les différents comptes, utilisateurs ou non, sur un système. Une application lancée par un utilisateur ne bénéficie que des droits accordés à cet utilisateur.
+
+\subsection{Confidentialité, Intégrité, Disponibilité}
+
+Ces trois objectifs font parti intégrale des contraintes de sécurité sur un système. Nous devons donc nous assurer que notre solution puisse intégrer l'ensemble de ces contraintes.
 
 \subsection{Les différentes méthodes de contrôle d'accès}
 
+Nous allons détaillé dans cette partie plusieurs méthodes employées pour appliquer le principe de séparation des privilèges et atteindre les objectifs CID.
+
 \subsubsection{Contrôle d'accès discrétionnaire (DAC)}
 
+Le contrôle d'accès discrétionnaire ou DAC correspond à un modèle laissant à l'utilisateur, et donc aux programmes qu'il lance, tout contrôle sur les droits accordés aux objets qu'il possède. Un utilisateur peut ainsi compromettre un système en accordant des droits importants à d'autres utilisateurs sur les fichiers qu'il possède.
+
 \subsubsection{Contrôle d'accès mandataire (MAC)}
+
+Le contrôle d'accès mandataire restreint fortement les droits accordés aux processus. En effet, ceux-ci ce voient contraints de respecter des régles établies sur le système
+
+\paragraph{Bella La Paluda}
+
+\paragraph{Biba}
 
 \subsubsection{Contrôle d'accès basé sur des rôles (RBAC)}
 
@@ -14,10 +38,18 @@
 
 \subsubsection{SELinux}
 
+Une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles. Cette solution présente l'avantage d'être intégrée dans le noyau.
+
 \subsubsection{PIGA}
+
+Une surcouche à SELinux permettant de définir et imposer des politique de sécurité à l'echelle du système en plus des contrôles à niveau des intéractions effectués par SELinux.
 
 \subsubsection{iptables}
 
+Un logiciel permettant de contrôler lpus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine.
+
 \subsubsection{grsecurity \& PaX}
+
+Une autre implémentation des mécanismes de contrôle d'accès mandataire et basé sur les rôles.
 
 \subsubsection{contextd}

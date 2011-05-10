@@ -81,32 +81,38 @@ L'étape suivante consiste à envoyer les informations récupérées dans l'espa
 
 \newpage
 
-\subsection{Idées abandonnées}
+% \subsubsection{Idées abandonnées}
+% 
+% \subsubsection{Socket Unix}
+% 
+% Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
+% 
+% \subsubsection{Proc fs}
+% 
+% Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
 
-\subsubsection{Socket Unix}
+\subsection{La communication entre contextd et le noyau}
 
-Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
+\subsubsection{Les appels systèmes}
 
-\subsubsection{Proc fs}
+\subsection{Intéractions entre un processus, le noyau et contextd}
 
-Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
+\subsection{Ajouts à contextd}
 
-\subsection{Interface et appels système}
-
-Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
-
-\begin{figure}[hb]
-	\centering
-	\includegraphics{global.pdf}
-	\caption{Communication entre le noyau, le démon et contextd}
-\end{figure}
-%
-Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
-
-Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
-
-\begin{figure}[hb]
-	\centering
-	\includegraphics{syscall_sync.pdf}
-	\caption{Communication entre les hooks LSM et les appels système}
-\end{figure}
+% Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
+% 
+% \begin{figure}[hb]
+% 	\centering
+% 	\includegraphics{global.pdf}
+% 	\caption{Communication entre le noyau, le démon et contextd}
+% \end{figure}
+% %
+% Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
+% 
+% Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
+% 
+% \begin{figure}[hb]
+% 	\centering
+% 	\includegraphics{syscall_sync.pdf}
+% 	\caption{Communication entre les hooks LSM et les appels système}
+% \end{figure}
