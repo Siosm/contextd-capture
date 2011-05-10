@@ -63,7 +63,7 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 				return 1;
 			}else{
 				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
-				if(register_prog(process_name)){
+				if(register_prog(process_name) == 0){
 					printk(KERN_INFO "AuditSec: Program registered: %s", process_name);
 					return 1;
 				}else{
@@ -75,11 +75,12 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 			if(process_name == NULL){
 				*contextd_pid() = -1;
 				*daemon_launched() = false;
+				clean_prog_list();
 				printk(KERN_INFO "AuditSec: The daemon is now considered stopped. Program list emptied");
 				return 0;
 			}else{
 				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
-				if(unregister_prog(process_name)){
+				if(unregister_prog(process_name) == 0){
 					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
 					return 1;
 				}else{
@@ -100,8 +101,8 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 
 asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 {
-	if(*daemon_launched() == false){
-		printk(KERN_INFO "AuditSec: The daemon is not launched");
+	if((*daemon_launched() == false)||(*contextd_pid() != task_pid_nr(current))){
+		printk(KERN_INFO "AuditSec: The daemon is not launched, or you're not the daemon");
 		return -EFAULT;
 	}
 
@@ -129,8 +130,8 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 
 asmlinkage long sys_auditsec_answer(int answer)
 {
-	if(*daemon_launched() == false){
-		printk(KERN_INFO "AuditSec: The daemon is not launched");
+	if((*daemon_launched() == false)||(*contextd_pid() != task_pid_nr(current))){
+		printk(KERN_INFO "AuditSec: The daemon is not launched, or you're not the daemon");
 		return -EFAULT;
 	}
 

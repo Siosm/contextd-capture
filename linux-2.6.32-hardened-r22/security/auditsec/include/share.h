@@ -11,11 +11,17 @@
 #include <linux/semaphore.h>
 #include <linux/limits.h>
 #include <linux/sched.h>
+#include <linux/list.h>
 
 #include "struct.h"
 
 
-#define MONITORED_PROG_SIZE 3
+struct prog {
+	char execname[TASK_COMM_LEN];
+	struct list_head list;
+};
+
+// #define MONITORED_PROG_SIZE 3
 
 
 struct auditsec_info * k_auditsec_info(void);
@@ -23,7 +29,7 @@ struct auditsec_info * k_auditsec_info(void);
 int prog_is_monitored(void);
 int register_prog(char *);
 int unregister_prog(char *);
-int clean_registered_prog(char *);
+int clean_prog_list(void);
 
 int * auditsec_answer(void);
 

@@ -143,7 +143,7 @@ int auditsec_inode_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 		if(fullpath == NULL){
 			printk(KERN_INFO "AuditSec: mkdir: pid: %d, execname: %s, mode: %d NO MEM",
 				   current_pid, current->comm, mode);
-			return -EFAULT;
+			return -ENOMEM;
 		}
 		dir_path(dentry, fullpath);
 		if(*daemon_launched()){
@@ -236,7 +236,7 @@ int auditsec_file_permission(struct file *file, int mask)
 		if(fullpath == NULL){
 			printk(KERN_INFO "AuditSec: file access: pid: %d, execname: %s, mask: %d NO MEM",
 					current_pid, current->comm, mask);
-			return -EFAULT;
+			return -ENOMEM;
 		}
 		file_path(file, fullpath);
 		if(*daemon_launched()){

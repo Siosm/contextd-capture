@@ -2,43 +2,96 @@
 #include <linux/semaphore.h>
 #include <linux/limits.h>
 #include <linux/sched.h>
-
+#include <linux/string.h>
+#include <linux/slab.h>
 
 #include "include/share.h"
 #include "include/struct.h"
 
 
+static LIST_HEAD(prog_list);
+
+
 int prog_is_monitored()
 {
-	int res = 1, i = 0;
-	static char monitored_prog[MONITORED_PROG_SIZE][TASK_COMM_LEN]={"firefox","testprog","soffice.bin"};
+	char current_task_comm[TASK_COMM_LEN];
+	struct prog * p;
 
-	task_lock(current);
-	for(i=0; i<MONITORED_PROG_SIZE && res; ++i){
-		if(strncmp(monitored_prog[i], current->comm, TASK_COMM_LEN) == 0)
-			res = 0;
+	get_task_comm(current_task_comm, current);
+	printk(KERN_INFO "AuditSec: Checking if %s is monitored", current_task_comm);
+	list_for_each_entry(p, &prog_list, list){
+		if(strncmp(p->execname, current_task_comm, TASK_COMM_LEN) == 0){
+			return 1;
+		}
 	}
-	task_unlock(current);
-
-	return res == 0;
+	return 0;
 }
 
 
 int register_prog(char * prog_name)
 {
-	return -1;
+	struct prog * p;
+
+	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
+			return -1;
+		}
+	}
+
+	p = kmalloc(sizeof(*p), GFP_NOFS);
+	if(p == NULL){
+		return -ENOMEM;
+	}
+	strncpy(p->execname, prog_name, TASK_COMM_LEN);
+	INIT_LIST_HEAD(&p->list);
+
+	list_add(&p->list, &prog_list);
+	printk(KERN_INFO "AuditSec: Prog %s registered", prog_name);
+	return 0;
 }
 
 
 int unregister_prog(char * prog_name)
 {
+	struct prog * p;
+
+	if(list_empty(&prog_list) != 0){
+		printk(KERN_INFO "AuditSec: Prog list empty !");
+		return -1;
+	}
+
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			list_del(&p->list);
+			kfree(p);
+			printk(KERN_INFO "AuditSec: Unregistering prog %s", prog_name);
+			return 0;
+		}
+	}
+
 	return -1;
 }
 
 
-int clean_registered_prog(char * prog_name)
+int clean_prog_list()
 {
-	return -1;
+	struct prog * p, * next_p;
+
+	printk(KERN_INFO "AuditSec: Cleanning prog list");
+
+	list_for_each_entry_safe(p, next_p, &prog_list, list) {
+		list_del(&p->list);
+		kfree(p);
+	}
+
+	if(list_empty(&prog_list) == 0){
+		printk(KERN_INFO "AuditSec: Prog list NOT empty !");
+		return -1;
+	}
+
+	return 0;
 }
 
 
