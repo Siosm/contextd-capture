@@ -107,7 +107,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 	}
 
 	if(*contextd_pid() != task_pid_nr(current)){
-		printk(KERN_INFO "AuditSec: You're not the daemon");
+		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
 		return -EFAULT;
 	}
 
@@ -135,8 +135,13 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 
 asmlinkage long sys_auditsec_answer(int answer)
 {
-	if((*daemon_launched() == false)||(*contextd_pid() != task_pid_nr(current))){
-		printk(KERN_INFO "AuditSec: The daemon is not launched, or you're not the daemon");
+	if(*daemon_launched() == false){
+		printk(KERN_INFO "AuditSec: The daemon is not launched");
+		return -EFAULT;
+	}
+
+	if(*contextd_pid() != task_pid_nr(current)){
+		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
 		return -EFAULT;
 	}
 
