@@ -59,6 +59,8 @@
 #include "include/share.h"
 
 
+#include <linux/module.h>
+
 int auditsec_info_len = sizeof(struct auditsec_info);
 
 int calculate_path(struct dentry *dentry, char *path, size_t len)
@@ -381,17 +383,20 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			if (sk->sk_family == PF_INET) {
 				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV4;
 				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr4, address, sizeof(struct sockaddr_in));
-				if (addrlen < sizeof(struct sockaddr_in)) {
+/*				if (addrlen < sizeof(struct sockaddr_in)) {
+					printk(KERN_INFO "Auditsec: addrlen size error for IPV4 struct");
+					up(auditsec_hook_lock());
 					return -EINVAL;
 				}
-			} else {
+*/			} else {
 				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV6;
 				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr6, address, sizeof(struct sockaddr_in6));
-				//k_auditsec_info()->auditsec_struct.socket.addr.addr6 = (struct sockaddr_in6) *address;
-				if (addrlen < SIN6_LEN_RFC2133) {
+/*				if (addrlen < SIN6_LEN_RFC2133) {
+					printk(KERN_INFO "Auditsec: addrlen size error for IPV6 struct");
+					up(auditsec_hook_lock());
 					return -EINVAL;
 				}
-			}
+*/			}
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
@@ -407,7 +412,10 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			return answer == 0 ? 0 : -EACCES;
+			if (answer == 0) printk(KERN_INFO "Auditsec: operation accepted");
+			else printk(KERN_INFO "Auditsec: operation denied");
+
+			return answer == 0 ? 0 : -EFAULT;
 		}else{
 			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);
@@ -487,8 +495,28 @@ static struct security_operations audit_ops = {
 #endif
 };
 
+int auditsec_procfile_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		result = sprintf(buffer, "HelloWorld!\n");
+	}
+
+	return result;
+}
+					
+
+
+
 static __init int auditsec_init(void)
 {
+	struct proc_dir_entry * auditsec_procfile;
+
 	if (!security_module_enable(&audit_ops)) {
 		printk(KERN_INFO "AuditSec: Abort initialization.\n");
 		return 0;
@@ -505,6 +533,21 @@ static __init int auditsec_init(void)
 
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
+
+	auditsec_procfile = create_proc_entry("contextd", 0400, NULL);
+
+	if (auditsec_procfile == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc file");
+		remove_proc_entry("contextd", NULL);
+		return -ENOMEM;
+	}
+
+	auditsec_procfile->read_proc    = auditsec_procfile_read;
+	auditsec_procfile->mode         = S_IFREG | S_IRUGO;
+	auditsec_procfile->uid          = 0;
+	auditsec_procfile->gid          = 0;
+	auditsec_procfile->size         = 0;
+
 
 	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
 
