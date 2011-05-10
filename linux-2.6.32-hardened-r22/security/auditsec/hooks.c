@@ -495,7 +495,24 @@ static struct security_operations audit_ops = {
 #endif
 };
 
-int auditsec_procfile_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+int auditsec_proc_programs_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result;
+	char * tmp = NULL;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		tmp = *prog_list();
+		result = sprintf(buffer, "%s\n", tmp);
+	}
+
+	return result;
+}
+	
+int auditsec_proc_status_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
 {
 	int result;
 	
@@ -504,18 +521,53 @@ int auditsec_procfile_read(char *buffer, char **buffer_location,  off_t offset, 
 		result  = 0;
 	} else {
 		/* fill the buffer, return the buffer size */
-		result = sprintf(buffer, "HelloWorld!\n");
+		result = sprintf(buffer, "%d\n", *contextd_pid());
 	}
 
 	return result;
 }
-					
 
+int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned long count, void *data)
+{
+	int len, int lecture; 
+	struct fb_data_t *fb_data
+	
+	MOD_INC_USE_COUNT;
+	
+	if(count > FOOBAR_LEN) {
+		len = FOOBAR_LEN;
+	} else {
+		len = count;
+	}
+
+	if(copy_from_user(fb_data->value, buffer, len)) { 
+		MOD_DEC_USE_COUNT;
+		return -EFAULT;
+	} 
+	
+	fb_data->value[len] = '\0';
+
+	lecture = atoi(fb_data->value);
+
+	if (lecture == 0) {
+		*daemon_launched() = false;
+		*contextd_pid() = -1;
+		clean_prog_list();
+	}
+
+	MOD_DEC_USE_COUNT;
+
+	return len;
+}
+
+#define PROC_AUDITSEC_DIR "contextd"
+#define PROC_AUDITSEC_PROGRAM "programs"
+#define PROC_AUDITSEC_STATUS "status"
 
 
 static __init int auditsec_init(void)
 {
-	struct proc_dir_entry * auditsec_procfile;
+	struct proc_dir_entry * auditsec_proc_programs, *auditsec_proc_status, *auditsec_dir;
 
 	if (!security_module_enable(&audit_ops)) {
 		printk(KERN_INFO "AuditSec: Abort initialization.\n");
@@ -534,20 +586,45 @@ static __init int auditsec_init(void)
 	down(auditsec_question_lock());
 	down(auditsec_answer_lock());
 
-	auditsec_procfile = create_proc_entry("contextd", 0400, NULL);
+	// Create dir in /proc
+	auditsec_dir = proc_mkdir(PROC_AUDITSEC_DIR, NULL);
 
-	if (auditsec_procfile == NULL) {
-		printk(KERN_INFO "AuditSec: failed to creat /proc file");
-		remove_proc_entry("contextd", NULL);
+	if (auditsec_dir == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/ directory", PROC_AUDITSEC_DIR);
 		return -ENOMEM;
 	}
 
-	auditsec_procfile->read_proc    = auditsec_procfile_read;
-	auditsec_procfile->mode         = S_IFREG | S_IRUGO;
-	auditsec_procfile->uid          = 0;
-	auditsec_procfile->gid          = 0;
-	auditsec_procfile->size         = 0;
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which lists registered programs
+	auditsec_proc_programs = create_proc_entry(PROC_AUDITSEC_PROGRAM, 0400, &auditsec_dir);
 
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_PROGRAM);
+		remove_proc_entry(PROC_AUDITSEC_PROGRAM, &auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_programs->read_proc    = auditsec_proc_programs_read;
+	auditsec_proc_programs->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_programs->uid          = 0;
+	auditsec_proc_programs->gid          = 0;
+	auditsec_proc_programs->size         = 0;
+
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which gives the current status and
+	// the opportunity to change it
+	auditsec_proc_status = create_proc_entry(PROC_AUDITSEC_STATUS, 0600, &auditsec_dir);
+
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_STATUS);
+		remove_proc_entry(PROC_AUDITSEC_STATUS, &auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_status->read_proc    = auditsec_proc_status_read;
+	auditsec_proc_status->write_proc   = auditsec_proc_status_write;
+	auditsec_proc_status->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_status->uid          = 0;
+	auditsec_proc_status->gid          = 0;
+	auditsec_proc_status->size         = 0;
 
 	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
 
