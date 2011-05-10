@@ -18,10 +18,20 @@
 KernelContext::KernelContext()
 {
 	qDebug("Trying to register with the kernel");
-	if(auditsec_register(1) != 1){
+	if(auditsec_register(1, NULL) != 1){
 		qFatal("FAILED to register with the kernel.");
 	}
 	qDebug("The daemon is registered with the kernel.");
+	
+	if(auditsec_register(1, "firefox") != 1){
+		qDebug() << "Can't register prog : firefox";
+	}
+	if(auditsec_register(1, "soffice.bin") != 1){
+		qDebug() << "Can't register prog : soffice.bin";
+	}
+	if(auditsec_register(1, "testprog") != 1){
+		qDebug() << "Can't register prog : testprog";
+	}
 
 	kernelT = new KThread(this);
 }
@@ -36,7 +46,7 @@ void KernelContext::start()
 KernelContext::~KernelContext()
 {
 	qDebug("Stopping daemon and telling the kenel.");
-	if(auditsec_register(0) != 0){
+	if(auditsec_register(0, NULL) != 0){
 		qCritical("The kernel state may NOT be ok. You should reboot.");
 	}else{
 		qDebug("The kernel is ok.");
@@ -51,7 +61,7 @@ void KernelContext::stop()
 	kernelT->wait();
 
 	qDebug("Stopping daemon and telling the kenel.");
-	if(auditsec_register(0) != 0){
+	if(auditsec_register(0, NULL) != 0){
 		qCritical("The kernel state may NOT be ok. You should reboot.");
 	}else{
 		qDebug("The kernel is ok.");

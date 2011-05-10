@@ -18,9 +18,9 @@ int prog_is_monitored()
 	struct prog * p;
 
 	get_task_comm(current_task_comm, current);
-	printk(KERN_INFO "AuditSec: Checking if %s is monitored", current_task_comm);
 	list_for_each_entry(p, &prog_list, list){
 		if(strncmp(p->execname, current_task_comm, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s is monitored", current_task_comm);
 			return 1;
 		}
 	}

@@ -3,9 +3,9 @@
 #include <stdio.h>
 
 
-long int auditsec_register(int state)
+long int auditsec_register(int state, char * prog)
 {
-	return syscall(__NR_sys_auditsec_reg, state);
+	return syscall(__NR_sys_auditsec_reg, state, prog);
 }
 
 

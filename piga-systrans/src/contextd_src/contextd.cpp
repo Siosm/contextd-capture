@@ -38,29 +38,29 @@ static void child_handler(int signum)
 	{
 		case SIGALRM:
 			qDebug("Signal handler: ALARM");
-			auditsec_register(0);
+			auditsec_register(0, NULL);
 			exit(EXIT_FAILURE);
 			break;
 		case SIGUSR1:
 			qDebug("Signal handler: USR1");
-			auditsec_register(0);
+			auditsec_register(0, NULL);
 			exit(EXIT_SUCCESS);
 			break;
 		case SIGCHLD:
 			qDebug("Signal handler: CHLD");
-			auditsec_register(0);
+			auditsec_register(0, NULL);
 			exit(EXIT_FAILURE);
 			break;
 		case SIGINT:
 			qDebug("Signal handler: INT");
-			auditsec_register(0);
+			auditsec_register(0, NULL);
 			exit(EXIT_FAILURE);
 			break;
 		case SIGTERM:
 			qDebug("Signal handler: TERM");
 			EventDispatcher::instance().sendNotification("Stopping the daemon");
 
-			auditsec_register(0);
+			auditsec_register(0, NULL);
 			remove(qPrintable(pid_path));
 
 			exit(EXIT_SUCCESS);
