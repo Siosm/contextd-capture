@@ -101,8 +101,13 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 
 asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 {
-	if((*daemon_launched() == false)||(*contextd_pid() != task_pid_nr(current))){
-		printk(KERN_INFO "AuditSec: The daemon is not launched, or you're not the daemon");
+	if(*daemon_launched() == false){
+		printk(KERN_INFO "AuditSec: The daemon is not launched");
+		return -EFAULT;
+	}
+
+	if(*contextd_pid() != task_pid_nr(current)){
+		printk(KERN_INFO "AuditSec: You're not the daemon");
 		return -EFAULT;
 	}
 
