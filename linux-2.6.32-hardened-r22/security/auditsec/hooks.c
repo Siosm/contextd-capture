@@ -458,7 +458,7 @@ int auditsec_socket_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 			k_auditsec_info()->pid = current_pid;
 			k_auditsec_info()->type = AUDITSEC_MSG;
 			
-			memcpy(&k_auditsec_info()->auditsec_struct.msg.msg, *msg, sizeof(struct msghdr));
+			memcpy(&k_auditsec_info()->auditsec_struct.msg.msg, msg, sizeof(struct msghdr));
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
