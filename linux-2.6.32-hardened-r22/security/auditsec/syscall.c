@@ -39,7 +39,7 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 	if(*contextd_pid() == -1){
 		if(state == 1){
 			if(process_name == NULL){
-				*contextd_pid() = task_pid_nr(current);
+				*contextd_pid() = task_tgid_nr(current);
 				*daemon_launched() = true;
 				printk(KERN_INFO "AuditSec: The daemon is now considered launched");
 				return 1;
@@ -56,7 +56,7 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 		}
 
 	// Contextd is already registered
-	}else if(*contextd_pid() == task_pid_nr(current)){
+	}else if(*contextd_pid() == task_tgid_nr(current)){
 		if(state == 1){
 			if(process_name == NULL){
 				printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
@@ -106,7 +106,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 		return -EFAULT;
 	}
 
-	if(*contextd_pid() != task_pid_nr(current)){
+	if(*contextd_pid() != task_tgid_nr(current)){
 		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
 		return -EFAULT;
 	}
@@ -140,7 +140,7 @@ asmlinkage long sys_auditsec_answer(int answer)
 		return -EFAULT;
 	}
 
-	if(*contextd_pid() != task_pid_nr(current)){
+	if(*contextd_pid() != task_tgid_nr(current)){
 		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
 		return -EFAULT;
 	}
