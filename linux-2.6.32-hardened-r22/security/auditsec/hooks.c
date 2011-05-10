@@ -383,16 +383,20 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			if (sk->sk_family == PF_INET) {
 				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV4;
 				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr4, address, sizeof(struct sockaddr_in));
-				if (addrlen < sizeof(struct sockaddr_in)) {
+/*				if (addrlen < sizeof(struct sockaddr_in)) {
+					printk(KERN_INFO "Auditsec: addrlen size error for IPV4 struct");
+					up(auditsec_hook_lock());
 					return -EINVAL;
 				}
-			} else {
+*/			} else {
 				k_auditsec_info()->auditsec_struct.socket.type = AUDITSEC_IPV6;
 				memcpy(&k_auditsec_info()->auditsec_struct.socket.addr.addr6, address, sizeof(struct sockaddr_in6));
-				if (addrlen < SIN6_LEN_RFC2133) {
+/*				if (addrlen < SIN6_LEN_RFC2133) {
+					printk(KERN_INFO "Auditsec: addrlen size error for IPV6 struct");
+					up(auditsec_hook_lock());
 					return -EINVAL;
 				}
-			}
+*/			}
 			// TODO Add fields to this struct (se_context)
 
 			up(auditsec_question_lock());
@@ -408,7 +412,10 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			return answer == 0 ? 0 : -EACCES;
+			if (answer == 0) printk(KERN_INFO "Auditsec: operation accepted");
+			else printk(KERN_INFO "Auditsec: operation denied");
+
+			return answer == 0 ? 0 : -EFAULT;
 		}else{
 			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);
