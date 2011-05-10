@@ -12,29 +12,41 @@
 static LIST_HEAD(prog_list);
 
 
-struct list_head prog_list()
-{
-	return prog_list;
-}
-
-
-// char * prog_list()
+// struct list_head *prog_list()
 // {
-// 	char * result = kmalloc(sizeof(char) * (TASK_COMM_LEN + 1) * 10, GFP_NOFS);
-// 	char * tmp = result;
-// 	int i = 0;
-// 	struct prog * p;
-// 
-// 	list_for_each_entry(p, &prog_list, list) {
-// 		if(i < 10)
-// 		strcpy(tmp, p->execname, TASK_COMM_LEN);
-// 		printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
-// 			return -1;
-// 		}
-// 	}
-// 	
-// 	return result;
+// 	return &prog_list;
 // }
+
+
+char * prog_liste()
+{
+	char * result = NULL;
+	char * tmp = NULL;
+	int alloc = 20 * (TASK_COMM_LEN + 1);
+	int res_len = 0;
+	struct prog * p;
+	
+	result = kmalloc(sizeof(char) * alloc, GFP_NOFS);
+	if(result == NULL){
+		printk(KERN_INFO "AuditSec: Can't allocate mem for /proc/contextd/programs");
+		return NULL;
+	}
+
+	list_for_each_entry(p, &prog_list, list){
+		if((res_len + TASK_COMM_LEN + 1) < alloc){
+			res_len += sprintf(result + res_len, "%s\n", p->execname);
+		}else{
+			alloc += 20 * (TASK_COMM_LEN + 1);
+			tmp = kmalloc(sizeof(char) * alloc, GFP_NOFS);
+			strncpy(tmp, result, alloc);
+			kfree(result);
+			result = tmp;
+			res_len += sprintf(result + res_len, "%s\n", p->execname);
+		}
+	}
+
+	return result;
+}
 
 
 int prog_is_monitored()

@@ -26,8 +26,8 @@ struct prog {
 
 struct auditsec_info * k_auditsec_info(void);
 
-struct list_head prog_list(void);
-// char * prog_list();
+char * prog_liste(void);
+// struct list_head * prog_list(void);
 
 int prog_is_monitored(void);
 int register_prog(char *);

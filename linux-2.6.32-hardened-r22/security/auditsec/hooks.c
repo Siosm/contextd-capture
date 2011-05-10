@@ -497,7 +497,7 @@ static struct security_operations audit_ops = {
 
 int auditsec_proc_programs_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
 {
-	int result;
+	int result = 0;
 	char * tmp = NULL;
 	
 	if (offset > 0) {
@@ -505,8 +505,9 @@ int auditsec_proc_programs_read(char *buffer, char **buffer_location,  off_t off
 		result  = 0;
 	} else {
 		/* fill the buffer, return the buffer size */
-		tmp = *prog_list();
-		result = sprintf(buffer, "%s\n", tmp);
+		tmp = prog_liste();
+		result = sprintf(buffer, "%s", tmp);
+		kfree(tmp);
 	}
 
 	return result;
@@ -529,35 +530,25 @@ int auditsec_proc_status_read(char *buffer, char **buffer_location,  off_t offse
 
 int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned long count, void *data)
 {
-	int len, int lecture; 
-	struct fb_data_t *fb_data
-	
-	MOD_INC_USE_COUNT;
-	
-	if(count > FOOBAR_LEN) {
-		len = FOOBAR_LEN;
-	} else {
-		len = count;
+	long lecture;
+	char tmp[count + 1];
+	char ** tmp2 = NULL;
+
+	if(copy_from_user(tmp, buffer, count)){ 
+		return -EFAULT;
 	}
 
-	if(copy_from_user(fb_data->value, buffer, len)) { 
-		MOD_DEC_USE_COUNT;
-		return -EFAULT;
-	} 
-	
-	fb_data->value[len] = '\0';
+	tmp[count] = '\0';
 
-	lecture = atoi(fb_data->value);
+	lecture = simple_strtol(tmp, tmp2, 10);
 
-	if (lecture == 0) {
+	if (lecture == 0){
 		*daemon_launched() = false;
 		*contextd_pid() = -1;
 		clean_prog_list();
 	}
 
-	MOD_DEC_USE_COUNT;
-
-	return len;
+	return 0;
 }
 
 #define PROC_AUDITSEC_DIR "contextd"
@@ -595,11 +586,11 @@ static __init int auditsec_init(void)
 	}
 
 	// Create file in /proc/PROC_AUDITSEC_DIR/ which lists registered programs
-	auditsec_proc_programs = create_proc_entry(PROC_AUDITSEC_PROGRAM, 0400, &auditsec_dir);
+	auditsec_proc_programs = create_proc_entry(PROC_AUDITSEC_PROGRAM, 0400, auditsec_dir);
 
 	if (auditsec_proc_programs == NULL) {
 		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_PROGRAM);
-		remove_proc_entry(PROC_AUDITSEC_PROGRAM, &auditsec_dir);
+		remove_proc_entry(PROC_AUDITSEC_PROGRAM, auditsec_dir);
 		return -ENOMEM;
 	}
 
@@ -611,11 +602,11 @@ static __init int auditsec_init(void)
 
 	// Create file in /proc/PROC_AUDITSEC_DIR/ which gives the current status and
 	// the opportunity to change it
-	auditsec_proc_status = create_proc_entry(PROC_AUDITSEC_STATUS, 0600, &auditsec_dir);
+	auditsec_proc_status = create_proc_entry(PROC_AUDITSEC_STATUS, 0600, auditsec_dir);
 
 	if (auditsec_proc_programs == NULL) {
 		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_STATUS);
-		remove_proc_entry(PROC_AUDITSEC_STATUS, &auditsec_dir);
+		remove_proc_entry(PROC_AUDITSEC_STATUS, auditsec_dir);
 		return -ENOMEM;
 	}
 
