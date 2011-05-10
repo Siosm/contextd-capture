@@ -1,0 +1,28 @@
+\section*{Introduction} \addcontentsline{toc}{section}{Introduction}
+Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année.
+%TODO
+
+~
+
+Le but de ce projet est de généraliser et simplifier la communication entre les applications et le démon contextd. Contextd permet d'appliquer le principe de séparation des privilèges de façon dynamique. Il commande et coordonne différents systèmes de sécurité (SELinux, iptables,...) pour autoriser une applications à effectuer certaines actions. Pour fonctionner, contextd doit avoir connaissance, entre autres, des accès aux fichiers et des noms de domaine des sites visités par une application.
+
+~
+
+Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les différentes opérations qu'elles effectuaient (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un domaine. Il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd.
+
+~
+
+L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Une modification non négligeable des sources d'information de contextd est aussi nécessaire.
+%TODO
+
+~
+
+% \section*{Objectifs} \addcontentsline{toc}{section}{Objectifs}
+%
+% Pour pouvoir se séparer des plugins/modifications par applications, il est nécessaire de communiquer à contextd certaines informations sur le comportement des programmes. Il faut notamment obtenir :
+% \begin{itemize}
+% 	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes SELinux associés, si le module SELinux est activé.
+% 	\item la liste des connexions ouvertes par le systeme, et plus particulièrement les adresses IP de destination, et donc finalement le nom de domaine de destination.\\
+% \end{itemize}
+%
+% De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre son exécution.
