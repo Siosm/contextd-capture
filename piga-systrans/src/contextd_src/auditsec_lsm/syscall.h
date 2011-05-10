@@ -12,9 +12,9 @@ extern "C" {
 #include "auditsec_info.h"
 
 
-long auditsec_register(int __user, char __user *);
-long auditsec_question(struct auditsec_info __user *);
-long auditsec_answer(int __user);
+long auditsec_register(int, char *);
+long auditsec_question(struct auditsec_info *);
+long auditsec_answer(int);
 
 #ifdef __cplusplus
 }

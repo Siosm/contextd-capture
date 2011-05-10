@@ -33,7 +33,7 @@
  * 		0 for off
  * 		-EFAULT if nothing performed or if an error occurred
  **/
-asmlinkage long sys_auditsec_reg(int state, char * process_name)
+asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 {
 	// Contextd isn't registered yet
 	if(*contextd_pid() == -1){
@@ -99,7 +99,7 @@ asmlinkage long sys_auditsec_reg(int state, char * process_name)
 }
 
 
-asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
+asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
 {
 	if(*daemon_launched() == false){
 		printk(KERN_INFO "AuditSec: The daemon is not launched");
@@ -133,7 +133,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i)
 }
 
 
-asmlinkage long sys_auditsec_answer(int answer)
+asmlinkage long sys_auditsec_answer(int __user answer)
 {
 	if(*daemon_launched() == false){
 		printk(KERN_INFO "AuditSec: The daemon is not launched");
