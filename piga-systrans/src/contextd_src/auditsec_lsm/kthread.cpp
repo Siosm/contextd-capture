@@ -20,16 +20,18 @@ void KThread::run()
 	struct sockaddr_in addr_;
 	struct hostent * hote = NULL;
 
+	qDebug("KThread: Starting kernel loop");
+
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
 		qDebug() << "";
-		qDebug() << "KernelContext: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
+		qDebug() << "KThread: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
 		if(KC->is_registered() == KERNEL_ERROR){
 			KC->register_application(KC->usai()->execname);
 		}
 
 		switch (KC->usai()->type){
 			case AUDITSEC_FILE:
-				qDebug() << "KThread : File: " << KC->usai()->auditsec_struct.file.fullpath;
+				qDebug() << "KThread: File: " << KC->usai()->auditsec_struct.file.fullpath;
 				KC->domain_changed(xmlContext(
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
 					//"filename", KC->usai()->auditsec_struct.file.name,
