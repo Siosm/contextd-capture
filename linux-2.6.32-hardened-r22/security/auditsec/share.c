@@ -12,6 +12,31 @@
 static LIST_HEAD(prog_list);
 
 
+struct list_head prog_list()
+{
+	return prog_list;
+}
+
+
+// char * prog_list()
+// {
+// 	char * result = kmalloc(sizeof(char) * (TASK_COMM_LEN + 1) * 10, GFP_NOFS);
+// 	char * tmp = result;
+// 	int i = 0;
+// 	struct prog * p;
+// 
+// 	list_for_each_entry(p, &prog_list, list) {
+// 		if(i < 10)
+// 		strcpy(tmp, p->execname, TASK_COMM_LEN);
+// 		printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
+// 			return -1;
+// 		}
+// 	}
+// 	
+// 	return result;
+// }
+
+
 int prog_is_monitored()
 {
 	char current_task_comm[TASK_COMM_LEN];

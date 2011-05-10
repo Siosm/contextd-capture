@@ -887,7 +887,7 @@ asmlinkage long sys_perf_event_open(
 asmlinkage long sys_mmap_pgoff(unsigned long addr, unsigned long len,
 			unsigned long prot, unsigned long flags,
 			unsigned long fd, unsigned long pgoff);
-asmlinkage long sys_auditsec_reg(int state, char * process_name);
-asmlinkage long sys_auditsec_question(struct auditsec_info * user_as_i);
-asmlinkage long sys_auditsec_answer(int answer);
+asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name);
+asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i);
+asmlinkage long sys_auditsec_answer(int __user answer);
 #endif
