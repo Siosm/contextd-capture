@@ -16,6 +16,15 @@ L'application la plus courante de ce principe est la séparation entre les diff�
 
 Ces trois objectifs font parti intégrale des contraintes de sécurité sur un système. Nous devons donc nous assurer que notre solution puisse intégrer l'ensemble de ces contraintes.
 
+\textbf{Confidentialité :}
+Les informations ne doivent être accessibles qu'aux utilisateurs qui ont besoin ou qui disposent des privilèges correspondant.
+
+\textbf{Intégrité :}
+Il ne doit pas être possible de modifier certaines informations comme les mots de passe, les binaires installés, les fichiers de configuration...
+
+\textbf{Disponibilité :}
+Le système doit être réactif, stable et utilisable. Les programes doivent pouvoir fonctionner correctement.
+
 \subsection{Les différentes méthodes de contrôle d'accès}
 
 Nous allons détaillé dans cette partie plusieurs méthodes employées pour appliquer le principe de séparation des privilèges et atteindre les objectifs CID.
@@ -28,9 +37,9 @@ Le contrôle d'accès discrétionnaire ou DAC correspond à un modèle laissant 
 
 Le contrôle d'accès mandataire restreint fortement les droits accordés aux processus. En effet, ceux-ci ce voient contraints de respecter des régles établies sur le système
 
-\paragraph{Bella La Paluda}
+\textbf{Bella La Paluda :}
 
-\paragraph{Biba}
+\textbf{Biba :}
 
 \subsubsection{Contrôle d'accès basé sur des rôles (RBAC)}
 
@@ -38,7 +47,15 @@ Le contrôle d'accès mandataire restreint fortement les droits accordés aux pr
 
 \subsubsection{SELinux}
 
-Une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles. Cette solution présente l'avantage d'être intégrée dans le noyau.
+Une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles.
+
+\begin{list}{}{}
+ \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques.
+
+ \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau.
+\end{list}
+
+
 
 \subsubsection{PIGA}
 
@@ -53,3 +70,18 @@ Un logiciel permettant de contrôler lpus facilement netfilter, le parre-feu int
 Une autre implémentation des mécanismes de contrôle d'accès mandataire et basé sur les rôles.
 
 \subsubsection{contextd}
+
+Pax = sécurité automatique
+SELinux, GrSec = MAC qui contrôle les accès directs
+PIGA = contrôle les accès indirects
+iptables contrôle le trafic réseau
+
+contextd = chef d'orchestre + changement dynamique des règles des autres  mécanismes de protection pour adapter les permissions au domaine d'utilisation.
+
+Chercher tous les systèmes de MAC/DAC/RBAC,...
+
+tu peux classer les MAC en fonction du travail à faire par l'administrateur, tu peux les classer en fonction d'où ils agissent
+
+
+tu peux les classer par rapport à la logique interne (stateless ou statefull)
+
