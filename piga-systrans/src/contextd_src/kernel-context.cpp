@@ -26,8 +26,9 @@ KernelContext::KernelContext()
 	qDebug("KernelContext: Starting to register programs");
 	QDir programd("/etc/context.d/program.d/");
 	QStringList _tmpProgramList = programd.entryList();
-	_tmpProgramList.removeAll(".");
-	_tmpProgramList.removeAll("..");
+	_tmpProgramList.remove(".");
+	_tmpProgramList.remove("..");
+	_tmpProgramList.remove("context-notify");
 	QStringList::iterator itr;
 	for(itr = _tmpProgramList.begin(); itr != _tmpProgramList.end(); ++itr){
 		(*itr).chop(4);
@@ -48,8 +49,9 @@ void KernelContext::reloadProgramList()
 {
 	QDir programd("/etc/context.d/program.d/");
 	QStringList _tmpProgramList = programd.entryList();
-	_tmpProgramList.removeAll(".");
-	_tmpProgramList.removeAll("..");
+	_tmpProgramList.remove(".");
+	_tmpProgramList.remove("..");
+	_tmpProgramList.remove("context-notify");
 	QStringList::iterator itr;
 
 	qDebug("KernelContext: Starting program registering stuff");
