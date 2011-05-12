@@ -62,7 +62,7 @@ asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 				printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
 				return 1;
 			}else{
-				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
+// 				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
 				if(register_prog(process_name) == 0){
 					printk(KERN_INFO "AuditSec: Program registered: %s", process_name);
 					return 1;
@@ -79,7 +79,7 @@ asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 				printk(KERN_INFO "AuditSec: The daemon is now considered stopped. Program list emptied");
 				return 0;
 			}else{
-				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
+// 				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
 				if(unregister_prog(process_name) == 0){
 					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
 					return 0;

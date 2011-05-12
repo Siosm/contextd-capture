@@ -57,7 +57,7 @@ int prog_is_monitored()
 	get_task_comm(current_task_comm, current);
 	list_for_each_entry(p, &prog_list, list){
 		if(strncmp(p->execname, current_task_comm, TASK_COMM_LEN) == 0){
-			printk(KERN_INFO "AuditSec: Prog %s is monitored", current_task_comm);
+// 			printk(KERN_INFO "AuditSec: Prog %s is monitored", current_task_comm);
 			return 1;
 		}
 	}
@@ -69,7 +69,7 @@ int register_prog(char * prog_name)
 {
 	struct prog * p;
 
-	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
+// 	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
 	list_for_each_entry(p, &prog_list, list) {
 		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
 			printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
@@ -85,7 +85,7 @@ int register_prog(char * prog_name)
 	INIT_LIST_HEAD(&p->list);
 
 	list_add(&p->list, &prog_list);
-	printk(KERN_INFO "AuditSec: Prog %s registered", prog_name);
+// 	printk(KERN_INFO "AuditSec: Prog %s registered", prog_name);
 	return 0;
 }
 
@@ -103,7 +103,7 @@ int unregister_prog(char * prog_name)
 		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
 			list_del(&p->list);
 			kfree(p);
-			printk(KERN_INFO "AuditSec: Unregistering prog %s", prog_name);
+// 			printk(KERN_INFO "AuditSec: Unregistering prog %s", prog_name);
 			return 0;
 		}
 	}
