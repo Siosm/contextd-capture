@@ -30,6 +30,8 @@ private:
 
 	QStringList _programList;
 
+	void clearProgList(QStringList&);
+
 public:
 	KernelContext();
     ~KernelContext();
