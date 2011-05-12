@@ -28,8 +28,9 @@ KernelContext::KernelContext()
 	QStringList _tmpProgramList = programd.entryList();
 	_tmpProgramList.removeAll(".");
 	_tmpProgramList.removeAll("..");
-	QStringList::const_iterator itr;
-	for(itr = _tmpProgramList.constBegin(); itr != _tmpProgramList.constEnd(); ++itr){
+	QStringList::iterator itr;
+	for(itr = _tmpProgramList.begin(); itr != _tmpProgramList.end(); ++itr){
+		(*itr).chop(4);
 		qDebug() << "KernelContext: Trying to register " << (*itr);
 		if(auditsec_register(1, (*itr).toAscii().data()) != 1){
 			qWarning() << "Can't register prog : " << (*itr);
@@ -49,11 +50,12 @@ void KernelContext::reloadProgramList()
 	QStringList _tmpProgramList = programd.entryList();
 	_tmpProgramList.removeAll(".");
 	_tmpProgramList.removeAll("..");
-	QStringList::const_iterator itr;
+	QStringList::iterator itr;
 
 	qDebug("KernelContext: Starting program registering stuff");
 
-	for(itr = _tmpProgramList.constBegin(); itr != _tmpProgramList.constEnd(); ++itr){
+	for(itr = _tmpProgramList.begin(); itr != _tmpProgramList.end(); ++itr){
+		(*itr).chop(4);
 		if(_programList.contains(*itr)){
 			_programList.removeAll(*itr);
 		}else{
@@ -62,7 +64,7 @@ void KernelContext::reloadProgramList()
 			}
 		}
 	}
-	for(itr = _programList.constBegin(); itr != _programList.constEnd(); ++itr){
+	for(itr = _programList.begin(); itr != _programList.end(); ++itr){
 		if(auditsec_register(0, (*itr).toAscii().data()) != 0){
 			qWarning() << "Can't unregister prog : " << (*itr);
 		}
