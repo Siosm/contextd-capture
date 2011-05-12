@@ -29,8 +29,8 @@
  * register the process_name program to be watched by contextd
  *
  * Returns the daemon status:
- *		1 for launched
- * 		0 for off
+ *		1 for launched / registered
+ * 		0 for off / unregistered
  * 		-EFAULT if nothing performed or if an error occurred
  **/
 asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
@@ -52,7 +52,7 @@ asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 			return 0;
 		}else{
 			printk(KERN_INFO "AuditSec: Invalid state provided !");
-			return 0;
+			return -EFAULT;
 		}
 
 	// Contextd is already registered
@@ -68,7 +68,7 @@ asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 					return 1;
 				}else{
 					printk(KERN_INFO "AuditSec: Program NOT registered: %s", process_name);
-					return -1;
+					return -EFAULT;
 				}
 			}
 		}else if(state == 0){
@@ -82,10 +82,10 @@ asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
 				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
 				if(unregister_prog(process_name) == 0){
 					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
-					return 1;
+					return 0;
 				}else{
 					printk(KERN_INFO "AuditSec: Error: Program: %s", process_name);
-					return -1;
+					return -EFAULT;
 				}
 			}
 		}

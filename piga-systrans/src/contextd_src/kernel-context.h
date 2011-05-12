@@ -10,6 +10,7 @@
 
 #include <QtCore/QMap>
 #include <QtCore/QThread>
+#include <QtCore/QStringList>
 
 #define KERNEL_SUCCESS "KernelContext: success"
 #define KERNEL_ERROR "KernelContext: error"
@@ -27,9 +28,13 @@ private:
 
 	KThread * kernelT;
 
+	QStringList _programList;
+
 public:
 	KernelContext();
     ~KernelContext();
+
+	void reloadProgramList();
 
 	void stop();
 	struct auditsec_info * usai();

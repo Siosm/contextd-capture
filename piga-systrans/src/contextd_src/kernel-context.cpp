@@ -22,18 +22,50 @@ KernelContext::KernelContext()
 		qFatal("FAILED to register with the kernel.");
 	}
 	qDebug("The daemon is registered with the kernel.");
-	
-	if(auditsec_register(1, "firefox") != 1){
-		qDebug() << "Can't register prog : firefox";
+
+	qDebug("KernelContext: Starting to register programs");
+	QDir programd("/etc/context.d/program.d/");
+	QStringList _tmpProgramList = programd.entryList();
+	QStringList::const_iterator itr;
+	for(itr = _tmpProgramList.constBegin(); itr != _tmpProgramList.constEnd(); ++itr){
+		qDebug() << "KernelContext: Trying to register " << (*itr);
+		if(auditsec_register(1, (*itr).toAscii().data()) != 1){
+			qWarning() << "Can't register prog : " << (*itr);
+		}else{
+			_programList << (*itr);
+		}
 	}
-	if(auditsec_register(1, "soffice.bin") != 1){
-		qDebug() << "Can't register prog : soffice.bin";
-	}
-	if(auditsec_register(1, "testprog") != 1){
-		qDebug() << "Can't register prog : testprog";
-	}
+	qDebug("KernelContext: End of program registering");
 
 	kernelT = new KThread(this);
+}
+
+
+void KernelContext::reloadProgramList()
+{
+	QDir programd("/etc/context.d/program.d/");
+	QStringList _tmpProgramList = programd.entryList();
+	QStringList::const_iterator itr;
+
+	qDebug("KernelContext: Starting program registering stuff");
+
+	for(itr = _tmpProgramList.constBegin(); itr != _tmpProgramList.constEnd(); ++itr){
+		if(_programList.contains(*itr)){
+			_programList.removeAll(*itr);
+		}else{
+			if(auditsec_register(1, (*itr).toAscii().data()) != 1){
+				qWarning() << "Can't register prog : " << (*itr);
+			}
+		}
+	}
+	for(itr = _programList.constBegin(); itr != _programList.constEnd(); ++itr){
+		if(auditsec_register(0, (*itr).toAscii().data()) != 0){
+			qWarning() << "Can't unregister prog : " << (*itr);
+		}
+	}
+	_programList = _tmpProgramList;
+
+	qDebug("KernelContext: End of program registering stuff");
 }
 
 

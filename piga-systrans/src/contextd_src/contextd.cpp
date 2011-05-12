@@ -30,6 +30,8 @@
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
+KernelContext * gKernelContext = NULL;
+
 static void child_handler(int signum)
 {
 	QString pid_path=QString("/var/run/%1.pid").arg(DAEMON_NAME);
@@ -77,9 +79,9 @@ static void child_handler(int signum)
 		ContextdPluginReloadEvent reloadEvent;
 		//Send the reload Event
 		EventDispatcher::instance().sendEvent(&reloadEvent);
+
+		::gKernelContext->reloadProgramList();
 	}
-
-
 }
 
 static void daemonize( const char *daemon_name, bool foreground )
@@ -304,6 +306,7 @@ int main(int argc, char **argv)
 	//Start DBUS & Kernel LSM listening
 	DBusContext dbus;
 	KernelContext kernel;
+	gKernelContext = &kernel;
 	ClientsCleaner cc(kernel.getClients());
 
 	//Log the startup
