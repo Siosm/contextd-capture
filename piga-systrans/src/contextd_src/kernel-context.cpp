@@ -36,6 +36,7 @@ KernelContext::KernelContext()
 		if(auditsec_register(1, (*itr).toAscii().data()) != 1){
 			qWarning() << "Can't register prog:" << (*itr);
 		}else{
+			qDebug() << "KernelContext:" << (*itr) << "OK";
 			_programList << (*itr);
 		}
 	}
@@ -64,12 +65,16 @@ void KernelContext::reloadProgramList()
 			qDebug() << "KernelContext: Trying to register" << (*itr);
 			if(auditsec_register(1, (*itr).toAscii().data()) != 1){
 				qWarning() << "Can't register prog:" << (*itr);
+			}else{
+				qDebug() << "KernelContext:" << (*itr) << "OK";
 			}
 		}
 	}
 	for(itr = _programList.begin(); itr != _programList.end(); ++itr){
 		if(auditsec_register(0, (*itr).toAscii().data()) != 0){
 			qWarning() << "Can't unregister prog:" << (*itr);
+		}else{
+			qDebug() << "KernelContext:" << (*itr) << "unregistered";
 		}
 	}
 	_programList = _tmpProgramList;
