@@ -36,9 +36,7 @@ Le principe de fonctionnement est simple : un module LSM est chargé dans le noy
 	\caption{Architecture des hooks LSM \cite{LSMINTRO}}
 \end{figure}
 
-L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de charger dans le noyau qu'un seul et unique module LSM. Or, PIGA utilise déjà un module LSM modifié, celui de SELinux.
-
-Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il se pourrait que SELinux soit définitivement désactivé.
+L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
 
 \begin{figure}%[hb]
 	\centering
@@ -46,15 +44,11 @@ Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il
 	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
 \end{figure}
 
-L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
-
 Pour les besoins du développement, nous avons dû désactiver SELinux, pour nous concentrer sur notre propre module, et non sur l'intégration avec le module LSM de SELinux.
 
 \subsubsection{Implémentation}
 
-Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous travaillons. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
-
-Par la suite, il faudra convenir des appels systèmes sur lesquels il est intéressant d'intervenir.
+Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous avons travaillé. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
 
 Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en suivant les conventions de nommage des options de configuration.
 
@@ -62,30 +56,17 @@ Ensuite, nous avons commencé à chercher les différentes informations nécessa
 	\begin{itemize}
 		\item le PID
 		\item l'execname
-		\item le chemin complet du fichier
-		\item ...
+		\item le chemin complet du fichier~\\
 	\end{itemize}
 
-Nous avons également remarqué que les hooks ``socket bind'' et ``socket connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. En revanche, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheuresement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivit l'intégration des ``connexions'' dans notre solution.
-% 	\begin{itemize}
-% 		\item[-] le PID
-% 		\item[-] l'execname
-% 		\item[-] la structure de la socket
-% 		\item[-] L'adresse de connexion
-% 		\item[-] ...
-% 	\end{itemize}
+Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hook" pouvoir surveiller les connexions réseau.
 
-La principale difficulté de cette étape était de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
+Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôls voulus.
 
-% \subsubsection{Idées abandonnées}
-% 
-% \subsubsection{Socket Unix}
-% 
-% Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
-% 
-% \subsubsection{Proc fs}
-% 
-% Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
+En effet, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheuresement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivit l'intégration des ``connexions'' dans notre solution.
+
+
+La principale difficulté de cette étape fut de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
 
 \subsection{La communication entre contextd et le noyau}
 
@@ -115,7 +96,13 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 
 \subsubsection{L'interface présentée à l'administrateur}
 
-Décrire les fichiers /proc/contextd/{status,programs}
+	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux "proc files" :
+	
+	\begin{itemize}
+		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule.
+		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste.
+	\end{itemize}
+
 
 \subsection{Intéractions entre un processus, le noyau et contextd}
 
@@ -127,7 +114,7 @@ Pour rendre contextd conscient de nos modifications nous avons implémenté plus
 
 %FIXME schéma des classes
 
-Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistré dans contextd, car cet action n'était pas présente.
+Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistrés dans contextd, car cet action n'était pas présente.
 
 De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox et claws-mail).
 
