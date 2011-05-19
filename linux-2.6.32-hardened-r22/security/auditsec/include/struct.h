@@ -22,7 +22,7 @@
 #include <linux/in6.h>
 
 
-enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR};
+enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR, AUDITSEC_MSG};
 enum socket_type {AUDITSEC_IPV4, AUDITSEC_IPV6};
 
 
@@ -51,6 +51,11 @@ struct auditsec_dir {
 	int			mode;
 };
 
+struct auditsec_msg {
+	struct msghdr msg;
+	int size;
+};
+
 
 struct auditsec_info {
 	pid_t		pid;
@@ -62,6 +67,7 @@ struct auditsec_info {
 		struct auditsec_file file;
 		struct auditsec_socket socket;
 		struct auditsec_dir dir;
+		struct auditsec_msg msg;
 	} auditsec_struct;
 };
 

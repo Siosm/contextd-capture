@@ -279,11 +279,8 @@ int auditsec_file_permission(struct file *file, int mask)
 			kfree(fullpath);
 			return -EFAULT;
 		}
-	}else{
-		/*printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-				fullpath, task_pid_nr(current), current->comm, mask);
-			kfree(fullpath);*/
 	}
+
 	return 0;
 }
 
@@ -412,19 +409,14 @@ int auditsec_socket_bind(struct socket *sock, struct sockaddr *address, int addr
 			answer = (*auditsec_answer() == 0);
 			up(auditsec_hook_lock());
 
-			if (answer == 0) printk(KERN_INFO "Auditsec: operation accepted");
-			else printk(KERN_INFO "Auditsec: operation denied");
-
-			return answer == 0 ? 0 : -EFAULT;
+			return answer == 0 ? 0 : -EACCES;
 		}else{
 			printk(KERN_INFO "AuditSecu: socket bind/connect: pid: %d, execname: %s, REFUSED : daemon not launched",
 				task_pid_nr(current), current->comm);
 			return -EFAULT;
 		}
-	}else{
-		/*printk(KERN_INFO "AuditSecu: socket bind: pid: %d, execname: %s",
-				task_pid_nr(current), current->comm);*/
 	}
+
 	return 0;
 }
 
@@ -447,13 +439,56 @@ int auditsec_socket_accept(struct socket *sock, struct socket *newsock)
 
 int auditsec_socket_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 {
+	int		answer = -1;
+	int		ret = 0;
+	pid_t 	current_pid = task_pid_nr(current);
+
+	if(prog_is_monitored()){
+		if(*daemon_launched()){
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: socket (send|recv}msg: pid: %d, execname: %s, HOOK TIMEOUT",
+					current_pid, current->comm);
+				return -EFAULT;
+			}
+			
+			printk(KERN_INFO "AuditSec: socket (send|recv}msg: pid: %d, execname: %s",
+					current_pid, current->comm);
+			
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->pid = current_pid;
+			k_auditsec_info()->type = AUDITSEC_MSG;
+			
+			memcpy(&k_auditsec_info()->auditsec_struct.msg.msg, *msg, sizeof(struct msghdr));
+			// TODO Add fields to this struct (se_context)
+
+			up(auditsec_question_lock());
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: socket (send|recv)msg: pid: %d, execname: %s, ANSWER TIMEOUT",
+					current_pid, current->comm);
+
+				ret = down_trylock(auditsec_question_lock());
+				up(auditsec_hook_lock());
+				return -EFAULT;
+			}
+
+			answer = (*auditsec_answer() == 0);
+			up(auditsec_hook_lock());
+
+			return answer == 0 ? 0 : -EACCES;
+		}else{
+			printk(KERN_INFO "AuditSecu: socket (send|recv)msg: pid: %d, execname: %s, REFUSED : daemon not launched",
+				task_pid_nr(current), current->comm);
+			return -EFAULT;
+		}
+	}
+
 	return 0;
 }
 
 int auditsec_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 			    int size, int flags)
 {
-	return 0;
+	return auditsec_socket_sendmsg(sock, msg, size);
 }
 
 #endif	/* CONFIG_SECURITY_NETWORK */
