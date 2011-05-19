@@ -61,6 +61,7 @@ void KThread::run()
 				break;
 			
 			case AUDITSEC_SOCKET:
+				/* TODO
 				qDebug() << "KThread socket";
 				address = inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
 				
@@ -72,10 +73,13 @@ void KThread::run()
 					qDebug() << "KThread: IP: " << address;
 				else
 					qDebug() << "KThread: IP: " << address << " " << hote->h_name;
-				
+				*/
 				auditsec_answer(true);
 				break;
-
+			case AUDITSEC_MSG:
+				// TODO
+				auditsec_answer(true);
+				break;	
 			default:
 				qCritical("KernelContext: can't determine struct type !");
 				auditsec_answer(0);
