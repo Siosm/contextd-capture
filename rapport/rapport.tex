@@ -207,11 +207,10 @@ Pour faciliter la communication entre l'espace noyau et le démon en espace util
 \end{figure}
 
 Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
-\newpage
 
 \begin{figure}[hb]
 	\centering
-	\includegraphics[scale=.6]{attachements/syscall_sync.pdf}
+	\includesvg{attachements/sequence_hook}{1}
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
@@ -228,7 +227,23 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 
 \subsection{Intéractions entre un processus, le noyau et contextd}
 
-%FIXME Faire le schéma complet ...
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/fonctionnement_avant}{1}
+	\caption{Communication entre les hooks LSM et les appels système avant les modifications}
+\end{figure}
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/fonctionnement_apres}{1}
+	\caption{Communication entre les hooks LSM et les appels système maintenant}
+\end{figure}
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/schema_general}{1}
+	\caption{Schema général}
+\end{figure}
 
 \subsection{Ajouts à contextd}
 
