@@ -107,15 +107,27 @@
 
 \newpage
 
-\include{introduction}
+\section*{Introduction} \addcontentsline{toc}{section}{Introduction}
+Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année. Ce projet s'inscrit dans le cadre des projets de recherche menés au Laboratoire d'Informatique Fondamentale d'Orléans (LIFO) par l'équipe Sécurité et Distribution des Systèmes (SDS) sur la création d'un système d'exploitation sécurisé basé sur Linux.
+% FIXME Est-ce correct ?
+
+~
+
+Ce projet a pour but la simplification et la généralisation du contrôle d'application par le démon contextd. Contextd est un démon résident en espace utilisateur qui commande et coordonne différents systèmes de sécurité (SELinux, PIGA-MAC, iptables...). Il permet de changer dynamiquement la configuration de ces outils de sécurité pour assurer la sécurité et la cohérence globale d'un système. Il constitue une mise en oeuvre avancée du principe de séparation des privilèges, limitant les droits des applications contrôlées au strict minimum, à chaque instant donné.
+
+~
+
+Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprisent par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les demandes de chacunes de ces applications (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
+
+~
+
+L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd et la nature de ses sources d'information.
+
+~
 
 \newpage
 
 \include{stateoftheart}
-
-\newpage
-
-\include{solutionused}
 
 \newpage
 
@@ -305,10 +317,44 @@ D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne p
 
 \newpage
 
-\include{results}
+\section{Résultats et benchmarks}
+
+Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
 
 \newpage
 
-\include{conclusion}
+\section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
+
+Le but de ce projet était de simplifier l'ajout d'application à PIGA-SYSTRANS et au système PIGA-OS. Cet objectif est atteint car nos travaux permettent, par exemple, de faire fonctionner OpenOffice.org/LibreOffice avec contextd, sans modifier ces applications.
+
+De plus, l'aspect totalement générique de notre solution nous assure un fort potentiel de réutilisation. En effet, les ajouts dans contextd permmettant le chargement dynamique de programmes à contrôler nous permettent de se concentrer sur l'écriture de règles contextd, et non sur la modification des applications. Il ne reste alors plus qu'à modifier uniquement les applications possédant un comportment s'étendant sur plusieurs domaines et dont l'état interne nécessite des modifications lors d'un changement de domaine.
+
+TODO Remarques sur SELinux / intégration avec PIGA-OS ...
+
+% Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDTE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
+
+\newpage
+\addcontentsline{toc}{section}{Annexes}
+\addcontentsline{toc}{subsection}{Liens et références}
+
+% \subsection*{Liens et références}
+\begin{thebibliography}{40}
+
+\bibitem{IBMRBST} \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, Bart Jacob, Paul Larson, Breno Henrique Leitao, Saulo Augusto M Martins da Silva, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
+
+\bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, Chris Wright, Crispin Cowan, Stephen Smalley, James Morris, Greg Kroah-Hartman, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
+
+\bibitem{LKDSE} \textit{Linux Kernel Development, Second Edition}, Robert Love, Novell Press
+\bibitem{LKDTE} \textit{Linux Kernel Development, Third Edition}, Robert Love, Pearson Education, Inc.
+
+\bibitem{MRHEL5} \textit{Managing Red Hat Enterprise Linux 5}, Daniel J Walsh, Karl MacMillan, \url{http://people.redhat.com/dwalsh/SELinux/Presentations/ManageRHEL5.pdf}
+
+\bibitem{WCS} \textit{Wikipedia : Computer Security}, \url{http://en.wikipedia.org/wiki/Computer_security}
+
+\bibitem{SOURCE} Code source (kernel 2.6.32 hardened r22, piga-systrans, et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle Contextd Capture), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+
+\end{thebibliography}
+
+%\printindex
 
 \end{document}
