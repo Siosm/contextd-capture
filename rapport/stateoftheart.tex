@@ -98,6 +98,18 @@ Chercher tous les systèmes de MAC/DAC/RBAC,...
 
 tu peux classer les MAC en fonction du travail à faire par l'administrateur, tu peux les classer en fonction d'où ils agissent
 
-
 tu peux les classer par rapport à la logique interne (stateless ou statefull)
 
+\newpage
+
+\section{Solution utilisée}
+
+% \subsection{PIGA-OS, PIGA-SYSTRANS}
+
+\subsection{SELinux, PIGA, contextd}
+
+La solution retenue par Jérémy Briffaut et l'équipe SDS pour construire un système d'exploitation sécurisé est constituée de SELinux, PIGA, et de contextd. Ces trois éléments forment une suite de couche qui offrent progressivement un contrôle plus fin sur les intéractions sur un système Linux, et permettent de garantir des propriétés fine et précises, mais en même temps générales.
+
+\subsection{Gentoo Hardened}
+
+Notre project ayant pour but potentiel, à terme, d'être intégré dans le système PIGA-OS, nous avons basé l'intégralité du développement sur la distribution Gentoo Hardened, qui propose une version du noyau modifié. C'est donc à partir des noyaux Linux 2.6.32-r9 et r22 version hardened que nous avons travaillé.
