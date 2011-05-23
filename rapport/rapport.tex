@@ -173,27 +173,46 @@ Nous avons donc développé un module LSM qui "hook" les appels système. Par d�
 
 Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en suivant les conventions de nommage des options de configuration.
 
-Ensuite, nous avons commencé à chercher les différentes informations nécessaires à contextd pour son fonctionnement, et plus particulièrement ce qui concerne les hooks ``file permission'' et ``mkdir'' :
+Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hook" pouvoir surveiller les connexions réseau.
+
+Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôls voulus à l'avenir.
+
+En effet, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheuresement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivit l'intégration des ``connexions'' dans notre solution.
+
+La principale difficulté de cette étape fut de localiser dans quels fichiers ces informations sont définies parmi l'ensemble du code source du noyau Linux. S'agissant de structures pour la plupart, il nous fallait savoir quels en étaient les membres pour pouvoir en tirer les informations essentielles au fonctionnement de contextd.
+
+Nous avons donc dû étudier également le fonctionnement du démon contextd. Il s'avère qu'il n'a besoin que de peu de données et se contente de :
 	\begin{itemize}
 		\item le PID
 		\item l'execname
 		\item le chemin complet du fichier~\\
 	\end{itemize}
+	
+\textit{\textsl{\textbf{Nota bene :}}} Pour les activitées réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Or, au niveau du noyau n'est accessible que l'adresse IP. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après uen tentative, grâce à la fonction \textit{getnamebyaddr}, nous avons pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, on pouvait retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
 
-Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hook" pouvoir surveiller les connexions réseau.
-
-Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôls voulus.
-
-En effet, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheuresement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivit l'intégration des ``connexions'' dans notre solution.
-
-
-La principale difficulté de cette étape fut de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
+Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (User space) là où opère contextd. 
 
 \subsection{La communication entre contextd et le noyau}
 
+Compte tenu du fonctionnement de contextd, il a fallut développé un système de communication entre le noyau et contextd.
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/fonctionnement_avant}{1}
+	\caption{Communication entre contextd et les applications}
+\end{figure}
+
+En effet, comme le montre le schéma, aucune implémentation ne permet à contextd de communiquer avec le noyau ; l'interface DBUS étant réservé historiquement qu'aux communications entre processus.
+
+\subsubsection{Les proc files}
+
+Pour la communication entre le noyau et l'espace utilisateur, ont été créés les proc files. Ce système de fichiers créé en RAM permet non seulement de récupéré des informations depuis le noyau mais aussi de pouvoir lui en envoyer.
+
+Nous avons donc envisager de créer des proc files afin de pouvoir récupérer les informations utiles à contextd décrites précédemment. Cependant, il a fallu considéré les problèmes liés aux aspects sécurité. Nous avons donc décider de ne pas retenir cette idée, tout en la retenant pour le débuggage. (cf. L'interface présentée à l'administrateur).
+
 \subsubsection{Les appels systèmes}
 
-Pour faciliter la communication entre l'espace noyau et le démon en espace utilisateur contextd, nous avons implémenté trois nouveaux appels systèmes. En effet, la solution des appels systèmes nous permet de contrôler les intéractions avec le noyau en créant :
+Pour mettre en place la communication entre l'espace noyau et le démon en espace utilisateur contextd, nous avons implémenté trois nouveaux appels systèmes. En effet, la solution des appels systèmes nous permet de contrôler les intéractions avec le noyau en créant :
 \begin{itemize}
  \item \textbf{auditsec\_reg} : démarre/termine la communication et enregistre/désinscrit les programmes à surveiller.
  \item \textbf{auditsec\_question} : bloquant, qui attends une demande d'autorisation de la part du noyau.
@@ -203,10 +222,10 @@ Pour faciliter la communication entre l'espace noyau et le démon en espace util
 \begin{figure}[hb]
 	\centering
 	\includepic{attachements/sequence_diagram}{1}
-	\caption{Communication entre le noyau, le démon et contextd}
+	\caption{Diagramme de séquence entre le noyau et contextd}
 \end{figure}
 
-Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
+Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et de s'assurer le traitement de chacun des appels système.
 
 \begin{figure}[hb]
 	\centering
@@ -214,18 +233,25 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
+L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître du noyau n'est pas tout à fait sûr. En effet, il n'est pas exclu qu'un program malveillant puisse s'enregistrer auprès du noyau via cet appel système sans que ce soit contextd. Une solution d'enregistrement sécurisé et sûre est à envisager à l'avenir.
 
 \subsubsection{L'interface présentée à l'administrateur}
 
 	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux "proc files" :
 
 	\begin{itemize}
-		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule.
+		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule afin de ne pas permettre un acte malveillant consistant à ajouter ou supprimer un programme de manière intempestive.
 		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste.
 	\end{itemize}
 
 
 \subsection{Intéractions entre un processus, le noyau et contextd}
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/schema_general}{.9}
+	\caption{Schema général}
+\end{figure}
 
 \begin{figure}[hb]
 	\centering
@@ -237,12 +263,6 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 	\centering
 	\includesvg{attachements/fonctionnement_apres}{1}
 	\caption{Communication entre les hooks LSM et les appels système maintenant}
-\end{figure}
-
-\begin{figure}[hb]
-	\centering
-	\includesvg{attachements/schema_general}{1}
-	\caption{Schema général}
 \end{figure}
 
 \subsection{Ajouts à contextd}
