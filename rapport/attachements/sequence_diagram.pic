@@ -1,0 +1,32 @@
+.PS
+copy "/usr/local/lib/sequence.pic";
+
+# Object definition
+object(K,"Kernel");
+object(C,"Contextd");
+step();
+active(K);
+active(C);
+
+# Message exchange
+message(C,K,"register(1)");
+step();
+begin_frame(K,L,"Hook");
+
+message(C,K,"question()");
+rmessage(K,C,"struct filled");
+message(C,C,"");
+message(C,K,"answer()");
+step();
+end_frame(C,L);
+
+step();
+message(C,K,"register(0)");
+step();
+
+# Object lifeline completion
+step();
+complete(K);
+complete(C);
+
+.PE

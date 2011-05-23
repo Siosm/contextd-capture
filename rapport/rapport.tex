@@ -32,6 +32,34 @@
 % \addtolength{\textwidth}{1cm}
 % \setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {\immediate\write18{#3}}\fi%
+}
+
+\newcommand{\includesvg}[2]{%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=500}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includedot}[2]{%
+ \executeiffilenewer{#1.dot}{#1.pdf}%
+ {dot -T pdf -o #1.pdf #1.dot}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includepic}[2]{%
+ \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=500}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % nouvelle commande pour un joli nom
 \newcommand{\nom}[1]{\textsc{#1}}
@@ -101,7 +129,7 @@ Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau g
 
 \begin{figure}[hb]
 	\centering
-	\includegraphics[scale=0.4]{kretprob.png}
+	\includegraphics[scale=0.4]{attachements/kretprob.png}
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
 \end{figure}
 
@@ -125,7 +153,7 @@ Le principe de fonctionnement est simple : un module LSM est chargé dans le noy
 
 \begin{figure}[hb]
 	\centering
-	\includegraphics[scale=0.45]{lsm1.png}
+	\includegraphics[scale=0.45]{attachements/lsm1.png}
 	\caption{Architecture des hooks LSM \cite{LSMINTRO}}
 \end{figure}
 
@@ -133,7 +161,7 @@ L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant,
 
 \begin{figure}%[hb]
 	\centering
-	\includegraphics[scale=0.45]{lsm2.png}
+	\includegraphics[scale=0.45]{attachements/lsm2.png}
 	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
 \end{figure}
 
@@ -174,18 +202,18 @@ Pour faciliter la communication entre l'espace noyau et le démon en espace util
 
 \begin{figure}[hb]
 	\centering
-	\includegraphics{global.pdf}
+	\includepic{attachements/sequence_diagram}{1}
 	\caption{Communication entre le noyau, le démon et contextd}
 \end{figure}
 
-%FIXME
-
 Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
+
 \begin{figure}[hb]
 	\centering
-	\includegraphics{syscall_sync.pdf}
+	\includesvg{attachements/sequence_hook}{1}
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
+
 
 \subsubsection{L'interface présentée à l'administrateur}
 
@@ -199,13 +227,34 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 
 \subsection{Intéractions entre un processus, le noyau et contextd}
 
-%FIXME Faire le schéma complet ...
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/fonctionnement_avant}{1}
+	\caption{Communication entre les hooks LSM et les appels système avant les modifications}
+\end{figure}
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/fonctionnement_apres}{1}
+	\caption{Communication entre les hooks LSM et les appels système maintenant}
+\end{figure}
+
+\begin{figure}[hb]
+	\centering
+	\includesvg{attachements/schema_general}{1}
+	\caption{Schema général}
+\end{figure}
 
 \subsection{Ajouts à contextd}
 
 Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
 
-Schéma des classes.
+\begin{figure}[hb]
+	\centering
+	\includedot{attachements/class}{.8}
+	\caption{Schéma des classes}
+\end{figure}
+
 
 Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
 
@@ -215,11 +264,7 @@ De plus, notre solution nécessitant maintenant l'enregistrement des programmes 
 
 % Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
 %
-\begin{figure}[hb]
-	\centering
-	\includegraphics{global.pdf}
-	\caption{Communication entre le noyau, le démon et contextd}
-\end{figure}
+
 % %
 % Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
 
