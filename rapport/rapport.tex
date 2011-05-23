@@ -62,7 +62,7 @@
 \ligne{\Large}
 }
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
-\date{25, 27, 30, 31, 1 \textsc{mai} 2011} %TODO
+\date{27 \textsc{mai} 2011}
 
 % titre
 \maketitle
@@ -211,7 +211,7 @@ Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
 
 Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistrés dans contextd, car cet action n'était pas présente.
 
-De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox et claws-mail).
+De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox, claws-mail et context-notify).
 
 % Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
 %

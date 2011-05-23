@@ -1,20 +1,14 @@
 \section{\'Etat de l'art}
 
-Ce projet de deuximème année s'inscrit dans le contexte de la sécurité d'un système basé sur le noyau Linux. Plus que simplement le noyau et les applications, ce sont l'ensemble des intéractions entre tous ces éléments qui doivent être contrôlées.
+Ce projet de deuximème année s'inscrit dans le contexte de la sécurité d'un système basé sur le noyau Linux. Plus que simplement le noyau et les applications, ce sont l'ensemble des intéractions entre tous ces éléments qui doivent être contrôlées. Nous allons détailler les objectifs à atteindre avant de présenter les différentes solutions disponibles. 
 
-Il existe différents mécanismes qui permettent d'apporter des couches de sécurité à un tel système. Nous détaillerons donc les principes fondateurs de la sécurité pour enchaîner sur les solutions disponibles.
+% Il existe différents mécanismes qui permettent d'apporter des couches de sécurité à un tel système. Nous détaillerons donc les principes fondateurs de la sécurité pour enchaîner sur les solutions disponibles.
 
 Nous allons réduire les concepts d'utilisateurs et d'applications aux ``simples'' processus qui sont la base de toute intéraction avec un système. De même, les fichiers, sockets, les IPC sont autant d'éléments sur lesquel un processus peut agir et nous les regrouperons sous le terme d'objet.
 
-\subsection{Le principe de séparation des privilèges}
+\subsection{Les objectifs de sécurité}
 
-Le principe de séparation des privilèges ou principe de moindre privilège est à la base des mécanismes de sécurité sur un système. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'ai pas accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
-
-L'application la plus courante de ce principe est la séparation entre les différents comptes, utilisateurs ou non, sur un système. Une application lancée par un utilisateur ne bénéficie que des droits accordés à cet utilisateur.
-
-\subsection{Confidentialité, Intégrité, Disponibilité}
-
-Ces trois objectifs font parti intégrale des contraintes de sécurité sur un système. Nous devons donc nous assurer que notre solution puisse intégrer l'ensemble de ces contraintes.
+La sécurité d'un système d'information et plus particulièrement la sécurité des systèmes d'exploitation réside dans l'application de mesures visant à atteindre les objectifs suivants :
 
 \textbf{Confidentialité :}
 Les informations ne doivent être accessibles qu'aux utilisateurs qui ont besoin ou qui disposent des privilèges correspondant.
@@ -24,6 +18,28 @@ Il ne doit pas être possible de modifier certaines informations comme les mots 
 
 \textbf{Disponibilité :}
 Le système doit être réactif, stable et utilisable. Les programes doivent pouvoir fonctionner correctement.
+
+\textbf{Authenticité :}
+
+\textbf{Non-répudiation :}
+
+\subsection{Le principe de séparation des privilèges}
+
+Le principe de séparation des privilèges ou principe de moindre privilège est à la base des mécanismes de sécurité sur un système. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'ai pas accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
+
+L'application la plus courante de ce principe est la séparation entre les différents comptes, utilisateurs ou non, sur un système. Une application lancée par un utilisateur ne bénéficie que des droits accordés à cet utilisateur.
+
+\subsection{A qui faire confiance ?}
+
+Il est possible d'employer différentes approches pour s'assurer de la sécurité d'un système d'exploitation, mais chacune d'entre elles repose à un moment ou un autre sur la confiance que l'on a dans l'un des éléments qui la constitue. On peut citer plusieurs cas de figures\cite{WCS}:
+\begin{itemize}
+  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité, tout en étant conscient que les logiciels ne sont pas de confiance % Trust all the software to abide by a security policy but the software is not trustworthy (this is computer insecurity).
+  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité et s'assurer que le logiciel est validé et fiable (analyse complète et exhaustive de tous les cas d'utilisations, de toutes les branches du code) % Trust all the software to abide by a security policy and the software is validated as trustworthy (by tedious branch and path analysis for example).
+  \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité par un moyen pas nécessairement fiable% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
+  \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliqué par des \_méchanismes\_ matériel% trustworthy hardware mechanisms. %FIXME
+
+\end{itemize}
+
 
 \subsection{Les différentes méthodes de contrôle d'accès}
 
