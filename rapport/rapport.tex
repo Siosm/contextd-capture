@@ -149,7 +149,7 @@ Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord
 
 Les modules LSM sont au noyau ce que netfilter est au réseau.
 
-Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
+Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un point d'ancrage ou hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
 
 \begin{figure}[hb]
 	\centering
@@ -185,7 +185,8 @@ Nous avons donc dû étudier également le fonctionnement du démon contextd. Il
 	\begin{itemize}
 		\item le PID
 		\item l'execname
-		\item le chemin complet du fichier~\\
+		\item le chemin complet du fichier
+		\item le context de sécurité SELinux~\\
 	\end{itemize}
 	
 \textit{\textsl{\textbf{Nota bene :}}} Pour les activitées réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Or, au niveau du noyau n'est accessible que l'adresse IP. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après uen tentative, grâce à la fonction \textit{getnamebyaddr}, nous avons pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, on pouvait retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
@@ -229,11 +230,13 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 
 \begin{figure}[hb]
 	\centering
-	\includesvg{attachements/sequence_hook}{1}
+	\includesvg{attachements/syscall_sync}{0.6}
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
+% FIXME
 L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître du noyau n'est pas tout à fait sûr. En effet, il n'est pas exclu qu'un program malveillant puisse s'enregistrer auprès du noyau via cet appel système sans que ce soit contextd. Une solution d'enregistrement sécurisé et sûre est à envisager à l'avenir.
+% FIXME
 
 \subsubsection{L'interface présentée à l'administrateur}
 
@@ -267,18 +270,18 @@ De même, pour lire cette liste, ajouter ou supprimer un élément, on utilise u
 	\caption{Schéma des classes}
 \end{figure}
 
-\subsubsection{Signaux et autres}
+\subsubsection{Surveillance et enregistrement dynamique}
 
 Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
 
 \begin{itemize}
-	\item Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
-	\item Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistrés dans contextd, car cet action n'était pas présente. Il s'agit simplement d'un thread qui s'exécute de manière synchrone et qui vérifie que les éléments de la liste, repérés par le pid, sont toujours présents dans le fichier /proc/. Si non, il les supprime de la liste. 
+	\item L'enregistrement et la désinscription/mise à jour de la liste des programmes surveillés par contextd lors de la réception du signal SIGUSR2.
+	\item La vérification de la cohérence de la liste des clients stockée par contextd : cette liste est maintenant nettoyée à intervalles réguliers.
 \end{itemize}
 
 De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox, claws-mail et context-notify).
 
-NOTE : Nous partons du principe que notre travail est utilisé avec SELinux. Nous ne nous occupons pas de vérifier l'intégrité des programmes, intégrité préservée par SELinux.
+\textit{\textsl{\textbf{Nota bene :}}} Nous partons du principe que notre travail est/sera utilisé avec SELinux, même s'il ce n'est pas possible actuellement. Nous n'effectuons aucune vérification d'intégrité sur les programmes surveillés par contextd. Cette intégrité est en principe assurée par les politiques SELinux et/ou les règles PIGA.
 
 %Notre travail dépendant intégralement des solutions sous-jacentes.
 
@@ -286,7 +289,7 @@ NOTE : Nous partons du principe que notre travail est utilisé avec SELinux. Nou
 
 Le produit de notre travail correspond globalement à ce qui était attendu. En effet, nos tests effectués à l'aide d'un programme de test "testprog" montrent que le comportement du système est bien celui attendu. Lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel, si la transaction est autorisée, une demande de changement de domaine est envoyé à context-notify qui attend la réponse, sinon, la demande est rejetée.
 
-D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement. Cependant, les erreurs dues aux refus ne sont pas explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès).
+D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement avec des programmes classiques et courant sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès). Ce problème est lié au choix de LSM, les applications ne pouvant faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
 
 \begin{figure}[h]
 	\centering
