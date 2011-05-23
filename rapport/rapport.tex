@@ -247,28 +247,23 @@ L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître d
 
 \subsection{Intéractions entre un processus, le noyau et contextd}
 
-\begin{figure}[hb]
-	\centering
-	\includesvg{attachements/contextd_dbus}{.55}
-	\caption{Schema général}
-\end{figure}
+Compte tenu de ce qui a été précédemment dit, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec les processus via le noyau. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par un canal dbus.
 
-\begin{figure}[hb]
-	\centering
-	\includesvg{attachements/fonctionnement_apres}{1}
-	\caption{Communication entre les hooks LSM et les appels système maintenant}
-\end{figure}
+Cette communication se faisait grâce à la classe "dbus-context". Cette classe traitait les solicitations des clients (programmes), les enregistrait dans une liste (attribut privé) et s'occupait des transitions, cette liste (Qmap) était indexée par le dbus\_id.
+
+Nous avons donc fait la même chose pour le noyau. Nous avons créé une classe "kernel-context" qui permet de traiter les autres processus qui ne disposent pas du plugin. Cependant, il faut tenir compte du fait que dans ce cas de figure, une application qui possède le plugin se verra authentifiée deux fois, une fois par dbus et une fois par le noyau. De plus, la liste des processus ne peut plus être indexée par le dbus\_id car il n'est pas pertinent dans le cas du noyau.
+
+Pour palier ce problème, nous avons décidé d'implémenter une classe abstraite "abstractcontext" qui, elle, possède une seule et unique liste qui contiendra les clients des deux modes de communication, à savoir dbus et noyau tous deux étant implémentées respectivement par "dbus-context" et "kernel-context", classes dérivées de "abstractcontext". Dans le cas où un troisième mode de communication sera envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà. La liste en question est déclarée en private static : ces propriétés permettent à toutes les classes dérivées d'hériter de l'instanciation de cette liste sans que celle-ci dépende de l'instance.
 
 \subsection{Ajouts à contextd}
 
-Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
-
 \begin{figure}[hb]
 	\centering
-	\includedot{attachements/class}{.8}
+	\includedot{attachements/class}{.6}
 	\caption{Schéma des classes}
 \end{figure}
 
+Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
 
 Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
 
