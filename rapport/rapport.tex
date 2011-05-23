@@ -198,7 +198,7 @@ Compte tenu du fonctionnement de contextd, il a fallut développé un système d
 
 \begin{figure}[hb]
 	\centering
-	\includesvg{attachements/contextd_dbus}{.5}
+	\includesvg{attachements/fonctionnement_avant}{1}
 	\caption{Communication entre contextd et les applications}
 \end{figure}
 
@@ -249,37 +249,56 @@ L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître d
 
 Compte tenu de ce qui a été précédemment dit, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec les processus via le noyau. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par un canal dbus.
 
+\subsection{Ajouts à contextd}
+
+\subsubsection{Classes de communication}
+
 Cette communication se faisait grâce à la classe "dbus-context". Cette classe traitait les solicitations des clients (programmes), les enregistrait dans une liste (attribut privé) et s'occupait des transitions, cette liste (Qmap) était indexée par le dbus\_id.
 
 Nous avons donc fait la même chose pour le noyau. Nous avons créé une classe "kernel-context" qui permet de traiter les autres processus qui ne disposent pas du plugin. Cependant, il faut tenir compte du fait que dans ce cas de figure, une application qui possède le plugin se verra authentifiée deux fois, une fois par dbus et une fois par le noyau. De plus, la liste des processus ne peut plus être indexée par le dbus\_id car il n'est pas pertinent dans le cas du noyau.
 
 Pour palier ce problème, nous avons décidé d'implémenter une classe abstraite "abstractcontext" qui, elle, possède une seule et unique liste qui contiendra les clients des deux modes de communication, à savoir dbus et noyau tous deux étant implémentées respectivement par "dbus-context" et "kernel-context", classes dérivées de "abstractcontext". Dans le cas où un troisième mode de communication sera envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà. La liste en question est déclarée en private static : ces propriétés permettent à toutes les classes dérivées d'hériter de l'instanciation de cette liste sans que celle-ci dépende de l'instance.
 
-\subsection{Ajouts à contextd}
+De même, pour lire cette liste, ajouter ou supprimer un élément, on utilise un vérrou (lock) afin d'éviter les accès concurrents. Ce vérrou est également déclaré en protected static, pour les mêmes raison évoquées supra concernant l'héritage et l'instanciation.
 
-\begin{figure}[hb]
+\begin{figure}[h]
 	\centering
-	\includedot{attachements/class}{.6}
+	\includedot{attachements/class}{1}
 	\caption{Schéma des classes}
 \end{figure}
 
+\subsubsection{Signaux et autres}
+
 Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
 
-Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
-
-Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistrés dans contextd, car cet action n'était pas présente.
+\begin{itemize}
+	\item Rechargement des programmes avec SIGUSR2, à la suite des settings de contextd.
+	\item Nous avons aussi rajouté un mécanisme permettant de nettoyer régulièrement la liste des clients enregistrés dans contextd, car cet action n'était pas présente. Il s'agit simplement d'un thread qui s'exécute de manière synchrone et qui vérifie que les éléments de la liste, repérés par le pid, sont toujours présents dans le fichier /proc/. Si non, il les supprime de la liste. 
+\end{itemize}
 
 De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox, claws-mail et context-notify).
 
-% Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
-%
-
-% %
-% Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
-
 NOTE : Nous partons du principe que notre travail est utilisé avec SELinux. Nous ne nous occupons pas de vérifier l'intégrité des programmes, intégrité préservée par SELinux.
 
-Notre travail dépendant intégralement des solutions sous-jacentes.
+%Notre travail dépendant intégralement des solutions sous-jacentes.
+
+\subsection{Résultats finaux}
+
+Le produit de notre travail correspond globalement à ce qui était attendu. En effet, nos tests effectués à l'aide d'un programme de test "testprog" montrent que le comportement du système est bien celui attendu. Lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel, si la transaction est autorisée, une demande de changement de domaine est envoyé à context-notify qui attend la réponse, sinon, la demande est rejetée.
+
+D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement. Cependant, les erreurs dues aux refus ne sont pas explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès).
+
+\begin{figure}[h]
+	\centering
+	\includedot{attachements/fonctionnement_apres}{1}
+	\caption{Schéma des classes}
+\end{figure}
+
+\subsection{Améliorations possibles et remarques}
+	\begin{itemize}
+		\item Les règles (regexp) des fichiers filtrés deviennent très compliquées car il faut autoriser toutes les librairies pour les programmes non compilés en statique.
+		\item Intégré les hook à SELinux. En effet, pour le moment, seul un module LSM est chargeable au niveau du noyau. Il n'est donc pas possible de déployer notre solution en cohabitation avec SELinux.
+	\end{itemize}
 
 \newpage
 
