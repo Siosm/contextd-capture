@@ -171,6 +171,8 @@ Le principe de fonctionnement est simple : un module LSM est chargé dans le noy
 
 L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
 
+\newpage
+
 \begin{figure}%[hb]
 	\centering
 	\includegraphics[scale=0.45]{attachements/lsm2.png}
@@ -179,7 +181,11 @@ L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant,
 
 Pour les besoins du développement, nous avons dû désactiver SELinux, pour nous concentrer sur notre propre module, et non sur l'intégration avec le module LSM de SELinux.
 
-\subsubsection{Implémentation}
+\newpage
+
+\section{Implémentation}
+
+\subsection{Modifications effectuées dans le noyau}
 
 Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous avons travaillé. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
 

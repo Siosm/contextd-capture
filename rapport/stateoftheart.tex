@@ -91,6 +91,10 @@ Ces deux modèles ne permettent pas d'atteindre plus d'un ou deux objectifs à l
 
 Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permettant de simplifier le travail de l'administrateur d'un système utilisant un contrôle mandataire. Le principe du contrôle d'accès mandataire consiste à attribuer des rôles à chaque utilisateur de la machine. Ces rôles donnent ainsi accès à différents éléments du système. Par exemple, les rôles d'utilisateur, d'administrateur et de webmaster peuvent être définis et un utilisateur classique pourra se voir attribuer le rôle de webmaster lui autorisant de modifier les pages disponibles sur un serveur sans avoir besoin de donner un accès administrateur complet à cette personne.
 
+\subsubsection{Application de règles de politiques par les types (Type Enforcement)}
+
+Ce principe repose sur l'association d'un context de sécurité à chaque objets et processus. L'accès à un object par un processus doit correspondre à une règle de la politique de sécurité pour être autorisé.
+
 \subsection{Solutions disponibles}
 
 \subsubsection{SELinux}
@@ -106,17 +110,37 @@ SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire
 
 Une surcouche à SELinux permettant de définir et imposer des politique de sécurité à l'echelle du système en plus des contrôles à niveau des intéractions effectués par SELinux.
 
+\begin{list}{}{}
+ \item \textbf{Contrainte pour l'administrateur :}
+ \item \textbf{Avantages :}
+\end{list}
+
 \subsubsection{iptables}
 
 iptables et un logiciel permettant de contrôler plus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. iptables est un parre-feu à états, c'est à dire qu'il garde en mémoire les intéractions précédantes opur déterminer la légitimité des interactions suivantes.
+
+\begin{list}{}{}
+ \item \textbf{Contrainte pour l'administrateur :}
+ \item \textbf{Avantages :}
+\end{list}
 
 \subsubsection{grsecurity \& PaX}
 
 \textsc{grsecurity} est une autre implémentation des mécanismes de contrôle d'accès mandataire et des listes de contrôle d'accès. Il permet aussi une gestion des droits basée sur les rôles. Souvent associé à \textsc{grsecurity}, PaX est un patch pour le noyau Linux ajoutant des restrictions et des contrôles sur les accès à la mémoire.
 
+\begin{list}{}{}
+ \item \textbf{Contrainte pour l'administrateur :}
+ \item \textbf{Avantages :}
+\end{list}
+
 \subsubsection{contextd}
 
 contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribués les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
+
+\begin{list}{}{}
+ \item \textbf{Contrainte pour l'administrateur :}
+ \item \textbf{Avantages :}
+\end{list}
 
 Pax = sécurité automatique
 SELinux, GrSec = MAC qui contrôle les accès directs
