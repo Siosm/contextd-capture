@@ -57,7 +57,7 @@ Le contrôle d'accès discrétionnaire correspond à un modèle laissant à l'ut
 
 \subsubsection{Contrôle d'accès mandataire (MAC)}
 
-Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, éventuelement matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui foment une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune intéraction puis en rajoutant progressivement des intéractions autorisées.
+Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, éventuelement matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui foment une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune intéraction puis en rajoutant progressivement des intéractions autorisées. Le contrôle d'accès mandataire correspond aux catégories trois et quatre, oû l'on ne fait pas confiance aux applications pour se reposer sur l'application d'une politique de sécurité plus ou moins fiable.
 
 % \begin{figure}[h]
 % 	\centering
@@ -73,15 +73,15 @@ Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés
 
 \begin{figure}[h]
 	\centering
-	\includesvg{attachements/bell-lp}{0.5}
+	\includesvg{attachements/bell-lp}{0.45}
 	\caption{Le modèle Bell-LaPadula}
 \end{figure}
 
-\textbf{Biba :} A contrario du modèle précédent, c'est l'intégrité qui est préservée, car seule les modifications dans un niveau de sécurité inférieur sont autorisée, et la lecture ne peut se faire que sur un niveau d'intégrité supérieur.
+\textbf{Biba :} A contrario du modèle précédent, c'est l'intégrité qui est préservée, car seules les modifications dans un niveau de sécurité inférieur sont autorisée, et la lecture ne peut se faire que sur un niveau d'intégrité supérieur.
 
 \begin{figure}[h]
 	\centering
-	\includesvg{attachements/biba}{0.5}
+	\includesvg{attachements/biba}{0.45}
 	\caption{Le modèle Biba}
 \end{figure}
 
@@ -108,13 +108,15 @@ Une surcouche à SELinux permettant de définir et imposer des politique de séc
 
 \subsubsection{iptables}
 
-iptables et un logiciel permettant de contrôler plus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur.
+iptables et un logiciel permettant de contrôler plus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. iptables est un parre-feu à états, c'est à dire qu'il garde en mémoire les intéractions précédantes opur déterminer la légitimité des interactions suivantes.
 
 \subsubsection{grsecurity \& PaX}
 
-\textsc{grsecurity} est une autre implémentation des mécanismes de contrôle d'accès mandataire et des listes de contrôle d'accès. % et basé sur les rôles.
+\textsc{grsecurity} est une autre implémentation des mécanismes de contrôle d'accès mandataire et des listes de contrôle d'accès. Il permet aussi une gestion des droits basée sur les rôles. Souvent associé à \textsc{grsecurity}, PaX est un patch pour le noyau Linux ajoutant des restrictions et des contrôles sur les accès à la mémoire.
 
 \subsubsection{contextd}
+
+contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribués les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
 
 Pax = sécurité automatique
 SELinux, GrSec = MAC qui contrôle les accès directs
