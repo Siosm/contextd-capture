@@ -13,8 +13,8 @@
    height="89.918579"
    id="svg3280"
    version="1.1"
-   inkscape:version="0.48.1 "
-   sodipodi:docname="sequece_hook.svg">
+   inkscape:version="0.48+devel r10120"
+   sodipodi:docname="sequence_hook.svg">
   <defs
      id="defs3282">
     <marker
@@ -166,7 +166,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="384.35166"
+     inkscape:cx="363.39099"
      inkscape:cy="89.791276"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -176,10 +176,10 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1280"
-     inkscape:window-height="940"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1">
+     inkscape:window-height="686"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
        id="grid3375"
@@ -196,7 +196,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -249,7 +249,7 @@
        inkscape:connector-curvature="3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1.34703887;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2.69407781, 2.69407781;stroke-dashoffset:0;marker-start:url(#StopL-8);marker-end:url(#StopL)"
-       d="m 176.80548,885.47902 138.61833,0"
+       d="m 176.80548,882.94558 138.61833,0"
        id="path2985-1-6-2-6-4"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="3" />
