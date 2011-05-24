@@ -42,6 +42,34 @@
 \texttt{Message} \emph{#1} \texttt{- #2 - #3 $\rightarrow$ #4}\\\noindent
 \rule{\linewidth}{0.4pt}
 
+
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {\immediate\write18{#3}}\fi%
+}
+
+\newcommand{\includesvg}[2]{%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includedot}[2]{%
+ \executeiffilenewer{#1.dot}{#1.pdf}%
+ {dot -T pdf -o #1.pdf #1.dot}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includepic}[2]{%
+ \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+
+
 \footnotesize\noindent\texttt{#5}
 
 \end{framed}}
@@ -76,51 +104,43 @@
 }
 
 \section{Introduction}
-\begin{frame}
-\frametitle{Context\{e|d\}}
-\begin{itemize}
-	\item Commande différents systèmes de sécurité pour autoriser une application à effectuer certaines actions
-	\item Pour fonctionner, il doit avoir connaissance :
-		\begin{itemize}
-			\item des accès aux fichiers
-			\item des noms de domaine des sites visités
-		\end{itemize}
-\end{itemize}
+\begin{frame}{Le context}
+	\begin{enumerate}
+		\item Contrôler les différents éléments accédés par les applications.
+		\item Autoriser les actions en suivant une politique bien déterminer.
+	\end{enumerate}
+	~\\
+	Jusqu'à présent : ~\\
+	~\\
+	\begin{enumerate}
+		\item Plugin développé pour chaque application.
+		\item Contextd.
+	\end{enumerate}
 \end{frame}
 
-\begin{frame}
-\frametitle{Présentation du sujet}
-\begin{itemize}
-	\item Intercepter les appels système
-	\item Récupérer des informations telles que PID, fichiers ouverts, socket créée, etc.
-	\item Envoyer ces informations dans l'espace utilisateur au démon contextd
-	\item Retourner la réponse de contextd au noyau pour débloquer l'appel système
-\end{itemize}
+\begin{frame}{Schéma de fonctionnement initial}
+	\begin{center}
+			%\includesvg{attachements/contextd_dbus}{1}
+			\includegraphics[scale=0.45]{attachements/contextd_dbus.pdf}
+	\end{center}
 \end{frame}
 
-\section{Systemtap}
-\begin{frame}
-\frametitle{Systemtap}
-\begin{center}
-	\includegraphics[scale=0.25]{attachements/kretprob.png}
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Systemtap}
-\begin{itemize}
-	\item Les scripts sont exécutés après les appels système
-	\item Impossibilité de suspendre un appel système
-	\item Les données accessibles sont inexploitables
-\end{itemize}
-~\\
-\textbf{Systemtap ne répondait absolument pas à nos besoins}
-
+\begin{frame}{Présentation du sujet}
+	\begin{block}{But :}
+		\textbf{Remplacer l'utilisation de plugin pour la plupart des applications.}
+	\end{block}
+	~\\
+	Organisation du projet en quatre étapes : 
+	\begin{itemize}
+		\item[-] Intercepter les appels système
+		\item[-] Récupérer des informations au niveau du noyau
+		\item[-] Envoyer ces informations dans l'espace utilisateur à contextd
+		\item[-] Retourner la réponse de contextd au noyau pour débloquer l'appel système
+	\end{itemize}
 \end{frame}
 
 \section{Linux Security Modules}
-\begin{frame}
-\frametitle{}
+\begin{frame}{Modules LSM}
 	\begin{itemize}
 		\item Ce sont des modules noyau
 		\item Ils permettent de "hooker" les appels système
@@ -137,19 +157,48 @@
 \end{center}
 \end{frame}
 
-\begin{frame}
-\frametitle{Notre travail}
-\begin{itemize}
-	\item Création du module LSM\\
-	\item Ajout dans le mode de configuration standard du noyau\\
-	\item Manipulation de deux "hooks"\\
+\begin{frame}{Travail produit}
+\begin{enumerate}
+	\item Création du module LSM \\
 	\begin{itemize}
-		\item file permission : appelé à chaque fois qu'un fichier est ouvert
-		\item socket bind : appelé à chaque création de socket (à venir)
+		\item Création du module
+		\item Création et implémentation des différents hooks \\
+		\begin{itemize}
+			\item file\_permission
+			\item mkdir
+			\item socket\_bind
+			\item socket\_connect
+			\item socket\_sendmsg
+			\item socket\_recvmsg
+		\end{itemize}
 	\end{itemize}
-\end{itemize}
-\textbf{Hooks principaux en ce qui concerne contextd}\\
-% \textbf{Évite de passer par ULOG pour la partie "réseau"}\\
+	\item Ajout dans le mode de configuration standard du noyau
+		\begin{itemize}
+			\item Makefiles
+			\item Kconfig
+		\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Travail produit}
+\begin{enumerate}
+\setcounter{enumi}{2}
+	\item Création de proc filesysstem \\
+	\begin{itemize}
+		\item Un dossier "contextd" (/proc/contextd/)
+		\item Deux fichiers\
+		\begin{itemize}
+			\item /proc/contextd/status
+			\item /proc/contextd/program
+		\end{itemize}
+	\end{itemize}
+	\item Création de 3 appels systèmes \\
+	\begin{itemize}
+		\item auditsec\_register (int, char *);
+		\item auditsec\_question (struct auditsec\_info *);
+		\item auditsec\_answer (int);
+	\end{itemize}
+\end{enumerate}
 \end{frame}
 
 \section{Objectifs suivants}

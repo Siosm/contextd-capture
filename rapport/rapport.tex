@@ -4,7 +4,14 @@
 \usepackage[english,francais]{babel}
 \usepackage{listings}
 \usepackage{setspace}
+\usepackage{color} 
 
+\definecolor{darkgreen}{rgb}{0.3,0.7,0.3} 
+\definecolor{blue}{rgb}{0,0,1} 
+\definecolor{red}{rgb}{0.9,0.2,0.4} 
+\definecolor{gris}{rgb}{0.95,0.95,0.95} 
+\lstset{language=make,captionpos=b,tabsize=3,frame=single,keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
+\lstset{language=C,captionpos=b,tabsize=3,frame=single,keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
 \usepackage[top=2.5cm, bottom=2.5cm, left=3.0cm, right=3.0cm, a4paper]{geometry}
 
 \usepackage{avant}
@@ -155,9 +162,12 @@ Il faut ajouter à cela que les informations recueillies à partir de Systemtap 
 
 Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
 
-\subsection{Linux Security Modules}
 
-\subsubsection{Principe de fonctionnement}
+\section{Solution retenue et implémentée}
+
+La solution retenue est axée sur les modules LSM.
+
+\subsection{Linux Security Modules}
 
 Les modules LSM sont au noyau ce que netfilter est au réseau.
 
@@ -179,11 +189,9 @@ L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant,
 
 Pour les besoins du développement, nous avons dû désactiver SELinux, pour nous concentrer sur notre propre module, et non sur l'intégration avec le module LSM de SELinux.
 
-\subsubsection{Implémentation}
+\subsection{Détail de la solution}
 
-Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous avons travaillé. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
-
-Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en suivant les conventions de nommage des options de configuration.
+Nous avons donc décider de nous orienter vers l'implémentation d'un module LSM. Grâce aux "hook", et notamment la fonction "file\_permission", nous pouvons contrôler les différents accès aux ressources systèmes telles que les fichiers (binaire ou texte).
 
 Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hook" pouvoir surveiller les connexions réseau.
 
@@ -205,7 +213,7 @@ Nous avons donc dû étudier également le fonctionnement du démon contextd. Il
 
 Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (User space) là où opère contextd. 
 
-\subsection{La communication entre contextd et le noyau}
+\subsection{Problématique de la communication entre contextd et le noyau}
 
 Compte tenu du fonctionnement de contextd, il a fallut développé un système de communication entre le noyau et contextd.
 
@@ -260,13 +268,9 @@ L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître d
 	\end{itemize}
 
 
-\subsection{Intéractions entre un processus, le noyau et contextd}
+\subsubsection{Classes de communication}
 
 Compte tenu de ce qui a été précédemment dit, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec les processus via le noyau. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par un canal dbus.
-
-\subsection{Ajouts à contextd}
-
-\subsubsection{Classes de communication}
 
 Cette communication se faisait grâce à la classe "dbus-context". Cette classe traitait les solicitations des clients (programmes), les enregistrait dans une liste (attribut privé) et s'occupait des transitions, cette liste (Qmap) était indexée par le dbus\_id.
 
@@ -295,7 +299,685 @@ De plus, notre solution nécessitant maintenant l'enregistrement des programmes 
 
 \textit{\textsl{\textbf{Nota bene :}}} Nous partons du principe que notre travail est/sera utilisé avec SELinux, même s'il ce n'est pas possible actuellement. Nous n'effectuons aucune vérification d'intégrité sur les programmes surveillés par contextd. Cette intégrité est en principe assurée par les politiques SELinux et/ou les règles PIGA.
 
-%Notre travail dépendant intégralement des solutions sous-jacentes.
+\section{Implémentation}
+
+\subsection{Ajout du module dans le menuconfig et la compilation du noyau}
+
+Premièrement, nous avons donc développé un module LSM qui "hook" les appels système. Pour ce faire, nous avons créé un dossier "auditsec" dans \textit{{kernel\_src}/security/}. C'est dans ce dossier que nous allons mettre toutes nos sources (appels système, hook, etc.) ainsi qu'un sous dossier \textit{{kernel\_src}/security/includes} pour nos .h.  
+
+Ensuite,  pour avoir la possibilité d'activer ou non ce module lors de la compilation du noyau (suivant les conventions de nommage des options de configuration) il a fallu ajouter la ligne suivante dans \textit{{kernel\_src}/security/Kconfig} afin d'indiquer d'aller voir dans le nouveau dossier.
+
+
+\begin{lstlisting}[language=make]
+source security/auditsec/Kconfig
+\end{lstlisting}
+
+Il faut ajouter également un fichier Kconfig dans le dossier \textit{{kernel\_src}/security/auditsec} pour définir la description, le type de variable et le texte du menuconfig. Dans ce fichier, on insère les lignes suivantes :
+
+\begin{lstlisting}[language=make]
+config SECURITY_AUDITSEC
+bool "Userspace contextd capture LSM hook"
+depends on AUDIT && NET && INET
+select NETWORK_SECMARK
+default n
+help
+ Module pour communiquer avec contextd pour la gestion d'applications en userspace.
+\end{lstlisting}
+
+La description des différentes lignes ci-dessus :
+\begin{itemize}
+	\item Nom de la variable. On pourra l'utiliser avec des "\#ifdef" dans le code C. La variable sera alors "CONFIG\_SECURITY\_AUDITSEC".
+	\item Type de variable pour menuconfig (ici bouléen)
+	\item De quel autre partie de configuration notre module a besoin.
+	\item
+	\item Par défaut, le module est désactivé.
+	\item La description
+\end{itemize}
+
+ Pour que ce dossier soit pris en compte lors de la compilation, il faut rajouter la ligne suivante dans \textit{{kernel\_src}/security/Makefile} :
+
+\begin{lstlisting}[language=make]
+subdir-$(CONFIG_SECURITY_AUDITSEC)  += auditsec	
+obj-$(CONFIG_SECURITY_AUDITSEC)     += auditsec/built-in.o
+\end{lstlisting}
+
+Puis, il faut ajouter un Makefile dans notre dossier \textit{{kernel\_src}/security/auditsec/Makefile} :
+
+\begin{lstlisting}[language=make]
+obj-$(CONFIG_SECURITY_AUDITSEC) := audit_security.o
+ 
+audit_security-y := hooks.o share.o syscall.o
+
+EXTRA_CFLAGS += -Isecurity/auditsec/include
+$\end{lstlisting}
+
+Ceci fait, tout est désormais prêt pour la compilation. Maintenant, passons à la création d'un module LSM. L'implémentation de ce module a été faite dans le fichier \textit{{kernel\_src}/security/auditsec/hook.c}. 
+
+\subsection{Création des éléments nécessaire au module}
+
+La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différents fonctions à appeler lorsqu'un appel système est demandé. Voici donc la structure de notre module.
+
+\begin{lstlisting}[language=C]
+static struct security_operations audit_ops = {
+	.name =             "audit_ops", // nom 
+	.inode_mkdir =                  auditsec_inode_mkdir,
+	.file_permission =              auditsec_file_permission,
+	.socket_bind =                  auditsec_socket_bind,
+	.socket_connect =               auditsec_socket_connect,
+	.socket_sendmsg =               auditsec_socket_sendmsg,
+ 	.socket_recvmsg =               auditsec_socket_recvmsg
+ };
+\end{lstlisting}
+
+Il faut donc ajouter le code de ces six hooks. Pour connaître la signature de ces fonctions, il faut aller voir dans \textit{{kernel\_src}/security/security.c}. 
+
+Par exemple, voici le code de la fonction auditsec\_file\_permission:
+
+\begin{lstlisting}[language=C]
+int auditsec_file_permission(struct file *file, int mask)
+{
+	int		answer = -1;
+	int		ret = 0;
+	pid_t 	current_pid = task_pid_nr(current);
+	char *	fullpath = NULL;
+
+	if(prog_is_monitored()){ // On teste si le programme est surveille
+		fullpath = kmalloc(PATH_MAX + 1, GFP_NOFS);
+		if(fullpath == NULL){
+			printk(KERN_INFO "AuditSec: file access: pid: %d, execname: %s, mask: %d NO MEM",
+					current_pid, current->comm, mask);
+			return -ENOMEM;
+		}
+		file_path(file, fullpath);
+		if(*daemon_launched()){  // On teste si contextd est lance.
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
+					fullpath, current_pid, current->comm, mask);
+				kfree(fullpath);
+				return -EFAULT;
+			}
+			
+			// On remplit la structure
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->pid = current_pid;
+			k_auditsec_info()->type = AUDITSEC_FILE;
+			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
+			k_auditsec_info()->auditsec_struct.file.mask = mask;
+			
+			// La structure est prete, on leve le verrou pour que contextd puisse la recuperer
+			up(auditsec_question_lock());
+			
+			// On attend la reponse
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
+				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
+					fullpath, current_pid, current->comm, mask);
+				kfree(fullpath);
+
+				ret = down_trylock(auditsec_question_lock());
+				up(auditsec_hook_lock());
+				return -EFAULT;
+			}
+
+			kfree(fullpath);
+			
+			// On a eu la reponse			
+			answer = (*auditsec_answer() == 0);
+			up(auditsec_hook_lock());
+
+			// On autorise ou non suivant la reponse (0 oui - -EACCES non)
+			return answer == 0 ? 0 : -EACCES;
+		}else{
+			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
+				fullpath, task_pid_nr(current), current->comm, mask);
+			kfree(fullpath);
+			return -EFAULT;
+		}
+	}else{
+		/*printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
+				fullpath, task_pid_nr(current), current->comm, mask);
+			kfree(fullpath);*/
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Liste des programmes surveillés}
+
+Comme on peut le voir, le code de ce "hook" fait appelle à plusieurs élements. Tout d'abord, on teste si le programme qui a déclenché ce "hook" est surveillé par contextd. Pour ce faire, on a crée une liste au niveau du noyau contenant l'ensemble des programmes surveillés par contextd. On traitera plus tard de la manière dont cette liste est mise à jour. 
+
+Nous définissons une structure pour stocker un programme :
+
+\textit{{kernel\_src}/security/auditsec/include/share.h} :
+\begin{lstlisting}{language=C}
+struct prog {
+	char execname[TASK_COMM_LEN];
+	struct list_head list;
+};
+\end{lstlisting}
+
+Puis nous déclarons et implémentons la liste dynamique:
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting}[language=C]
+static LIST_HEAD(prog_list);
+
+char * prog_liste()
+{
+	char * result = NULL;
+	char * tmp = NULL;
+	int alloc = 20 * (TASK_COMM_LEN + 1);
+	int res_len = 0;
+	struct prog * p;
+	
+	result = kmalloc(sizeof(char) * alloc, GFP_NOFS);
+	if(result == NULL){
+		printk(KERN_INFO "AuditSec: Can't allocate mem for /proc/contextd/programs");
+		return NULL;
+	}
+
+	list_for_each_entry(p, &prog_list, list){
+		if((res_len + TASK_COMM_LEN + 1) < alloc){
+			res_len += sprintf(result + res_len, "%s\n", p->execname);
+		}else{
+			alloc += 20 * (TASK_COMM_LEN + 1);
+			tmp = kmalloc(sizeof(char) * alloc, GFP_NOFS);
+			strncpy(tmp, result, alloc);
+			kfree(result);
+			result = tmp;
+			res_len += sprintf(result + res_len, "%s\n", p->execname);
+		}
+	}
+
+	return result;
+}
+\end{lstlisting} 
+
+Maintenant, pour tester si une application appartient à cette liste, nous faisons appel à la fonction suivante :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting} [language=C]
+int prog_is_monitored()
+{
+	char current_task_comm[TASK_COMM_LEN];
+	struct prog * p;
+
+	get_task_comm(current_task_comm, current);
+	list_for_each_entry(p, &prog_list, list){
+		if(strncmp(p->execname, current_task_comm, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s is monitored", current_task_comm);
+			return 1;
+		}
+	}
+	return 0;
+}
+\end{lstlisting} 
+
+Enfin, il faut pouvoir ajouter ou supprimer des éléments de cette liste. Nous avons implémenté pour cela les fonctions suivantes :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting} [language=C]
+int register_prog(char * prog_name)
+{
+	struct prog * p;
+
+	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
+			return -1;
+		}
+	}
+
+	p = kmalloc(sizeof(*p), GFP_NOFS);
+	if(p == NULL){
+		return -ENOMEM;
+	}
+	strncpy(p->execname, prog_name, TASK_COMM_LEN);
+	INIT_LIST_HEAD(&p->list);
+
+	list_add(&p->list, &prog_list);
+	printk(KERN_INFO "AuditSec: Prog %s registered", prog_name);
+	return 0;
+}
+
+
+int unregister_prog(char * prog_name)
+{
+	struct prog * p;
+
+	if(list_empty(&prog_list) != 0){
+		printk(KERN_INFO "AuditSec: Prog list empty !");
+		return -1;
+	}
+
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			list_del(&p->list);
+			kfree(p);
+			printk(KERN_INFO "AuditSec: Unregistering prog %s", prog_name);
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+
+int clean_prog_list()
+{
+	struct prog * p, * next_p;
+
+	printk(KERN_INFO "AuditSec: Cleanning prog list");
+
+	list_for_each_entry_safe(p, next_p, &prog_list, list) {
+		list_del(&p->list);
+		kfree(p);
+	}
+
+	if(list_empty(&prog_list) == 0){
+		printk(KERN_INFO "AuditSec: Prog list NOT empty !");
+		return -1;
+	}
+
+	return 0;
+}
+\end{lstlisting} 
+
+\subsubsection{Structure transmise}
+
+Une fois les tests effectués, le "hook" remplie une structure. Nous avons opté pour une structure "dynamique" plutôt qu'une multitude de structure car en effet, les données sont différentes selon le "hook" surveillé.
+
+La partie principale de cette structure est la suivante :
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR, AUDITSEC_MSG};
+
+struct auditsec_info {
+    pid_t       pid;
+    char        execname[TASK_COMM_LEN];
+    //FIXME Add SELinux context to this struct
+    enum        auditsec_type type;
+    union
+    {  
+        struct auditsec_file file;
+        struct auditsec_socket socket;
+        struct auditsec_dir dir;
+        struct auditsec_msg msg;
+    } auditsec_struct;
+};
+\end{lstlisting} 
+
+Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créer différentes autres structures pour chaque type de "hook".
+
+Concernant les fichiers : 
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+struct auditsec_file {
+    char        name[NAME_MAX + 1];
+    char        fullpath[PATH_MAX + 1];
+    int         mask;
+};
+\end{lstlisting} 
+
+Concernant les dossiers : 
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+struct auditsec_dir {
+    char        name[NAME_MAX + 1];
+    char        fullpath[PATH_MAX + 1];
+    int         mode;
+};
+\end{lstlisting} 
+
+Concernant les sockets : 
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+enum socket_type {AUDITSEC_IPV4, AUDITSEC_IPV6};
+
+struct auditsec_socket {
+    enum        socket_type type;
+    union
+    {
+        struct sockaddr_in  addr4; // Adresse ip V4
+        struct sockaddr_in6  addr6; // Adresse ip V6
+    } addr;
+};
+
+struct auditsec_msg {
+    struct msghdr msg;
+    int size;
+};
+\end{lstlisting} 
+
+\subsection{Création du module}
+
+Maintenant que tous les éléments nécessaires sont définis, il faut maintenant implémenter la fonction d'initialisation du module. Lors de cette initialisation, doivent être créés les "proc files" ainsi que les fonctions nécessaires pour les lire et/ou écrire dedans.
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+static __init int auditsec_init(void)
+{
+	struct proc_dir_entry * auditsec_proc_programs, *auditsec_proc_status, *auditsec_dir;
+
+	if (!security_module_enable(&audit_ops)) {
+		printk(KERN_INFO "AuditSec: Abort initialization.\n");
+		return 0;
+	}
+
+	printk(KERN_INFO "AuditSec: Initializing.\n");
+
+	if (register_security(&audit_ops))
+		panic("AuditSec: Unable to register with kernel.\n");
+
+	init_MUTEX(auditsec_hook_lock());
+	init_MUTEX(auditsec_question_lock());
+	init_MUTEX(auditsec_answer_lock());
+
+	down(auditsec_question_lock());
+	down(auditsec_answer_lock());
+
+	// Create dir in /proc
+	auditsec_dir = proc_mkdir(PROC_AUDITSEC_DIR, NULL);
+
+	if (auditsec_dir == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/ directory", PROC_AUDITSEC_DIR);
+		return -ENOMEM;
+	}
+
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which lists registered programs
+	auditsec_proc_programs = create_proc_entry(PROC_AUDITSEC_PROGRAM, 0400, auditsec_dir);
+
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_PROGRAM);
+		remove_proc_entry(PROC_AUDITSEC_PROGRAM, auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_programs->read_proc    = auditsec_proc_programs_read;
+	auditsec_proc_programs->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_programs->uid          = 0;
+	auditsec_proc_programs->gid          = 0;
+	auditsec_proc_programs->size         = 0;
+
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which gives the current status and
+	// the opportunity to change it
+	auditsec_proc_status = create_proc_entry(PROC_AUDITSEC_STATUS, 0600, auditsec_dir);
+
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_STATUS);
+		remove_proc_entry(PROC_AUDITSEC_STATUS, auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_status->read_proc    = auditsec_proc_status_read;
+	auditsec_proc_status->write_proc   = auditsec_proc_status_write;
+	auditsec_proc_status->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_status->uid          = 0;
+	auditsec_proc_status->gid          = 0;
+	auditsec_proc_status->size         = 0;
+
+	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
+
+	return 0;
+}
+
+security_initcall(auditsec_init);
+\end{lstlisting}
+
+\subsubsection{Fonctions de lecture pour \textit{/proc/contextd/programs}}
+
+L'initialisation du module et la création des proc files nécessite l'implémentation également des fonctions qui permettront la lecture et l'écriture dans ces fichiers. Pour pouvoir lire le fichier \textit{/proc/contextd/programs}, nous avons implémenté la fonction suivante :
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+int auditsec_proc_programs_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result = 0;
+	char * tmp = NULL;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		tmp = prog_liste();
+		result = sprintf(buffer, "%s", tmp);
+		kfree(tmp);
+	}
+
+	return result;
+}
+\end{lstlisting}
+
+\subsubsection{Fonctions de lecture/écriture pour \textit{/proc/contextd/status}}
+
+Concernant ce proc file, il faut deux fonctions car il est accessible en lecture et écriture. En lecture il fournit le pid qu'il considère comme être celui de contextd ; en écriture, il permet, si on envoie "0" de désactiver la surveillance et de vider la liste des programmes surveillés.
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+int auditsec_proc_status_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		result = sprintf(buffer, "%d\n", *contextd_pid());
+	}
+
+	return result;
+}
+
+int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned long count, void *data)
+{
+	long lecture;
+	char tmp[count + 1];
+	char ** tmp2 = NULL;
+
+	if(copy_from_user(tmp, buffer, count)){ 
+		return -EFAULT;
+	}
+
+	tmp[count] = '\0';
+
+	lecture = simple_strtol(tmp, tmp2, 10);
+
+	if (lecture == 0){
+		*daemon_launched() = false;
+		*contextd_pid() = -1;
+		clean_prog_list();
+	}
+
+	return 0;
+}
+\end{lstlisting}
+
+Voici donc le module LSM complet et fonctionnel. Nous avons vu comment étaient implémentées les différentes composantes dont il a besoin pour fonctionner.
+
+\subsection{Les appels système}
+
+Maintenant, voyons comment sont implémentés les appels système.
+
+\subsubsection{ausitsec\_reg}
+
+Cet appel système a une triple fonction :
+\begin{itemize}
+	\item Enregistrer contextd auprès du noyau.
+	\item Ajouter les programmes surveillés.
+	\item Dé-enregistrer et nettoyer les éléments de la liste. 
+\end{itemize}
+
+Voici le code source de cet appel système :
+
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
+{
+	// Contextd isn't registered yet
+	if(*contextd_pid() == -1){
+		if(state == 1){
+			if(process_name == NULL){
+				*contextd_pid() = task_tgid_nr(current);
+				*daemon_launched() = true;
+				printk(KERN_INFO "AuditSec: The daemon is now considered launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: The daemon is not launched: can't register a program !");
+				return 0;
+			}
+		}else if(state == 0){
+			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already stopped");
+			return 0;
+		}else{
+			printk(KERN_INFO "AuditSec: Invalid state provided !");
+			return 0;
+		}
+
+	// Contextd is already registered
+	}else if(*contextd_pid() == task_tgid_nr(current)){
+		if(state == 1){
+			if(process_name == NULL){
+				printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
+				if(register_prog(process_name) == 0){
+					printk(KERN_INFO "AuditSec: Program registered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Program NOT registered: %s", process_name);
+					return -1;
+				}
+			}
+		}else if(state == 0){
+			if(process_name == NULL){
+				*contextd_pid() = -1;
+				*daemon_launched() = false;
+				clean_prog_list();
+				printk(KERN_INFO "AuditSec: The daemon is now considered stopped. Program list emptied");
+				return 0;
+			}else{
+				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
+				if(unregister_prog(process_name) == 0){
+					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Error: Program: %s", process_name);
+					return -1;
+				}
+			}
+		}
+
+	// Contextd is registered but access is denied to other process
+	}else{
+		printk(KERN_INFO "AuditSec: You're not contextd");
+	}
+	printk(KERN_INFO "AuditSec: No action performed");
+	return -EFAULT;
+}
+\end{lstlisting}
+
+\subsubsection{ausitsec\_question}
+
+Cet appel système attend, grâce aux jeux des verrous que la structure de données soit remplie par le "hook".
+
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
+{
+	if(*daemon_launched() == false){
+		printk(KERN_INFO "AuditSec: The daemon is not launched");
+		return -EFAULT;
+	}
+
+	if(*contextd_pid() != task_tgid_nr(current)){
+		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
+		return -EFAULT;
+	}
+
+	if(down_interruptible(auditsec_question_lock()) != 0){
+		printk(KERN_INFO "AuditSec: Can't get the question lock or interrupted");
+		return -EFAULT;
+	}
+
+	// FIXME faire des tests sur le pointeur donne par le process en userspace
+	if(likely(user_as_i != NULL)){
+		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
+// 			printk(KERN_INFO "AuditSec: pid: %d, execname: %s, file: %s (%d) COPIED",
+//				   user_as_i->pid, user_as_i->execname, user_as_i->auditsec_struct.file.fullpath, strlen(user_as_i->auditsec_struct.file.fullpath));
+			return 0;
+		}
+	}
+	// If an error occured during the copy, the transaction is rejected
+	*auditsec_answer() = false;
+	up(auditsec_answer_lock());
+	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace.", task_pid_nr(current));
+
+	return -EFAULT;
+}
+\end{lstlisting}
+
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+struct semaphore * auditsec_hook_lock()
+{
+	static DECLARE_MUTEX(auditsec_hook_lock);
+	return &auditsec_hook_lock;
+}
+
+
+struct semaphore * auditsec_question_lock()
+{
+	static DECLARE_MUTEX(auditsec_question_lock);
+	return &auditsec_question_lock;
+}
+
+
+struct semaphore * auditsec_answer_lock()
+{
+	static DECLARE_MUTEX(auditsec_answer_lock);
+	return &auditsec_answer_lock;
+}
+\end{lstlisting}
+
+\subsubsection{auditsec\_answer}
+
+Cet appel système transmet la réponse de contextd au noyau. Voici son implémentation :
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_answer(int __user answer)
+{
+	if(*daemon_launched() == false){
+		printk(KERN_INFO "AuditSec: The daemon is not launched");
+		return -EFAULT;
+	}
+
+	if(*contextd_pid() != task_tgid_nr(current)){
+		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
+		return -EFAULT;
+	}
+
+	*auditsec_answer() = answer;
+// 	printk(KERN_INFO "AuditSec: answer = %d ; affectation = %d", answer, *auditsec_answer());
+	up(auditsec_answer_lock());
+
+	return 0;
+}
+\end{lstlisting}
+
+Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision si le noyau donne l'accès ou non à la ressource demandée.
+
+\subsection{Modification de contextd}
+
+Maintenant, voyons les modifications apportées à contextd. 
+
 
 \subsection{Résultats finaux}
 
