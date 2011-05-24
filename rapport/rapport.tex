@@ -252,17 +252,15 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
-% FIXME
-L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître du noyau n'est pas tout à fait sûr. En effet, il n'est pas exclu qu'un program malveillant puisse s'enregistrer auprès du noyau via cet appel système sans que ce soit contextd. Une solution d'enregistrement sécurisé et sûre est à envisager à l'avenir.
-% FIXME
+Une fois que contextd est enregistré, toute nouvelle tentative d'enregistrement échouera. Il sera nécessaire de quitter contextd avant d'effectuer un nouvel enregistrement. Cela permet de limiter la communication par l'intermédiaire de cet appel, pour l'enregistrement et la désincription des programmes à surveiller.
 
 \subsubsection{L'interface présentée à l'administrateur}
 
-	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux "proc files" :
+	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux fichiers dans l'arborescence /proc :
 
 	\begin{itemize}
 		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule afin de ne pas permettre un acte malveillant consistant à ajouter ou supprimer un programme de manière intempestive.
-		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste.
+		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste. Il est donc impératif que ce dossier ne soit pas accessible par défaut à un utilisateur non privilégié.
 	\end{itemize}
 
 
@@ -315,19 +313,21 @@ D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne p
 	\caption{Schéma des classes}
 \end{figure}
 
-\subsection{Améliorations possibles et remarques}
+\subsection{Poursuite du projet}
+
+Les éléments suivant restent à réaliser avant d'envisager l'intégration de notre travail dans PIGA-OS :
 	\begin{itemize}
-		\item Les règles (regexp) des fichiers filtrés deviennent très compliquées car il faut autoriser toutes les librairies pour les programmes non compilés en statique.
-		\item Intégré les hook à SELinux. En effet, pour le moment, seul un module LSM est chargeable au niveau du noyau. Il n'est donc pas possible de déployer notre solution en cohabitation avec SELinux.
+		\item Les règles à fournir à contextd pour définir les accès autorisés pour un programme deviennent rapidement compliquées car elles doivent être exhaustives (il faut notament autoriser le chargement de toutes les librairies pour les programmes non compilés en statique, ...). L'usage des expressions régulières réduit cet impact mais ne résout pas le prblème.
+		\item Nous avons pris pour base un module LSM vide. Il faut en revanche intégrer nos modifications au module SELinux pour pouvoir faire fonctionner notre solution avec PIGA-OS. Il faudrait aussi envisager la solution des empilements de modules LSM et s'assurer de l'usage de notre module.
 	\end{itemize}
 
 \newpage
 
-\section{Résultats et benchmarks}
-
-Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
-
-\newpage
+% \section{Résultats et benchmarks}
+% 
+% Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
+% 
+% \newpage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
@@ -365,6 +365,10 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 \bibitem{QNX} QNX Realtime Operating System, \url{http://www.qnx.com}
 
 \bibitem{ITXT} Intel Trusted Execution Technology (TXT), \url{http://www.intel.com/technology/malwarereduction/index.htm}
+
+\bibitem{PIGA}, Jérémy Briffaut, Martin Peres, Jonathan Rouzaud-Cornabas, Jigar Solanki, Christian Toinard, Benjamin Venelle, \textit{PIGA-OS : Retour sur le système d'exploitation vainqueur du défi sécurité}
+
+\bibitem{PIGA2}, Jérémy Briffaut, Jean-François Lalande, Christian Toinard, \textit{Formalization os security properties : enforcement for mac operating systems and verification of dynamic mac policies}, International journal on advances in security, 2:325-343, 2009
 
 \end{thebibliography}
 

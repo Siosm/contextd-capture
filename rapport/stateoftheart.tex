@@ -91,15 +91,15 @@ Ces deux modèles ne permettent pas d'atteindre plus d'un ou deux objectifs à l
 
 Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permettant de simplifier le travail de l'administrateur d'un système utilisant un contrôle mandataire. Le principe du contrôle d'accès mandataire consiste à attribuer des rôles à chaque utilisateur de la machine. Ces rôles donnent ainsi accès à différents éléments du système. Par exemple, les rôles d'utilisateur, d'administrateur et de webmaster peuvent être définis et un utilisateur classique pourra se voir attribuer le rôle de webmaster lui autorisant de modifier les pages disponibles sur un serveur sans avoir besoin de donner un accès administrateur complet à cette personne.
 
-\subsubsection{Application de règles de politiques par les types (Type Enforcement)}
+\subsubsection{Application de règles de politiques securité par les types (Type Enforcement)}
 
-Ce principe repose sur l'association d'un context de sécurité à chaque objets et processus. L'accès à un object par un processus doit correspondre à une règle de la politique de sécurité pour être autorisé.
+Ce principe repose sur l'association d'un contexte de sécurité à chaque objets et processus. L'accès à un object par un processus doit correspondre à une règle de la politique de sécurité pour être autorisé. 
 
 \subsection{Solutions disponibles}
 
 \subsubsection{SELinux}
 
-SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler à chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décission est prise indépendamment des précédantes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
+SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire basé sur le ``type enforcement'', de niveau de sécurité/confidentialité non prédéfinis, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler à chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décission est prise indépendamment des précédantes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
 
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux.
@@ -108,12 +108,14 @@ SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire
 
 \subsubsection{PIGA}
 
-Une surcouche à SELinux permettant de définir et imposer des politique de sécurité à l'echelle du système en plus des contrôles à niveau des intéractions effectués par SELinux.
+L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notement d'une surcouche à SELinux permettant de définir et imposer des propriétés de sécurité à l'echelle du système en plus des contrôles au niveau des intéractions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des intéractions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'information dans un système, qu'ils soient directs ou indirects.
 
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :}
- \item \textbf{Avantages :}
+ \item \textbf{Contrainte pour l'administrateur :} Connaissance du langage de définition de propriété PIGA, maîtrise préalable de SELinux, prérequis matériels pour la ``compilation'' des politiques.
+ \item \textbf{Avantages :} Un contrôle très fin sur les intéractions dans un système, restriction (statique) des privilèges maximale.
 \end{list}
+
+Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a été vainqueur du concours Sec\&Si organisé par l'Agence Nationale pour la Recherche (ANR) \cite{PIGA}\cite{PIGA2}.
 
 \subsubsection{iptables}
 
@@ -133,7 +135,7 @@ iptables et un logiciel permettant de contrôler plus facilement netfilter, le p
  \item \textbf{Avantages :}
 \end{list}
 
-\subsubsection{contextd}
+\subsubsection{PIGA-SYSTRANS ou contextd}
 
 contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribués les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
 
