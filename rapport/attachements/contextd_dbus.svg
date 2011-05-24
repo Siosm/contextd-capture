@@ -9,11 +9,11 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="640px"
-   height="480px"
+   width="854.18762"
+   height="359.60007"
    id="svg3217"
    version="1.1"
-   inkscape:version="0.48.1 r9760"
+   inkscape:version="0.48+devel r10120"
    sodipodi:docname="contextd_dbus.svg">
   <defs
      id="defs3219">
@@ -277,17 +277,29 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6568542"
-     inkscape:cx="507.55088"
-     inkscape:cy="325.0784"
+     inkscape:zoom="0.99999999"
+     inkscape:cx="320.37952"
+     inkscape:cy="148.6746"
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
-     showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1150"
-     inkscape:window-x="-2"
-     inkscape:window-y="-3"
-     inkscape:window-maximized="1" />
+     showgrid="true"
+     inkscape:window-width="1280"
+     inkscape:window-height="686"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid102"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
   <metadata
      id="metadata3222">
     <rdf:RDF>
@@ -303,13 +315,14 @@
   <g
      id="layer1"
      inkscape:label="Layer 1"
-     inkscape:groupmode="layer">
+     inkscape:groupmode="layer"
+     transform="translate(131.09375,-18.806235)">
     <rect
-       style="fill:none;stroke:#000000;stroke-width:2.04214358;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.4000001;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:2.04662228;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.4000001;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect3066-6"
-       width="755.96118"
+       width="759.28058"
        height="56.093288"
-       x="-127.77435"
+       x="-131.09375"
        y="321.28134" />
     <rect
        style="fill:none;stroke:#000000;stroke-width:1.20164073;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.4000001;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
@@ -345,12 +358,12 @@
        width="116.36021"
        height="24.168987"
        x="605.74023"
-       y="100.19017" />
+       y="100.93331" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot3410"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(136,269)"><flowRegion
+       transform="translate(147.57343,270.37013)"><flowRegion
          id="flowRegion3412"><rect
            id="rect3414"
            width="106"
@@ -361,7 +374,7 @@
        xml:space="preserve"
        id="flowRoot3418"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(-280,129)"><flowRegion
+       transform="translate(-281.11692,128.08712)"><flowRegion
          id="flowRegion3420"><rect
            id="rect3422"
            width="187"
@@ -372,7 +385,7 @@
        xml:space="preserve"
        id="flowRoot3426"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(58,-126)"><flowRegion
+       transform="translate(58.850204,-126.33749)"><flowRegion
          id="flowRegion3428"><rect
            id="rect3430"
            width="407"
@@ -383,7 +396,7 @@
        xml:space="preserve"
        id="flowRoot3434"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(260,-288)"><flowRegion
+       transform="translate(259.14903,-274.9155)"><flowRegion
          id="flowRegion3436"><rect
            id="rect3438"
            width="252"
@@ -394,7 +407,7 @@
        xml:space="preserve"
        id="flowRoot3446"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="matrix(0.63834511,0,0,0.63834511,325.04279,-108.20384)"><flowRegion
+       transform="matrix(0.63834511,0,0,0.63834511,326.89157,-109.02084)"><flowRegion
          id="flowRegion3448"><rect
            id="rect3450"
            width="220"
@@ -405,7 +418,7 @@
        xml:space="preserve"
        id="flowRoot3454"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(52,175)"><flowRegion
+       transform="translate(50.834892,175.42632)"><flowRegion
          id="flowRegion3456"><rect
            id="rect3458"
            width="262"
@@ -425,7 +438,7 @@
        width="116.36021"
        height="24.168987"
        x="473.49695"
-       y="99.655624" />
+       y="99.322495" />
     <rect
        style="fill:none;stroke:#000000;stroke-width:0.98032063;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.4000001;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect3068-6-7-7-4-9-5-4"
@@ -439,12 +452,12 @@
        width="116.36021"
        height="24.168987"
        x="336.49695"
-       y="100.65562" />
+       y="100.32249" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot3434-6"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(-8.125,-289.45004)"><flowRegion
+       transform="translate(-10.094223,-274.45004)"><flowRegion
          id="flowRegion3436-5"><rect
            id="rect3438-6"
            width="252"
@@ -455,7 +468,7 @@
        xml:space="preserve"
        id="flowRoot3434-3"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="translate(126.875,-290.45004)"><flowRegion
+       transform="translate(126.90578,-275.45004)"><flowRegion
          id="flowRegion3436-7"><rect
            id="rect3438-4"
            width="252"
@@ -466,7 +479,7 @@
        xml:space="preserve"
        id="flowRoot3446-2"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="matrix(0.63834511,0,0,0.63834511,198.97124,-111.03865)"><flowRegion
+       transform="matrix(0.63834511,0,0,0.63834511,194.64829,-110.63166)"><flowRegion
          id="flowRegion3448-5"><rect
            id="rect3450-4"
            width="220"
@@ -477,7 +490,7 @@
        xml:space="preserve"
        id="flowRoot3446-2-4"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-       transform="matrix(0.63834511,0,0,0.63834511,60.971237,-110.03865)"><flowRegion
+       transform="matrix(0.63834511,0,0,0.63834511,57.648288,-109.63167)"><flowRegion
          id="flowRegion3448-5-4"><rect
            id="rect3450-4-3"
            width="220"
