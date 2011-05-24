@@ -1,4 +1,4 @@
-\documentclass[pdftex,a4paper,titlepage,11pt,openright]{article}
+\documentclass[pdftex,a4paper,titlepage,11pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english,francais]{babel}
@@ -12,7 +12,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE,RO]{\itshape\thepage}
+\fancyhead[RO]{\itshape\thepage}
 % \fancyhead[LO]{\itshape\rightmark}
 % \fancyhead[RE]{\itshape\leftmark}
 \renewcommand{\headrulewidth}{0.5pt}
@@ -305,7 +305,7 @@ D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne p
 
 \begin{figure}[h]
 	\centering
-	\includedot{attachements/fonctionnement_apres}{1}
+	\includesvg{attachements/fonctionnement_apres}{1}
 	\caption{Schéma des classes}
 \end{figure}
 
@@ -334,8 +334,8 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 % Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDTE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
 
 \newpage
-\addcontentsline{toc}{section}{Annexes}
-\addcontentsline{toc}{subsection}{Liens et références}
+% \addcontentsline{toc}{section}{Annexes}
+\addcontentsline{toc}{section}{Références}
 
 % \subsection*{Liens et références}
 \begin{thebibliography}{40}
@@ -352,6 +352,10 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 \bibitem{WCS} \textit{Wikipedia : Computer Security}, \url{http://en.wikipedia.org/wiki/Computer_security}
 
 \bibitem{SOURCE} Code source (kernel 2.6.32 hardened r22, piga-systrans, et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle Contextd Capture), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+
+\bibitem{TIOF} P...
+
+\bibitem{QNX} QNX Realtime Operating System, \url{http://www.qnx.com}
 
 \end{thebibliography}
 
