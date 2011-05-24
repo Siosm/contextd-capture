@@ -42,7 +42,7 @@
 
 \newcommand{\includesvg}[2]{%
  \executeiffilenewer{#1.svg}{#1.pdf}%
- {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=500}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
  %\input{#1.eps_tex}%
  \includegraphics[scale=#2]{#1.pdf}
 }
@@ -55,7 +55,7 @@
 }
 
 \newcommand{\includepic}[2]{%
- \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=500}%
+ \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
  \includegraphics[scale=#2]{#1.pdf}
 }
 
@@ -211,7 +211,7 @@ Compte tenu du fonctionnement de contextd, il a fallut développé un système d
 
 \begin{figure}[hb]
 	\centering
-	\includesvg{attachements/fonctionnement_avant}{1}
+	\includesvg{attachements/fonctionnement_avant}{1.6}
 	\caption{Communication entre contextd et les applications}
 \end{figure}
 
@@ -278,8 +278,8 @@ De même, pour lire cette liste, ajouter ou supprimer un élément, on utilise u
 
 \begin{figure}[h]
 	\centering
-	\includedot{attachements/class}{1}
-	\caption{Schéma des classes}
+	\includedot{attachements/class}{.8}
+	\caption{Diagramme de classes}
 \end{figure}
 
 \subsubsection{Surveillance et enregistrement dynamique}
@@ -305,7 +305,7 @@ D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne p
 
 \begin{figure}[h]
 	\centering
-	\includedot{attachements/fonctionnement_apres}{1}
+	\includesvg{attachements/fonctionnement_apres}{1.3}
 	\caption{Schéma des classes}
 \end{figure}
 

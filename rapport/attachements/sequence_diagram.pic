@@ -2,21 +2,25 @@
 copy "sequence.pic";
 
 # Object definition
+object(A,"App");
 object(K,"Kernel");
 object(C,"Contextd");
 step();
+active(A);
 active(K);
 active(C);
 
 # Message exchange
 message(C,K,"register(1)");
 step();
-begin_frame(K,L,"Hook");
+begin_frame(A,L,"loop");
 
 message(C,K,"question()");
+message(A,K,"syscall()");
 rmessage(K,C,"struct filled");
 message(C,C,"");
 message(C,K,"answer()");
+rmessage(K,A, "return code");
 step();
 end_frame(C,L);
 
@@ -28,5 +32,6 @@ step();
 step();
 complete(K);
 complete(C);
+complete(A);
 
 .PE
