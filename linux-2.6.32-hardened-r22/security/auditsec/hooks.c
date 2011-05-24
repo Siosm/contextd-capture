@@ -525,8 +525,8 @@ static struct security_operations audit_ops = {
 	.socket_connect =				auditsec_socket_connect,
 //	.socket_listen =				auditsec_socket_listen,
 //	.socket_accept =				auditsec_socket_accept,
-//	.socket_sendmsg =				auditsec_socket_sendmsg,
-//	.socket_recvmsg =				auditsec_socket_recvmsg,
+	.socket_sendmsg =				auditsec_socket_sendmsg,
+	.socket_recvmsg =				auditsec_socket_recvmsg,
 
 #endif
 };
