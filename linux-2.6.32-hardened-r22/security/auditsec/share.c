@@ -25,7 +25,7 @@ char * prog_liste()
 	int alloc = 20 * (TASK_COMM_LEN + 1);
 	int res_len = 0;
 	struct prog * p;
-	
+
 	result = kmalloc(sizeof(char) * alloc, GFP_NOFS);
 	if(result == NULL){
 		printk(KERN_INFO "AuditSec: Can't allocate mem for /proc/contextd/programs");
@@ -69,11 +69,16 @@ int register_prog(char * prog_name)
 {
 	struct prog * p;
 
+	if(prog_name == NULL) {
+		printk(KERN_INFO "AuditSec: Can't register a null prog !", prog_name);
+		return -EFAULT;
+	}
+
 // 	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
 	list_for_each_entry(p, &prog_list, list) {
 		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
 			printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
-			return -1;
+			return -EFAULT;
 		}
 	}
 
