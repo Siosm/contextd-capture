@@ -49,35 +49,58 @@ Les modèles de sécurité standards se situent tous dans la première catégrie
 
 \subsection{Les différentes méthodes de contrôle d'accès}
 
-Nous allons détaillé dans cette partie plusieurs méthodes employées pour appliquer le principe de séparation des privilèges et atteindre les objectifs CID.
+Pour atteindre les objectifs détaillés précédement et assurer la séparation des privilèges, nous allons détailler dans cette partie plusieurs méthodes de contrôle d'accès.
 
 \subsubsection{Contrôle d'accès discrétionnaire (DAC)}
 
-Le contrôle d'accès discrétionnaire ou DAC correspond à un modèle laissant à l'utilisateur, et donc aux programmes qu'il lance, tout contrôle sur les droits accordés aux objets qu'il possède. Un utilisateur peut ainsi compromettre un système en accordant des droits importants à d'autres utilisateurs sur les fichiers qu'il possède.
+Le contrôle d'accès discrétionnaire correspond à un modèle laissant à l'utilisateur, et donc aux programmes qu'il lance, tout contrôle sur les droits accordés aux objets qu'il possède. Un utilisateur peut ainsi compromettre un système en accordant des droits importants à d'autres utilisateurs sur les fichiers qu'il possède. Ce modèle ne permet pas d'assurer la confidentialité, l'intégrité d'un système. Il est à ranger dans la première catégorie des modèles qui font confiance aux logiciels sans imposer de contrôle de sécurité fort.
 
 \subsubsection{Contrôle d'accès mandataire (MAC)}
 
-Le contrôle d'accès mandataire restreint fortement les droits accordés aux processus. En effet, ceux-ci ce voient contraints de respecter des régles établies sur le système
+Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, éventuelement matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui foment une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune intéraction puis en rajoutant progressivement des intéractions autorisées.
 
-\textbf{Bella La Paluda :}
+% \begin{figure}[h]
+% 	\centering
+% 	\includegraphics[scale=0.70]{attachements/techrefresh-info-txtfull.png}
+% 	\caption{Intel Trusted Execution Technology}
+% \end{figure}
 
-\textbf{Biba :}
+\subsubsection{Sécurité multiniveau}
+
+Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés comme l'intégrité ou la confidentialité. Il repose sur la séparation des données en plusieurs domaines, imposant des règles limitant les intéractions de l'utilisateur.
+
+\textbf{Bell-LaPaluda :} Ce modèle préserve la confidentialité de l'information en n'autorisant un sujet à écrire uniquement dans un niveau de confidentialité supérieur ou égal, et à ne lire que dans un niveau de sécurité inférieur ou égal. Ce modèle présente plusieurs inconvénients majeurs parce qu'il ne permet pas d'imposer des contraintes d'intégrité et ne permet pas de faire de disctinctions précise entre deux personnes possédant le même niveau d'accréditation.
+
+\begin{figure}[h]
+	\centering
+	\includesvg{attachements/bell-lp}{0.5}
+	\caption{Le modèle Bell-LaPadula}
+\end{figure}
+
+\textbf{Biba :} A contrario du modèle précédent, c'est l'intégrité qui est préservée, car seule les modifications dans un niveau de sécurité inférieur sont autorisée, et la lecture ne peut se faire que sur un niveau d'intégrité supérieur.
+
+\begin{figure}[h]
+	\centering
+	\includesvg{attachements/biba}{0.5}
+	\caption{Le modèle Biba}
+\end{figure}
+
+Ces deux modèles ne permettent pas d'atteindre plus d'un ou deux objectifs à la fois, et posent le problème de la sur-classification des données (toutes les données devenues confidentielles). Ceci conduit à l'introduction d'une méthode de déclassification, compromettant l'ensemble du modèle.
 
 \subsubsection{Contrôle d'accès basé sur des rôles (RBAC)}
+
+Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permettant de simplifier le travail de l'administrateur d'un système utilisant un contrôle mandataire. Le principe du contrôle d'accès mandataire consiste à attribuer des rôles à chaque utilisateur de la machine. Ces rôles donnent ainsi accès à différents éléments du système. Par exemple, les rôles d'utilisateur, d'administrateur et de webmaster peuvent être définis et un utilisateur classique pourra se voir attribuer le rôle de webmaster lui autorisant de modifier les pages disponibles sur un serveur sans avoir besoin de donner un accès administrateur complet à cette personne.
 
 \subsection{Solutions disponibles}
 
 \subsubsection{SELinux}
 
-Une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles.
+SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire, de niveau de sécurité/confidentialité, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler à chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décission est prise indépendamment des précédantes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
 
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques.
-
- \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau.
+ \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux.
+ \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau. Des politiques ont déjà été écrites. Il existe une distribution facilitant le déploiement de ce type de protection : Fedora.
 \end{list}
-
-
 
 \subsubsection{PIGA}
 
@@ -85,11 +108,11 @@ Une surcouche à SELinux permettant de définir et imposer des politique de séc
 
 \subsubsection{iptables}
 
-Un logiciel permettant de contrôler lpus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine.
+iptables et un logiciel permettant de contrôler plus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur.
 
 \subsubsection{grsecurity \& PaX}
 
-Une autre implémentation des mécanismes de contrôle d'accès mandataire et basé sur les rôles.
+\textsc{grsecurity} est une autre implémentation des mécanismes de contrôle d'accès mandataire et des listes de contrôle d'accès. % et basé sur les rôles.
 
 \subsubsection{contextd}
 
@@ -102,9 +125,7 @@ contextd = chef d'orchestre + changement dynamique des règles des autres  méca
 
 Chercher tous les systèmes de MAC/DAC/RBAC,...
 
-tu peux classer les MAC en fonction du travail à faire par l'administrateur, tu peux les classer en fonction d'où ils agissent
-
-tu peux les classer par rapport à la logique interne (stateless ou statefull)
+Classer les MAC en fonction du travail à faire par l'administrateur ? en fonction d'où ils agissent ? par rapport à la logique interne (stateless ou statefull) ?
 
 \newpage
 
