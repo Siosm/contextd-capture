@@ -10,8 +10,9 @@
 \definecolor{blue}{rgb}{0,0,1} 
 \definecolor{red}{rgb}{0.9,0.2,0.4} 
 \definecolor{gris}{rgb}{0.95,0.95,0.95} 
-\lstset{language=make,captionpos=b,tabsize=3,frame=single,keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
-\lstset{language=C,captionpos=b,tabsize=3,frame=single,keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
+
+\lstset{keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},captionpos=b,tabsize=3,frame=single,numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
+
 \usepackage[top=2.5cm, bottom=2.5cm, left=3.0cm, right=3.0cm, a4paper]{geometry}
 
 \usepackage{avant}
@@ -181,6 +182,8 @@ Le principe de fonctionnement est simple : un module LSM est chargé dans le noy
 
 L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
 
+\newpage
+
 \begin{figure}%[hb]
 	\centering
 	\includegraphics[scale=0.45]{attachements/lsm2.png}
@@ -254,17 +257,15 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
-% FIXME
-L'appel système "auditsec\_reg" qui permet à contextd de se faire connaître du noyau n'est pas tout à fait sûr. En effet, il n'est pas exclu qu'un program malveillant puisse s'enregistrer auprès du noyau via cet appel système sans que ce soit contextd. Une solution d'enregistrement sécurisé et sûre est à envisager à l'avenir.
-% FIXME
+Une fois que contextd est enregistré, toute nouvelle tentative d'enregistrement échouera. Il sera nécessaire de quitter contextd avant d'effectuer un nouvel enregistrement. Cela permet de limiter la communication par l'intermédiaire de cet appel, pour l'enregistrement et la désincription des programmes à surveiller.
 
 \subsubsection{L'interface présentée à l'administrateur}
 
-	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux "proc files" :
+	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux fichiers dans l'arborescence /proc :
 
 	\begin{itemize}
 		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule afin de ne pas permettre un acte malveillant consistant à ajouter ou supprimer un programme de manière intempestive.
-		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste.
+		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste. Il est donc impératif que ce dossier ne soit pas accessible par défaut à un utilisateur non privilégié.
 	\end{itemize}
 
 
@@ -353,7 +354,7 @@ $\end{lstlisting}
 
 Ceci fait, tout est désormais prêt pour la compilation. Maintenant, passons à la création d'un module LSM. L'implémentation de ce module a été faite dans le fichier \textit{{kernel\_src}/security/auditsec/hook.c}. 
 
-\subsection{Création des éléments nécessaire au module}
+\subsection{Création des éléments nécessaires au module}
 
 La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différents fonctions à appeler lorsqu'un appel système est demandé. Voici donc la structure de notre module.
 
@@ -972,14 +973,527 @@ asmlinkage long sys_auditsec_answer(int __user answer)
 }
 \end{lstlisting}
 
+\subsubsection{Déclaration des appels système}
+
+Une dernière étapes est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouter les lignes suivantes dans le fichier \textit{{kernel\_src}/security/auditsec/syscall.c} :
+
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_reg(int __user state, char __user *);
+asmlinkage long sys_auditsec_question(struct auditsec_info __user *);
+asmlinkage long sys_auditsec_answer(int __user);
+\end{lstlisting}
+
+Ensuite, il faut attribuer aux appels système un numéro. Cela est fait en ajoutant les lignes suivantes dans le fichier \textit{{kernel\_src}/arch/x86/kernel/syscall\_table\_32.S} en notant les numéros !
+
+\begin{lstlisting}[language=C]
+	.long sys_auditsec_reg
+	.long sys_auditsec_question
+	.long sys_auditsec_answer
+\end{lstlisting}
+
+%Puis ajouter les lignes suivantes en faisant attention à bien incrémenter "\_\_NR\_syscalls":
+%
+%\textit{{kernel\_src}/include/asm-generic/unistd.h }
+%\begin{lstlisting}[language=C]
+%#define __NR_sys_auditsec_reg 242
+%__SYSCALL(__NR_sys_auditsec_reg, sys_auditsec_reg)
+%#define __NR_sys_auditsec_question 243
+%__SYSCALL(__NR_sys_auditsec_question, sys_auditsec_question)
+%#define __NR_sys_auditsec_answer 244
+%__SYSCALL(__NR_sys_auditsec_answer, sys_auditsec_answer)
+%
+%#undef __NR_syscalls
+%#define __NR_syscalls 245
+%\end{lstlisting}
+
+et enfin :
+
+\textit{{kernel\_src}/arch/x86/include/asm/unistd\_64.h}
+\begin{lstlisting}[language=C]
+#define __NR_auditsec_reg			299
+__SYSCALL(__NR_auditsec_reg, sys_auditsec_reg)
+#define __NR_auditsec_question			300
+__SYSCALL(__NR_auditsec_question, sys_auditsec_question)
+#define __NR_auditsec_answer			301
+__SYSCALL(__NR_auditsec_answer, sys_auditsec_answer)
+\end{lstlisting}
+
+
 Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision si le noyau donne l'accès ou non à la ressource demandée.
 
 \subsection{Modification de contextd}
 
-Maintenant, voyons les modifications apportées à contextd. 
+Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication entre lui et les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus. Nous avons donc implémenté une classe "pseudo" abstraite `àbstractcontext''.
+
+\subsubsection{Ajout d'une classe ``abstractcontext''}
+
+Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons fait qu'une déclaration dans un .h et implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
+
+De plus, pour palier le problème liée à la liste de clients (alias les applications surveillées et enregistrées), nous avons déclaré cette liste ainsi que le verrou en tant qu'attribut de cette classe abstraite. Voici le code produit :
+
+\textit{abstractcontext.h} : 
+\begin{lstlisting}[language=C++]
+class AbstractContext : public QObject
+{
+Q_OBJECT
+protected:
+	//There is some concurrency here. Use the lock!
+	static QMap<pid_t, ContextClient> clients;
+	static QReadWriteLock lock;
+
+	QString getFullPathFromPID(pid_t pid);
+
+public slots:
+	virtual QString register_application(const QString &app_name, uint app_pid) = 0;
+
+	virtual QString domain_changed(const QString &xml_context) = 0;
+	virtual QString required_domain(const QString &xml_context) = 0;
+
+	virtual QString current_domain() = 0;
+	virtual QString is_registered() = 0;
+
+	virtual QString register_for_domain_changes_updates() = 0;
+
+protected slots:
+	virtual void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext) = 0;
+
+	void onEvent(ContextdPluginEvent* event);
+
+signals:
+	void globalContextChanged(const QString &previous_context, const QString &new_context);
+};
+\end{lstlisting}
+
+\textit{abstractcontext.cpp} : 
+\begin{lstlisting}[language=C++]
+QMap< pid_t, ContextClient > AbstractContext::clients;
+
+QReadWriteLock AbstractContext::lock;
 
 
-\subsection{Résultats finaux}
+QString AbstractContext::getFullPathFromPID(pid_t pid)
+{
+	QString proc_path="/proc/%1/exe";
+	proc_path=proc_path.arg(pid);
+
+	return QFile::readLink(proc_path);
+}
+
+
+void AbstractContext::onEvent(ContextdPluginEvent* event)
+{
+	if(event->type()==ContextdPluginRestartEvent().type())
+	{
+		DomainHolder::instance().resetToDefaultDomain();
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Modification de dbus-context}
+
+Compte tenu que la précédente liste de client était indexée par le dbus\_id, et que les programmes dont l'enregistrement se fait via le noyau ne dispose pas d'un tel identifiant, il a fallut modifier les méthodes de cette case. La modification est très succincte : il a juste fallu ajouter ces quelques lignes dans les méthodes et de modifier dbus\_id en pid.
+
+\textit{dbus-context.cpp} : 
+\begin{lstlisting}[language=C++]
+	//Get the pid
+	QDBusReply<uint> res = QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid = res.value();
+	}else{
+		return DBUS_ERROR;
+	}
+\end{lstlisting}
+
+\subsubsection{Ajout de la classe ``kernel-context''}
+
+Enfin, nous avons implémenté la classe kernel-context qui hérite d'abstractcontext.
+
+\textit{kernel-context.h} : 
+\begin{lstlisting}[language=C++]
+class KernelContext: public AbstractContext
+{
+Q_OBJECT
+private:
+	struct auditsec_info _usai;
+	char exec_path[PATH_MAX];
+
+	KThread * kernelT;
+
+public:
+	KernelContext();
+    ~KernelContext();
+
+	void stop();
+	struct auditsec_info * usai();
+
+	QMap< pid_t, ContextClient > * getClients();
+
+public slots:
+	void start();
+
+	QString register_application(const QString &app_name, uint app_pid);
+	QString register_application(const QString &app_name);
+
+	QString domain_changed(const QString &xml_context);
+	QString required_domain(const QString &xml_context);
+
+	QString current_domain();
+	QString is_registered();
+
+	QString register_for_domain_changes_updates();
+
+private slots:
+	void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext);
+
+signals:
+	void globalContextChanged(const QString &previous_context, const QString &new_context);
+};
+
+\end{lstlisting}
+
+\textit{kernel-context.cpp} : 
+\begin{lstlisting}[language=C++]
+KernelContext::KernelContext()
+{
+	qDebug("Trying to register with the kernel");
+	if(auditsec_register(1, NULL) != 1){
+		qFatal("FAILED to register with the kernel.");
+	}
+	qDebug("The daemon is registered with the kernel.");
+	
+	if(auditsec_register(1, "firefox") != 1){
+		qDebug() << "Can't register prog : firefox";
+	}
+	if(auditsec_register(1, "soffice.bin") != 1){
+		qDebug() << "Can't register prog : soffice.bin";
+	}
+	if(auditsec_register(1, "testprog") != 1){
+		qDebug() << "Can't register prog : testprog";
+	}
+
+	kernelT = new KThread(this);
+}
+
+
+void KernelContext::start()
+{
+	kernelT->start();
+}
+
+
+KernelContext::~KernelContext()
+{
+	qDebug("Stopping daemon and telling the kenel.");
+	if(auditsec_register(0, NULL) != 0){
+		qCritical("The kernel state may NOT be ok. You should reboot.");
+	}else{
+		qDebug("The kernel is ok.");
+	}
+}
+
+
+void KernelContext::stop()
+{
+	kernelT->_keep_going = false;
+
+	kernelT->wait();
+
+	qDebug("Stopping daemon and telling the kenel.");
+	if(auditsec_register(0, NULL) != 0){
+		qCritical("The kernel state may NOT be ok. You should reboot.");
+	}else{
+		qDebug("The kernel is ok.");
+	}
+}
+
+
+struct auditsec_info * KernelContext::usai()
+{
+	return &_usai;
+}
+
+
+QMap< pid_t, ContextClient > * KernelContext::getClients()
+{
+	return &clients;
+}
+
+
+QString KernelContext::register_application(const QString& app_name, uint app_pid)
+{
+	QWriteLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	qDebug() << "KernelContext: Trying to register " << app_name;
+
+	//You can't register two applications using the same pid !
+	if((pid != 0) && !clients.contains(pid))
+	{
+		//Get the exe full path
+		QString full_path=getFullPathFromPID(pid);
+
+		const Configuration& transRules=Configuration::instance();
+
+		//If the program is white listed
+		if(transRules.isProgramAllowed(app_name, full_path))
+		{
+			Program program=transRules.getProgramByName(app_name);
+			clients[pid]=ContextClient(0, program, pid);
+
+			EventDispatcher::instance().sendNotification("KernelContext: " + app_name + " has been successfuly registered.");
+
+			return KERNEL_SUCCESS;
+		}else{
+			EventDispatcher::instance().sendError("KernelContext: " + full_path + " cannot be identified as "+ app_name +".");
+
+			return KERNEL_ERROR;
+		}
+	}
+	else
+		return KERNEL_ERROR;
+}
+
+
+QString KernelContext::register_application(const QString& app_name)
+{
+	return register_application(app_name, 0);
+}
+
+
+QString KernelContext::is_registered()
+{
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	if(clients.contains(pid))
+		return KERNEL_SUCCESS;
+	else
+		return KERNEL_ERROR;
+}
+
+
+QString KernelContext::domain_changed(const QString &xml_context)
+{
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	//You have to be registered to use this function !
+	if(clients.contains(pid))
+	{
+		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
+			qDebug() << "KernelContext: domain_changed: accepted";
+			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
+			auditsec_answer(true);
+			return CONTEXT_ACCEPT;
+		}else{
+			qDebug() << "KernelContext: domain_changed: refused";
+			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
+			auditsec_answer(false);
+			return KERNEL_ERROR;
+		}
+	} else {
+		qDebug() << "KernelContext: domain_changed: non registered";
+		auditsec_answer(true);
+		return KERNEL_ERROR;
+	}
+}
+
+
+QString KernelContext::required_domain(const QString &xml_context)
+{
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	qDebug("KernelContext: required_domain");
+
+	//You have to be registered to use this function !
+	if(clients.contains(pid))
+	{
+		return clients[pid].required_domain(xml_context);
+	} else {
+// 		auditsec_answer(false);
+		return KERNEL_ERROR;
+	}
+}
+
+
+QString KernelContext::current_domain()
+{
+	QReadLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	//You have to be registered to use this function !
+	if(clients.contains(pid))
+		return DomainHolder::instance().currentDomain().name();
+	else
+		return KERNEL_ERROR;
+}
+
+
+QString KernelContext::register_for_domain_changes_updates()
+{
+	QWriteLocker _lock(&lock);
+	pid_t pid = _usai.pid;
+
+	//You have to be registered to use this function !
+	if(clients.contains(pid))
+		return clients[pid].registerForContextChangesUpdates();
+	else
+		return KERNEL_ERROR;
+}
+
+
+void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext)
+{
+	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
+}
+\end{lstlisting}
+
+\subsubsection{Thread pour les attentes}
+
+Dernière modification, il a fallu ajouter un thread afin de pouvoir surveiller en permanence les actions des programmes monitorés.
+
+\textit{auditsec\_lsm/kthread.h} : 
+\begin{lstlisting}[language=C++]
+class KThread : public QThread
+{
+Q_OBJECT
+public:
+	KThread(KernelContext *);
+	void run();
+
+	bool _keep_going;
+
+private:
+	KernelContext * KC;
+	QString xmlContext(char *, ...);
+	QString toXMLEntities(QString str);
+};
+\end{lstlisting}
+
+\textit{auditsec\_lsm/kthread.h} : 
+\begin{lstlisting}[language=C++]
+KThread::KThread(KernelContext * kc) : KC(kc)
+{
+	_keep_going = true;
+}
+
+
+void KThread::run()
+{
+	QString address;
+	struct sockaddr_in addr_;
+	struct hostent * hote = NULL;
+
+	qDebug("KThread: Starting kernel loop");
+
+	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
+		qDebug() << "";
+		qDebug() << "KThread: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
+		if(KC->is_registered() == KERNEL_ERROR){
+			KC->register_application(KC->usai()->execname);
+		}
+
+		switch (KC->usai()->type){
+			case AUDITSEC_FILE:
+				qDebug() << "KThread: File: " << KC->usai()->auditsec_struct.file.fullpath;
+				KC->domain_changed(xmlContext(
+					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
+					//"filename", KC->usai()->auditsec_struct.file.name,
+					NULL, NULL));
+
+				#ifdef DEBUG
+				read_execpath(KC->usai()->pid, exec_path);
+				qDebug() << "file access: " << KC->usai()->auditsec_struct.file.fullpath
+				<< "/" << KC->usai()->auditsec_struct.file.name << ", pid: " << KC->usai()->pid
+				<< ", execname: " << exec_path
+				/*<< ", mask: " << KC->usai()->auditsec_struct.file.mask*/;
+				#endif /* DEBUG */
+				break;
+
+			case AUDITSEC_DIR:
+				qDebug() << "KThread : Directory: " << KC->usai()->auditsec_struct.file.fullpath;
+				KC->domain_changed(xmlContext(
+					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
+					NULL, NULL));
+
+				#ifdef DEBUG
+				read_execpath(KC->usai()->pid, exec_path);
+				qDebug(); << "mkdir: " << KC->usai()->auditsec_struct.dir.fullpath
+				<< ", pid: " << KC->usai()->pid << ", execname: " << exec_path << KC->usai()->execname
+				/*<< ", mode: " << KC->usai()->auditsec_struct.dir.mode*/;
+				#endif /* DEBUG */
+				break;
+			
+			case AUDITSEC_SOCKET:
+				qDebug() << "KThread socket";
+				address = inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
+				
+				addr_.sin_addr.s_addr = inet_addr(address.toStdString().c_str());
+				
+				hote = gethostbyaddr((char *) &addr_.sin_addr, 4, AF_INET);
+				
+				if (hote == NULL)
+					qDebug() << "KThread: IP: " << address;
+				else
+					qDebug() << "KThread: IP: " << address << " " << hote->h_name;
+				
+				auditsec_answer(true);
+				break;
+
+			default:
+				qCritical("KernelContext: can't determine struct type !");
+				auditsec_answer(0);
+				break;
+		}
+	}
+	qDebug("KernelContext: loop end.");
+}
+
+
+QString KThread::toXMLEntities(QString str)
+{
+	return str.replace("&","&amp;").replace("<", "$lt;").replace(">", "&gt;").replace("\"", "&quot;");
+}
+
+
+QString KThread::xmlContext(char * param_name, ...)
+{
+	const char* name;
+	const char* value;
+
+	QString xmlContext="<xmlContext>";
+
+	va_list vl;
+	va_start(vl, param_name);
+
+	name = param_name;
+	value = va_arg(vl, char*);
+
+	do {
+		if(name == NULL)
+			name = "";
+		if(value == NULL)
+			value = "";
+
+		QString sname = name;
+		QString svalue = toXMLEntities(value);
+
+		if(sname!="" && svalue!="")
+			xmlContext += QString("<parameter name=\"%1\" value=\"%2\"/>").arg(sname).arg(svalue);
+
+		name = va_arg(vl, char*);
+		value = va_arg(vl, char*);
+	} while (name != NULL);
+	va_end(vl);
+
+	xmlContext+="</xmlContext>";
+
+	return xmlContext;
+}
+$\end{lstlisting}
+
+\section{Résultats finaux}
 
 Le produit de notre travail correspond globalement à ce qui était attendu. En effet, nos tests effectués à l'aide d'un programme de test "testprog" montrent que le comportement du système est bien celui attendu. Lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel, si la transaction est autorisée, une demande de changement de domaine est envoyé à context-notify qui attend la réponse, sinon, la demande est rejetée.
 
@@ -991,19 +1505,21 @@ D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne p
 	\caption{Schéma des classes}
 \end{figure}
 
-\subsection{Améliorations possibles et remarques}
+\subsection{Poursuite du projet}
+
+Les éléments suivant restent à réaliser avant d'envisager l'intégration de notre travail dans PIGA-OS :
 	\begin{itemize}
-		\item Les règles (regexp) des fichiers filtrés deviennent très compliquées car il faut autoriser toutes les librairies pour les programmes non compilés en statique.
-		\item Intégré les hook à SELinux. En effet, pour le moment, seul un module LSM est chargeable au niveau du noyau. Il n'est donc pas possible de déployer notre solution en cohabitation avec SELinux.
+		\item Les règles à fournir à contextd pour définir les accès autorisés pour un programme deviennent rapidement compliquées car elles doivent être exhaustives (il faut notament autoriser le chargement de toutes les librairies pour les programmes non compilés en statique, ...). L'usage des expressions régulières réduit cet impact mais ne résout pas le prblème.
+		\item Nous avons pris pour base un module LSM vide. Il faut en revanche intégrer nos modifications au module SELinux pour pouvoir faire fonctionner notre solution avec PIGA-OS. Il faudrait aussi envisager la solution des empilements de modules LSM et s'assurer de l'usage de notre module.
 	\end{itemize}
 
 \newpage
 
-\section{Résultats et benchmarks}
-
-Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
-
-\newpage
+% \section{Résultats et benchmarks}
+% 
+% Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
+% 
+% \newpage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
@@ -1022,14 +1538,15 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 % \subsection*{Liens et références}
 \begin{thebibliography}{40}
 
-\bibitem{IBMRBST} \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, Bart Jacob, Paul Larson, Breno Henrique Leitao, Saulo Augusto M Martins da Silva, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
+\bibitem{IBMRBST} Bart Jacob, Paul Larson, Breno Henrique Leitao, Saulo Augusto M Martins da Silva, \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
 
-\bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, Chris Wright, Crispin Cowan, Stephen Smalley, James Morris, Greg Kroah-Hartman, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
+\bibitem{LSMINTRO} Chris Wright, Crispin Cowan, Stephen Smalley, James Morris, Greg Kroah-Hartman, \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
 
-\bibitem{LKDSE} \textit{Linux Kernel Development, Second Edition}, Robert Love, Novell Press
-\bibitem{LKDTE} \textit{Linux Kernel Development, Third Edition}, Robert Love, Pearson Education, Inc.
+\bibitem{LKDSE} Robert Love, \textit{Linux Kernel Development, Second Edition}, Novell Press
+\bibitem{LKDTE} Robert Love, \textit{Linux Kernel Development, Third Edition}, Pearson Education, Inc.
 
-\bibitem{MRHEL5} \textit{Managing Red Hat Enterprise Linux 5}, Daniel J Walsh, Karl MacMillan, \url{http://people.redhat.com/dwalsh/SELinux/Presentations/ManageRHEL5.pdf}
+\bibitem{SELEX} Frank Mayer, Karl MacMillan, David Caplan, \textit{SELinux By Example}, Prentice Hall, Première édition, 6 août 2006
+\bibitem{MRHEL5} Daniel J Walsh, Karl MacMillan, \textit{Managing Red Hat Enterprise Linux 5}, \url{http://people.redhat.com/dwalsh/SELinux/Presentations/ManageRHEL5.pdf}
 
 \bibitem{WCS} \textit{Wikipedia : Computer Security}, \url{http://en.wikipedia.org/wiki/Computer_security}
 
@@ -1038,6 +1555,12 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 \bibitem{TIOF} Peter A. Loscocco, Stephen D. Smalley, Patrick A. Muckelbauer, Ruth C. Taylor, S. Jeff Turner, and John F. Farrell. The Inevitability of Failure : The Flawed Assumption of Security in Modern Computing Environments. In Proceedings of the 21st National Information Systems Security Conference, pages 303–314, Arlington, Virginia, USA, October 1998
 
 \bibitem{QNX} QNX Realtime Operating System, \url{http://www.qnx.com}
+
+\bibitem{ITXT} Intel Trusted Execution Technology (TXT), \url{http://www.intel.com/technology/malwarereduction/index.htm}
+
+\bibitem{PIGA}, Jérémy Briffaut, Martin Peres, Jonathan Rouzaud-Cornabas, Jigar Solanki, Christian Toinard, Benjamin Venelle, \textit{PIGA-OS : Retour sur le système d'exploitation vainqueur du défi sécurité}
+
+\bibitem{PIGA2}, Jérémy Briffaut, Jean-François Lalande, Christian Toinard, \textit{Formalization os security properties : enforcement for mac operating systems and verification of dynamic mac policies}, International journal on advances in security, 2:325-343, 2009
 
 \end{thebibliography}
 

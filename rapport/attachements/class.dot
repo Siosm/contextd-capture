@@ -20,11 +20,11 @@ digraph G {
 	]
 
 	dbuscontext [
-		label = "{Dbus-Context||...}"
+		label = "{Dbus-Context|...|...}"
 	]
 
 	kernelcontext [
-		label = "{Kernel-Context|+ register_application(const QString, uint) : QString\l+ domain_changed(const QString) : QString\l+ required_domain(const QString) : QString\l+ current_domain() : QString\l+ is_registered() : QString\l+ register_for_domain_changes_updates() : QString\l}"
+		label = "{Kernel-Context|...|+ register_application(const QString, uint) : QString\l+ domain_changed(const QString) : QString\l+ required_domain(const QString) : QString\l+ current_domain() : QString\l+ is_registered() : QString\l+ register_for_domain_changes_updates() : QString\l...}"
 	]
 
 	dbuscontext->abstractcontext;
