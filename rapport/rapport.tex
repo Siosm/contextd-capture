@@ -159,7 +159,7 @@ Notre project ayant pour but potentiel, à terme, d'être intégré dans le syst
 
 Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé par la Figure~\ref{IBMST}.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[scale=0.4]{attachements/kretprob.png}
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
@@ -373,7 +373,7 @@ Ceci fait, tout est désormais prêt pour la compilation. Maintenant, passons à
 
 \subsection{Création des éléments nécessaires au module}
 
-La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différents fonctions à appeler lorsqu'un appel système est demandé. Voici donc la structure de notre module.
+La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différents fonctions appelées lorsqu'un appel système est demandé. Voici donc la structure de notre module.
 
 \begin{lstlisting}[language=C]
 static struct security_operations audit_ops = {
@@ -394,26 +394,13 @@ Par exemple, voici le code de la fonction auditsec\_file\_permission:
 \begin{lstlisting}[language=C]
 int auditsec_file_permission(struct file *file, int mask)
 {
-	int		answer = -1;
-	int		ret = 0;
-	pid_t 	current_pid = task_pid_nr(current);
-	char *	fullpath = NULL;
-
-	if(prog_is_monitored()){ // On teste si le programme est surveille
-		fullpath = kmalloc(PATH_MAX + 1, GFP_NOFS);
-		if(fullpath == NULL){
-			printk(KERN_INFO "AuditSec: file access: pid: %d, execname: %s, mask: %d NO MEM",
-					current_pid, current->comm, mask);
-			return -ENOMEM;
-		}
+...
+	if(prog_is_monitored()){ // On teste si le programme est surveillé
+...
+		// On récupère le chemin complet du fichier auquel on accède
 		file_path(file, fullpath);
 		if(*daemon_launched()){  // On teste si contextd est lance.
-			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d HOOK TIMEOUT",
-					fullpath, current_pid, current->comm, mask);
-				kfree(fullpath);
-				return -EFAULT;
-			}
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){...}
 			
 			// On remplit la structure
 			get_task_comm(k_auditsec_info()->execname, current);
@@ -427,17 +414,7 @@ int auditsec_file_permission(struct file *file, int mask)
 			up(auditsec_question_lock());
 			
 			// On attend la reponse
-			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){// 30s timeout. Is it too much ?
-				printk(KERN_INFO "AuditSec: file access: %s, pid: %d, execname: %s, mask: %d ANSWER TIMEOUT",
-					fullpath, current_pid, current->comm, mask);
-				kfree(fullpath);
-
-				ret = down_trylock(auditsec_question_lock());
-				up(auditsec_hook_lock());
-				return -EFAULT;
-			}
-
-			kfree(fullpath);
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){...}
 			
 			// On a eu la reponse			
 			answer = (*auditsec_answer() == 0);
@@ -445,24 +422,15 @@ int auditsec_file_permission(struct file *file, int mask)
 
 			// On autorise ou non suivant la reponse (0 oui - -EACCES non)
 			return answer == 0 ? 0 : -EACCES;
-		}else{
-			printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d REFUSED : daemon not launched",
-				fullpath, task_pid_nr(current), current->comm, mask);
-			kfree(fullpath);
-			return -EFAULT;
-		}
-	}else{
-		/*printk(KERN_INFO "AuditSecu: file access: %s, pid: %d, execname: %s, mask: %d",
-				fullpath, task_pid_nr(current), current->comm, mask);
-			kfree(fullpath);*/
-	}
+		}else{...}
+	}else{...}
 	return 0;
 }
 \end{lstlisting}
 
 \subsubsection{Liste des programmes surveillés}
 
-Comme on peut le voir, le code de ce "hook" fait appelle à plusieurs élements. Tout d'abord, on teste si le programme qui a déclenché ce "hook" est surveillé par contextd. Pour ce faire, on a crée une liste au niveau du noyau contenant l'ensemble des programmes surveillés par contextd. On traitera plus tard de la manière dont cette liste est mise à jour. 
+Comme on peut le voir, le code de ce "hook" fait appel à plusieurs élements. Tout d'abord, on teste si le programme qui a déclenché ce "hook" est surveillé par contextd. Pour ce faire, on a crée une liste au niveau du noyau contenant l'ensemble des programmes surveillés par contextd. On traitera plus tard de la manière dont cette liste est mise à jour.
 
 Nous définissons une structure pour stocker un programme :
 
@@ -1509,19 +1477,66 @@ QString KThread::xmlContext(char * param_name, ...)
 
 	return xmlContext;
 }
-$\end{lstlisting}
+\end{lstlisting}
 
 \section{Résultats finaux}
 
-Le produit de notre travail correspond globalement à ce qui était attendu. En effet, nos tests effectués à l'aide d'un programme de test "testprog" montrent que le comportement du système est bien celui attendu. Lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel, si la transaction est autorisée, une demande de changement de domaine est envoyé à context-notify qui attend la réponse, sinon, la demande est rejetée.
+La Figure~\ref{SCHEMAFIN} résume le fonctionnement de contextd avec toutes les modifications que nous avons apportées.
 
-D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement avec des programmes classiques et courant sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès). Ce problème est lié au choix de LSM, les applications ne pouvant faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
-
-\begin{figure}[h]
+\begin{figure}[!ht]
 	\centering
 	\includesvg{attachements/fonctionnement_apres}{1.3}
 	\caption{Schéma de fonctionnement}
+	\label{SCHEMAFIN}
 \end{figure}
+
+\subsection{Avec un programme de test}
+
+Les tests que nous avons conduit nous amènent à penser que notre travail correspond globalement à ce qui était attendu. En effet, le programme de test "testprog" montre que le comportement du système est cohérent avec les règles contextd écrites. Le programme testprog se contente d'afficher le contenu de fichiers placés dans des répertoires aux noms explicites :
+
+\begin{lstlisting}[language=C++]
+int openfile(std::string filename){...}
+
+int main(int argc, char ** argv)
+{
+	for (int i=0; i < 2; i++) {
+		openfile("/home/user/impots/test");
+		openfile("/home/user/ecommerce/test");
+	}
+	return 0;
+}
+\end{lstlisting}
+
+Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
+
+Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va ... (terminal en haut à gauche). Puis nous lançons context-notify qui ... (terminal en haut à droite). Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg ...(terminal en bas à droite).
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_ini.png}
+	\caption{Après lancement de contextd}
+	\label{INI}
+\end{figure}
+
+La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel (ici default). Si la transaction est autorisée par les règles établies pour testprog et qu'il est précisé que l'utilisateur doit confirmer cette action, une demande est envoyée à context-notify qui attend la réponse pour la renvoyer à contextd. Si l'utilisateur mets trop de temps à répondre (30 secondes actuellement), la demande est rejetée et il ne se produit aucun changement de domaine.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_notify.png}
+	\caption{Après lancement de progtest}
+	\label{DEMANDE}
+\end{figure}
+
+La Figure~\ref{FIN} présente le résultat final.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_fin.png}
+	\caption{Après confirmation du changement de domaine}
+	\label{FIN}
+\end{figure}
+
+D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement avec des programmes classiques et courant sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès). Ce problème est lié au choix de LSM, les applications ne pouvant faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
 
 \subsection{Poursuite du projet}
 
