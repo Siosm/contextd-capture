@@ -65,7 +65,7 @@ Le contrôle d'accès mandataire repose sur la séparation entre les application
 % 	\caption{Intel Trusted Execution Technology}
 % \end{figure}
 
-\subsubsection{Sécurité multiniveau}
+\subsubsection{Sécurité multiniveau, multi catégorie (MLS ou MCS)}
 
 Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés comme l'intégrité ou la confidentialité. Il repose sur la séparation des données en plusieurs domaines, imposant des règles limitant les intéractions de l'utilisateur.
 
@@ -97,6 +97,8 @@ Ce principe repose sur l'association d'un contexte de sécurité à chaque objet
 
 \subsection{Solutions disponibles}
 
+Nous allons détailler les implémentations de ces modèles de sécurité dans certains systèmes d'exploitations, notamment les systèmes ``libres'', pour lesquels nous pouvons avoir accès au code source : Linux et la famille des BSD.
+
 \subsubsection{SELinux}
 
 SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire basé sur le ``type enforcement'', de niveau de sécurité/confidentialité non prédéfinis, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler à chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décission est prise indépendamment des précédantes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
@@ -105,6 +107,10 @@ SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire
  \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux.
  \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau. Des politiques ont déjà été écrites. Il existe une distribution facilitant le déploiement de ce type de protection : Fedora.
 \end{list}
+
+\subsection{TrustedBSD}
+
+% TODO
 
 \subsubsection{PIGA}
 
@@ -144,27 +150,14 @@ contextd est un démon chargé de coordonner différents mécanismes de sécurit
  \item \textbf{Avantages :}
 \end{list}
 
-Pax = sécurité automatique
-SELinux, GrSec = MAC qui contrôle les accès directs
-PIGA = contrôle les accès indirects
-iptables contrôle le trafic réseau
-
-contextd = chef d'orchestre + changement dynamique des règles des autres  mécanismes de protection pour adapter les permissions au domaine d'utilisation.
-
-Chercher tous les systèmes de MAC/DAC/RBAC,...
-
-Classer les MAC en fonction du travail à faire par l'administrateur ? en fonction d'où ils agissent ? par rapport à la logique interne (stateless ou statefull) ?
-
-\newpage
-
-\section{Solution utilisée}
-
-% \subsection{PIGA-OS, PIGA-SYSTRANS}
-
-\subsection{SELinux, PIGA, contextd}
-
-La solution retenue par Jérémy Briffaut et l'équipe SDS pour construire un système d'exploitation sécurisé est constituée de SELinux, PIGA, et de contextd. Ces trois éléments forment une suite de couche qui offrent progressivement un contrôle plus fin sur les intéractions sur un système Linux, et permettent de garantir des propriétés fine et précises, mais en même temps générales.
-
-\subsection{Gentoo Hardened}
-
-Notre project ayant pour but potentiel, à terme, d'être intégré dans le système PIGA-OS, nous avons basé l'intégralité du développement sur la distribution Gentoo Hardened, qui propose une version du noyau modifié. C'est donc à partir des noyaux Linux 2.6.32-r9 et r22 version hardened que nous avons travaillé.
+% TODO & FIXME
+% Pax = sécurité automatique
+% SELinux, GrSec = MAC qui contrôle les accès directs
+% PIGA = contrôle les accès indirects
+% iptables contrôle le trafic réseau
+% 
+% contextd = chef d'orchestre + changement dynamique des règles des autres  mécanismes de protection pour adapter les permissions au domaine d'utilisation.
+% 
+% Chercher tous les systèmes de MAC/DAC/RBAC,...
+% 
+% Classer les MAC en fonction du travail à faire par l'administrateur ? en fonction d'où ils agissent ? par rapport à la logique interne (stateless ou statefull) ?

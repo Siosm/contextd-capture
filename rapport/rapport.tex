@@ -141,16 +141,29 @@ L'idée retenue consiste à déplacer la contrainte de communication au niveau d
 
 \section{Déroulement du projet}
 
+\subsection{Base utilisée pour le développement}
+
+% \subsection{PIGA-OS, PIGA-SYSTRANS}
+
+\subsubsection{SELinux, PIGA, contextd}
+
+La solution retenue par Jérémy Briffaut et l'équipe SDS pour construire un système d'exploitation sécurisé est constituée de SELinux, PIGA, et de contextd. Ces trois éléments forment une suite de couche qui offrent progressivement un contrôle plus fin sur les intéractions sur un système Linux, et permettent de garantir des propriétés fine et précises, mais en même temps générales.
+
+\subsubsection{Gentoo Hardened}
+
+Notre project ayant pour but potentiel, à terme, d'être intégré dans le système PIGA-OS, nous avons basé l'intégralité du développement sur la distribution Gentoo Hardened, qui propose une version du noyau modifié. C'est donc à partir des noyaux Linux 2.6.32-r9 et r22 version hardened que nous avons travaillé.
+
 \subsection{Systemtap}
 
 \subsubsection{Principe de fonctionnement}
 
-Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
+Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé par la Figure~\ref{IBMST}.
 
-\begin{figure}[hb]
+\begin{figure}[h!]
 	\centering
 	\includegraphics[scale=0.4]{attachements/kretprob.png}
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
+	\label{IBMST}
 \end{figure}
 
 \subsubsection{Résultats obtenus}
@@ -174,7 +187,7 @@ Les modules LSM sont au noyau ce que netfilter est au réseau.
 
 Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un point d'ancrage ou hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
 
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[scale=0.45]{attachements/lsm1.png}
 	\caption{Architecture des hooks LSM \cite{LSMINTRO}}
@@ -182,9 +195,7 @@ Le principe de fonctionnement est simple : un module LSM est chargé dans le noy
 
 L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
 
-\newpage
-
-\begin{figure}%[hb]
+\begin{figure}[!ht]
 	\centering
 	\includegraphics[scale=0.45]{attachements/lsm2.png}
 	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
@@ -218,21 +229,16 @@ Maintenant que ces informations sont localisées, il faut pouvoir les extraire d
 
 \subsection{Problématique de la communication entre contextd et le noyau}
 
-Compte tenu du fonctionnement de contextd, il a fallut développé un système de communication entre le noyau et contextd.
+Compte tenu du fonctionnement de contextd, il a fallut développer un système de communication entre le noyau et contextd.
 
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
 	\includesvg{attachements/contextd_dbus}{0.45}
 	\caption{Communication entre contextd et les applications}
+	\label{contextd_dbus}
 \end{figure}
 
-En effet, comme le montre le schéma, aucune implémentation ne permet à contextd de communiquer avec le noyau ; l'interface DBUS étant réservé historiquement qu'aux communications entre processus.
-
-\subsubsection{Les proc files}
-
-Pour la communication entre le noyau et l'espace utilisateur, ont été créés les proc files. Ce système de fichiers créé en RAM permet non seulement de récupéré des informations depuis le noyau mais aussi de pouvoir lui en envoyer.
-
-Nous avons donc envisager de créer des proc files afin de pouvoir récupérer les informations utiles à contextd décrites précédemment. Cependant, il a fallu considéré les problèmes liés aux aspects sécurité. Nous avons donc décider de ne pas retenir cette idée, tout en la retenant pour le débuggage. (cf. L'interface présentée à l'administrateur).
+En effet, comme le montre la Figure~\ref{contextd_dbus}, l'implémentation choisie au départ pour acheminer les informations nécessaires à contextd était centrée sur DBus, un système de communication inter-processus simple.
 
 \subsubsection{Les appels systèmes}
 
@@ -240,10 +246,10 @@ Pour mettre en place la communication entre l'espace noyau et le démon en espac
 \begin{itemize}
  \item \textbf{auditsec\_reg} : démarre/termine la communication et enregistre/désinscrit les programmes à surveiller.
  \item \textbf{auditsec\_question} : bloquant, qui attends une demande d'autorisation de la part du noyau.
- \item \textbf{auditsec\_answer} : qui permet de donner une réponse au noyau.
+ \item \textbf{auditsec\_answer} : qui permet de donner une réponse au noyau.\\
 \end{itemize}
 
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
 	\includepic{attachements/sequence_diagram}{1}
 	\caption{Diagramme de séquence entre le noyau, contextd, et une application}
@@ -251,7 +257,7 @@ Pour mettre en place la communication entre l'espace noyau et le démon en espac
 
 Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et de s'assurer le traitement de chacun des appels système.
 
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
 	\includesvg{attachements/syscall_sync}{0.6}
 	\caption{Communication entre les hooks LSM et les appels système}
@@ -259,29 +265,40 @@ Nous utilisons des mutex pour contrôler les échanges d'informations entre le n
 
 Une fois que contextd est enregistré, toute nouvelle tentative d'enregistrement échouera. Il sera nécessaire de quitter contextd avant d'effectuer un nouvel enregistrement. Cela permet de limiter la communication par l'intermédiaire de cet appel, pour l'enregistrement et la désincription des programmes à surveiller.
 
+Les appels systèmes présentes deux avantages majeurs par rapport à d'autres solutions :
+\begin{itemize}
+  \item l'appel auditsec\_question est bloquant, laissant le processus en attente d'une réponse du noyau. Cela évite d'avoir à vérifier périodiquement l'état d'un fichier contenant temporairement des informations.
+  \item il n'est pas nécessaire de parser les informations reçues : nous utilisons un pointeur sur une structure remplie le noyau.\\
+\end{itemize}
+
+En revanche, il est peu probable qu'une telle solution soit acceptée par les développeur du noyau. Il faudrait donc envisager de convertir ces appels systèmes en appels à ioctl, un appel système utilisé pour communiquer avec les périphériques par exemple.
+
 \subsubsection{L'interface présentée à l'administrateur}
 
-	Pour faciliter l'administration et pour pouvoir intéragir plus aisément avec le noyau, nous avons mis en place deux fichiers dans l'arborescence /proc :
+Pour simplifier la tâche de l'administrateur et rendre compte de l'état du noyau, nous avons créé les ``proc files''. Ce système de fichiers virtuel, contenu dans la mémoire vive du système, permet non seulement de récupérer des informations depuis le noyau mais aussi de lui en envoyer.
+
+Nous avons mis en place deux fichiers dans l'arborescence /proc :
 
 	\begin{itemize}
-		\item /proc/contextd/programs : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Ce fichier n'est disponible qu'en lecture seule afin de ne pas permettre un acte malveillant consistant à ajouter ou supprimer un programme de manière intempestive.
-		\item /proc/contextd/status : Ce fichier est en revanche accessible en lecture/écriture. En lecture, il renvoie le PID de contextd (plus précisément le tgid (threads)). En ecriture, s'il reçoit un 0, il désactive la surveillance des programmes enregistrés et vide la liste. Il est donc impératif que ce dossier ne soit pas accessible par défaut à un utilisateur non privilégié.
+		\item \textbf{/proc/contextd/programs} : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Des demandes seront envoyées à contextd pour ces programmes. Ce fichier n'est disponible qu'en lecture seule. En effet, nous considérons qu'une fois contextd lancé, lui seul peut décider de l'enregistrement ou de la désincription d'un programme.
+		\item \textbf{/proc/contextd/status} : Ce fichier est en revanche accessible en lecture et en écriture. En lecture, on y trouve le PID de contextd (plus précisément le tgid, pour ne pas prendre en compte les threads de contextd). En ecriture, s'il reçoit un 0, le noyau désactive la surveillance par contextd et vide la liste des programmes enregistrés. Il est donc impératif que ce fichier ne soit pas accessible par défaut à un utilisateur non privilégié. On peut aussi envisager de désactiver ce comportement sur un système en production.
 	\end{itemize}
 
+\subsubsection{Séparation des fonctions de communications dans contextd}
 
-\subsubsection{Classes de communication}
+Compte tenu de ce qui a été dit précédemment, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
 
-Compte tenu de ce qui a été précédemment dit, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec les processus via le noyau. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par un canal dbus.
+Cette communication se faisait grâce à la classe "DBusContext". Cette classe traitait les solicitations des clients (programmes), les enregistrait dans une table de hashage privée et s'occupait des transitions. Les programmes étaient indexés par le dbus\_id correspondant au canal de communication DBus.
 
-Cette communication se faisait grâce à la classe "dbus-context". Cette classe traitait les solicitations des clients (programmes), les enregistrait dans une liste (attribut privé) et s'occupait des transitions, cette liste (Qmap) était indexée par le dbus\_id.
+Nous avons donc reproduit ce comportement pour la réceptions des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
 
-Nous avons donc fait la même chose pour le noyau. Nous avons créé une classe "kernel-context" qui permet de traiter les autres processus qui ne disposent pas du plugin. Cependant, il faut tenir compte du fait que dans ce cas de figure, une application qui possède le plugin se verra authentifiée deux fois, une fois par dbus et une fois par le noyau. De plus, la liste des processus ne peut plus être indexée par le dbus\_id car il n'est pas pertinent dans le cas du noyau.
+Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc palié ce problème en implémentant une classe abstraite "AbstractContext" de telle sorte à centraliser la liste des clients pour toutes les source d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier.
 
-Pour palier ce problème, nous avons décidé d'implémenter une classe abstraite "abstractcontext" qui, elle, possède une seule et unique liste qui contiendra les clients des deux modes de communication, à savoir dbus et noyau tous deux étant implémentées respectivement par "dbus-context" et "kernel-context", classes dérivées de "abstractcontext". Dans le cas où un troisième mode de communication sera envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà. La liste en question est déclarée en private static : ces propriétés permettent à toutes les classes dérivées d'hériter de l'instanciation de cette liste sans que celle-ci dépende de l'instance.
+Dans le cas où un troisième mode de communication serait envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà : il suffira d'hériter de la classe AbstractContext.
 
 De même, pour lire cette liste, ajouter ou supprimer un élément, on utilise un vérrou (lock) afin d'éviter les accès concurrents. Ce vérrou est également déclaré en protected static, pour les mêmes raison évoquées supra concernant l'héritage et l'instanciation.
 
-\begin{figure}[h]
+\begin{figure}[!ht]
 	\centering
 	\includedot{attachements/class}{.8}
 	\caption{Diagramme de classes}
@@ -298,7 +315,7 @@ Pour rendre contextd conscient de nos modifications nous avons implémenté plus
 
 De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormé possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox, claws-mail et context-notify).
 
-\textit{\textsl{\textbf{Nota bene :}}} Nous partons du principe que notre travail est/sera utilisé avec SELinux, même s'il ce n'est pas possible actuellement. Nous n'effectuons aucune vérification d'intégrité sur les programmes surveillés par contextd. Cette intégrité est en principe assurée par les politiques SELinux et/ou les règles PIGA.
+\textit{\textsl{\textbf{Nota bene :}}} Nous partons du principe que notre travail est/sera utilisé avec SELinux, même si ce n'est pas possible actuellement. Nous n'effectuons aucune vérification d'intégrité sur les programmes surveillés par contextd. Cette intégrité est en principe assurée par les politiques SELinux et/ou les règles PIGA.
 
 \section{Implémentation}
 
@@ -610,9 +627,9 @@ struct auditsec_info {
 };
 \end{lstlisting} 
 
-Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créer différentes autres structures pour chaque type de "hook".
+Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créé différentes autres structures pour chaque type de "hook".
 
-Concernant les fichiers : 
+Concernant les fichiers :
 
 \textit{{kernel\_src}/security/auditsec/struct.c} :
 \begin{lstlisting} [language=C]
@@ -815,7 +832,7 @@ Cet appel système a une triple fonction :
 	\item Dé-enregistrer et nettoyer les éléments de la liste. 
 \end{itemize}
 
-Voici le code source de cet appel système :
+Il s'assure aussi de l'identité de l'appelant, ne laissant que contextd, une fois lancé, modifier la liste des programmes à surveiller. Voici le code source de cet appel système :
 
 \textit{{kernel\_src}/security/auditsec/syscall.c} :
 \begin{lstlisting} [language=C]
@@ -925,7 +942,9 @@ asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
 }
 \end{lstlisting}
 
-\textit{{kernel\_src}/security/auditsec/syscall.c} :
+Les verrous sont accessibles grâce aux fonctions définies dans :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
 \begin{lstlisting} [language=C]
 struct semaphore * auditsec_hook_lock()
 {
@@ -975,15 +994,14 @@ asmlinkage long sys_auditsec_answer(int __user answer)
 
 \subsubsection{Déclaration des appels système}
 
-Une dernière étapes est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouter les lignes suivantes dans le fichier \textit{{kernel\_src}/security/auditsec/syscall.c} :
-
+Une dernière étapes est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouter les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
 \begin{lstlisting} [language=C]
 asmlinkage long sys_auditsec_reg(int __user state, char __user *);
 asmlinkage long sys_auditsec_question(struct auditsec_info __user *);
 asmlinkage long sys_auditsec_answer(int __user);
 \end{lstlisting}
 
-Ensuite, il faut attribuer aux appels système un numéro. Cela est fait en ajoutant les lignes suivantes dans le fichier \textit{{kernel\_src}/arch/x86/kernel/syscall\_table\_32.S} en notant les numéros !
+Ensuite, il faut attribuer aux appels système un numéro. Cela est fait en ajoutant les lignes suivantes dans le fichier \textit{{kernel\_src}/arch/x86/kernel/syscall\_table\_32.S} : %en notant les numéros !
 
 \begin{lstlisting}[language=C]
 	.long sys_auditsec_reg
@@ -1019,13 +1037,13 @@ __SYSCALL(__NR_auditsec_answer, sys_auditsec_answer)
 \end{lstlisting}
 
 
-Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision si le noyau donne l'accès ou non à la ressource demandée.
+Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision sur l'accès ou non à la ressource demandée.
 
 \subsection{Modification de contextd}
 
-Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication entre lui et les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus. Nous avons donc implémenté une classe "pseudo" abstraite `àbstractcontext''.
+Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus. Nous avons donc implémenté une classe virtuelle ``AbstractContext''.
 
-\subsubsection{Ajout d'une classe ``abstractcontext''}
+\subsubsection{Ajout d'une classe ``AbstractContext''}
 
 Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons fait qu'une déclaration dans un .h et implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
 
