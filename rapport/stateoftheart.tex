@@ -39,10 +39,10 @@ L'application la plus courante de ce principe est la séparation entre les diff�
 Il est possible d'employer différentes approches pour s'assurer de la sécurité d'un système d'exploitation, mais chacune d'entre elles repose à un moment ou un autre sur la confiance que l'on a dans l'un des éléments qui la constitue. On peut citer plusieurs cas de figures \cite{WCS}:
 
 \begin{itemize}
-  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité, tout en étant conscient que les logiciels ne sont pas de confiance % Trust all the software to abide by a security policy but the software is not trustworthy (this is computer insecurity).
-  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité et s'assurer que le logiciel est validé et fiable (analyse complète et exhaustive de tous les cas d'utilisations, de toutes les branches du code) % Trust all the software to abide by a security policy and the software is validated as trustworthy (by tedious branch and path analysis for example).
-  \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité même si la fiabilité de cette politique et son moyen d'application n'est pas complétement fiable% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
-  \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliquée par des méchanismes matériels de confiance% trustworthy hardware mechanisms. %FIXME
+  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité, tout en étant conscient que les logiciels ne sont pas de confiance.% Trust all the software to abide by a security policy but the software is not trustworthy (this is computer insecurity).
+  \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité et s'assurer que le logiciel est validé et fiable (analyse complète et exhaustive de tous les cas d'utilisations, de toutes les branches du code).% Trust all the software to abide by a security policy and the software is validated as trustworthy (by tedious branch and path analysis for example).
+  \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité même si la fiabilité de cette politique et son moyen d'application n'est pas complétement fiable.% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
+  \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliquée par des méchanismes matériels de confiance.% trustworthy hardware mechanisms.
 \end{itemize}
 
 Les modèles de sécurité standard se situent tous dans la première catégrie alors que les méthodes que nous allons présenter par la suite peuvent être placées dans les catégories trois et quatre. Le test complet de tous les logiciels présents sur un système d'exploitation est une tâche difficilement réalisable si l'on considère la diversité des matériels disponibles et la complexité d'une application telle que le noyau d'un système d'exploitation. Il existe des systèmes d'exploitation et plus particulièrement des noyaux certifiés critères communs, tel QNX\cite{QNX}, qui peuvent être classés dans la catégorie 2. En revanche, le code source de ces différents systèmes n'étant pas disponible librement, nous ne les détaillerons pas dans ce document.
@@ -102,7 +102,6 @@ Nous allons détailler les implémentations de ces modèles de sécurité dans c
 \subsubsection{SELinux}
 
 SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire basé sur le ``type enforcement'', de niveaux de sécurité/confidentialité non prédéfinis, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler pour chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décision est prise indépendamment des précédentes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
-
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des interactions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux. Seuls certains systèmes de fichiers supportent les attributs étendus nécessaires à la labelisation des fichiers présents sur les supports de stockage.
  \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau. Des politiques ont déjà été écrites. Il existe une distribution facilitant le déploiement de ce type de protection : Fedora.
@@ -111,7 +110,6 @@ SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire
 \subsubsection{PIGA}
 
 L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notamment d'une sur-couche à SELinux permettant de définir et imposer des propriétés de sécurité à l'échelle du système en plus des contrôles au niveau des interactions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des interactions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'information dans un système, qu'ils soient directs ou indirects.
-
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Connaissance du langage de définition de propriété PIGA, maîtrise préalable de SELinux, pré-requis matériels pour la ``compilation'' des politiques.
  \item \textbf{Avantages :} Un contrôle très fin sur les interactions dans un système, restriction (statique) des privilèges maximale.
@@ -122,35 +120,31 @@ Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a �
 \subsubsection{grsecurity \& PaX}
 
 \textsc{grsecurity} est une autre implémentation des mécanismes de contrôle d'accès mandataire et des listes de contrôle d'accès. Il permet aussi une gestion des droits basée sur les rôles. Souvent associé à \textsc{grsecurity}, PaX est un patch pour le noyau Linux ajoutant des restrictions et des contrôles sur les accès à la mémoire.
-
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :} Certains programmes ne fonctionnent plus avec les restrictions implémentées par PaX.
- \item \textbf{Avantages :} Protection avancée de l'utilisation de la mémoire avec PaX (pile non exécutable, ...)
+ \item \textbf{Contrainte pour l'administrateur :} Certains programmes ne fonctionnent plus avec les restrictions implémentées par PaX. Il faut organiser correctement les binaires car la labellisation est effectuée par rapport à l'arborescence
+ \item \textbf{Avantages :} Protection avancée de l'utilisation de la mémoire avec PaX (pile non exécutable, ...), fonctionnement un peu plus simple que SELinux
 \end{list}
 
 \subsubsection{TrustedBSD}
 
-% TODO
+Le projet TrustedBSD consiste à intégrer à FreeBSD des fonctions de sécurité telles les attributs étendus pour le système de fichier UFS2, les listes de contrôle d'accès, des capacités d'audit lié à la sécurité, plusieurs contrôles d'accès mandataire.
 
 \subsubsection{iptables}
 
 iptables et un logiciel permettant de contrôler plus facilement netfilter, le pare-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles interactions avec le réseau sont autorisés sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. Iptables est un pare-feu à états, c'est-à-dire qu'il garde en mémoire les interactions précédentes pour déterminer la légitimité des interactions suivantes.
-
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :}
- \item \textbf{Avantages :}
+ \item \textbf{Contrainte pour l'administrateur :} Il faut préciser de manière exhaustive les ports utilisés sur une machine.
+ \item \textbf{Avantages :} Contrôle fin des connexions réseaux possibles. Audit des connexions facilité.
 \end{list}
 
 \subsubsection{PIGA-SYSTRANS ou contextd}
 
-Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
-
+Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port. Contextd introduit la notion de domaine (web, impôts, ...) liés à une activité particulière de l'utilisateur. Les programmes surveillé n'ont le droit de faire que ce qui leur est autorisé dans le domaine courant.
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :}
- \item \textbf{Avantages :}
+ \item \textbf{Contrainte pour l'administrateur :} Maîtrise de SELinux, PIGA. Rédaction et test des règles exhaustives pour faire fonctionner les programmes avec contextd. Certains programmes nécessitent des modifications, surtout lorsque ceux-ci ont un comportement inter-domaine.
+ \item \textbf{Avantages :} Presque la plus fine implémentation du principe de moindre privilèges.
 \end{list}
 
-% TODO & FIXME
 % Pax = sécurité automatique
 % SELinux, GrSec = MAC qui contrôle les accès directs
 % PIGA = contrôle les accès indirects
