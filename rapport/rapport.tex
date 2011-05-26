@@ -241,10 +241,10 @@ En effet, comme le montre la Figure~\ref{contextd_dbus}, l'implémentation chois
 
 \subsubsection{Les appels systèmes}
 
-Pour mettre en place la communication entre l'espace noyau et le démon en espace utilisateur contextd, nous avons implémenté trois nouveaux appels systèmes. En effet, la solution des appels systèmes nous permet de contrôler les interactions avec le noyau en créant :
+Pour mettre en place la communication entre l'espace noyau et le démon en espace utilisateur contextd, nous avons implémenté trois nouveaux appels système. En effet, la solution des appels système nous permet de contrôler les interactions avec le noyau en créant :
 \begin{itemize}
  \item \textbf{auditsec\_reg} : démarre/termine la communication et enregistre/désinscrit les programmes à surveiller.
- \item \textbf{auditsec\_question} : bloquant, qui attends une demande d'autorisation de la part du noyau.
+ \item \textbf{auditsec\_question} : bloquant, qui attend une demande d'autorisation de la part du noyau.
  \item \textbf{auditsec\_answer} : qui permet de donner une réponse au noyau.\\
 \end{itemize}
 
@@ -264,13 +264,13 @@ Nous utilisons des mutex pour s'assurer du traitement par contextd de chacun des
 
 Une fois que contextd est enregistré, toute nouvelle tentative d'enregistrement échouera. Il sera nécessaire de quitter contextd avant d'effectuer un nouvel enregistrement. Cela permet de limiter la communication par l'intermédiaire de cet appel, pour l'enregistrement et la désinscription des programmes à surveiller.
 
-Les appels systèmes présentes deux avantages majeurs par rapport à d'autres solutions :
+Les appels système présentent deux avantages majeurs par rapport à d'autres solutions :
 \begin{itemize}
   \item l'appel auditsec\_question est bloquant, laissant le processus en attente d'une réponse du noyau. Cela évite d'avoir à vérifier périodiquement l'état d'un fichier contenant temporairement des informations.
-  \item il n'est pas nécessaire de parser les informations reçues : nous utilisons un pointeur sur une structure remplie le noyau.\\
+  \item il n'est pas nécessaire de parser les informations reçues : nous utilisons un pointeur sur une structure remplie par le noyau.\\
 \end{itemize}
 
-En revanche, il est peu probable qu'une telle solution soit acceptée par les développeur du noyau. Il faudrait donc envisager de convertir ces appels systèmes en appels à ioctl, un appel système utilisé pour communiquer avec les périphériques par exemple.
+En revanche, il est peu probable qu'une telle solution soit acceptée par les développeurs du noyau. Il faudrait donc envisager de convertir ces appels systèmes en appels à ioctl, un appel système utilisé pour communiquer avec les périphériques par exemple.
 
 \subsubsection{L'interface présentée à l'administrateur}
 
@@ -285,13 +285,13 @@ Nous avons mis en place deux fichiers dans l'arborescence /proc :
 
 \subsubsection{Séparation des fonctions de communications dans contextd}
 
-Compte tenu de ce qui a été dit précédemment, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspirés de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
+Compte tenu de ce qui a été dit précédemment, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspiré de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
 
 Cette communication se faisait grâce à la classe "DBusContext". Cette classe traitait les sollicitations des clients (programmes), les enregistrait dans une table de hashage privée et s'occupait des transitions. Les programmes étaient indexés par le dbus\_id correspondant au canal de communication DBus.
 
-Nous avons donc reproduit ce comportement pour la réceptions des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
+Nous avons donc reproduit ce comportement pour la réception des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
 
-Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc pallié ce problème en implémentant une classe abstraite "AbstractContext" de telle sorte à centraliser la liste des clients pour toutes les source d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier. L'accès à la liste des clients est synchronisée pour éviter toute concurrence d'accès.
+Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc pallié ce problème en implémentant une classe abstraite "AbstractContext" afin de centraliser la liste des clients pour toutes les sources d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier. L'accès à la liste des clients est synchronisé pour éviter toute concurrence d'accès.
 
 Dans le cas où un troisième mode de communication serait envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà : il suffira d'hériter de la classe AbstractContext.
 
@@ -349,7 +349,7 @@ La description des différentes lignes ci-dessus :
 	\item La description
 \end{itemize}
 
- Pour que ce dossier soit pris en compte lors de la compilation, il faut rajouter la ligne suivante dans \textit{{kernel\_src}/security/Makefile} :
+ Pour que ce dossier soit pris en compte lors de la compilation, il faut rajouter les lignes suivantes dans \textit{{kernel\_src}/security/Makefile} :
 
 \begin{lstlisting}[language=make]
 subdir-$(CONFIG_SECURITY_AUDITSEC)  += auditsec	
@@ -370,7 +370,7 @@ Ceci fait, tout est désormais prêt pour la compilation. Maintenant, passons à
 
 \subsection{Création des éléments nécessaires au module}
 
-La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différents fonctions appelées lorsqu'un appel système est demandé. Voici donc la structure de notre module.
+La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différentes fonctions appelées lorsqu'un appel système est demandé. Voici donc la structure de notre module.
 
 \begin{lstlisting}[language=C]
 static struct security_operations audit_ops = {
@@ -714,7 +714,7 @@ security_initcall(auditsec_init);
 
 \subsubsection{Fonctions de lecture pour \textit{/proc/contextd/programs}}
 
-L'initialisation du module et la création des proc files nécessite l'implémentation également des fonctions qui permettront la lecture et l'écriture dans ces fichiers. Pour pouvoir lire le fichier \textit{/proc/contextd/programs}, nous avons implémenté la fonction suivante :
+L'initialisation du module et la création des proc files nécessitent l'implémentation également des fonctions qui permettront la lecture et l'écriture dans ces fichiers. Pour pouvoir lire le fichier \textit{/proc/contextd/programs}, nous avons implémenté la fonction suivante :
 
 \textit{{kernel\_src}/security/auditsec/hooks.c} :
 \begin{lstlisting} [language=C]
@@ -797,7 +797,7 @@ Cet appel système a une triple fonction :
 	\item Dé-enregistrer et nettoyer les éléments de la liste. 
 \end{itemize}
 
-Il s'assure aussi de l'identité de l'appelant, ne laissant que contextd, une fois lancé, modifier la liste des programmes à surveiller. Voici le code source de cet appel système :
+Il s'assure aussi de l'identité de l'appelant, ne laissant qu'à contextd, une fois lancé, la possibilité de modifier la liste des programmes à surveiller. Voici le code source de cet appel système :
 
 \textit{{kernel\_src}/security/auditsec/syscall.c} :
 \begin{lstlisting} [language=C]
@@ -1507,7 +1507,7 @@ int main(int argc, char ** argv)
 Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
 
 % FIXME
-Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins interne contenants les fonctionnalités de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
+Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins internes contenant les fonctionnalités de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
 % FIXME
 
 \begin{figure}%[!ht]
@@ -1517,7 +1517,7 @@ Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de 
 	\label{INI}
 \end{figure}
 
-La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel (ici default). Si la transaction est autorisée par les règles établies pour testprog et qu'il est précisé que l'utilisateur doit confirmer cette action, une demande est envoyée à context-notify qui attend la réponse pour la renvoyer à contextd. Si l'utilisateur mets trop de temps à répondre (30 secondes actuellement), la demande est rejetée et il ne se produit aucun changement de domaine.
+La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel (ici default). Si la transaction est autorisée par les règles établies pour testprog et qu'il est précisé que l'utilisateur doit confirmer cette action, une demande est envoyée à context-notify qui attend la réponse pour la renvoyer à contextd. Si l'utilisateur met trop de temps à répondre (30 secondes actuellement), la demande est rejetée et il ne se produit aucun changement de domaine.
 
 \begin{figure}%[!ht]
 	\centering
@@ -1526,7 +1526,7 @@ La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test t
 	\label{DEMANDE}
 \end{figure}
 
-La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans \/etc\/context.d\/program.d\/mon\_programme.xml et le fichier décrivant les transitions autorisées \/etc\/context.d\/transitions.xml). Ainsi, une fois dans le domaine impôts, testprog peut afficher les données du dossier impôts mais pas celle du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
+La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans /etc/context.d/program.d/mon\_programme.xml et le fichier décrivant les transitions autorisées /etc/context.d/transitions.xml). Ainsi, une fois dans le domaine ``impôts'', testprog peut afficher les données du dossier impôts mais pas celles du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
 
 \begin{figure}%[!ht]
 	\centering
@@ -1535,7 +1535,7 @@ La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y 
 	\label{FIN}
 \end{figure}
 
-D'autres tests effectués avec Libreoffice, montrent que le résultat fonctionne parfaitement avec des programmes classiques et courants sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a refusé l'accès). Ce problème est lié au choix de LSM : les applications ne peuvent pas faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
+D'autres tests effectués avec Libreoffice, montrent que le résultat fonctionne parfaitement avec des programmes classiques et courants sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a refusé l'accès). Ce problème est lié au choix de LSM : les applications ne peuvent pas faire la différence entre un refus lié aux permissions classiques et un refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
 
 Pour finir, voici un extrait du fichier de configuration pour testprog :
 
