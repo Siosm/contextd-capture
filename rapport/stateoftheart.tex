@@ -7,7 +7,7 @@ Plus généralement, c'est dans l'absence de mécanisme de sécurité global imp
 %  Nous allons détailler les objectifs à atteindre avant de présenter les différentes solutions disponibles.
 % Il existe différents mécanismes qui permettent d'apporter des couches de sécurité à un tel système. Nous détaillerons donc les principes fondateurs de la sécurité pour enchaîner sur les solutions disponibles.
 
-Nous allons réduire les concepts d'utilisateurs et d'applications aux ``simples'' processus qui sont la base de toute intéraction avec un système. De même, les fichiers, sockets, les IPC sont autant d'éléments sur lesquel un processus peut agir et nous les regrouperons sous le terme d'objet.
+Nous allons réduire les concepts d'utilisateurs et d'applications aux ``simples'' processus qui sont la base de toute interaction avec un système. De même, les fichiers, sockets, les IPC sont autant d'éléments sur lesquels un processus peut agir et nous les regrouperons sous le terme d'objet.
 
 \subsection{Les objectifs de sécurité}
 
@@ -49,15 +49,15 @@ Les modèles de sécurité standard se situent tous dans la première catégrie 
 
 \subsection{Les différentes méthodes de contrôle d'accès}
 
-Pour atteindre les objectifs détaillés précédement et assurer la séparation des privilèges, nous allons détailler dans cette partie plusieurs méthodes de contrôle d'accès.
+Pour atteindre les objectifs détaillés précédemment et assurer la séparation des privilèges, nous allons détailler dans cette partie plusieurs méthodes de contrôle d'accès.
 
 \subsubsection{Contrôle d'accès discrétionnaire (DAC)}
 
-Le contrôle d'accès discrétionnaire correspond à un modèle laissant à l'utilisateur, et donc aux programmes qu'il lance, tout contrôle sur les droits accordés aux objets qu'il possède. Un utilisateur peut ainsi compromettre un système en accordant des droits importants à d'autres utilisateurs sur les fichiers qu'il possède. Ce modèle ne permet pas d'assurer la confidentialité, l'intégrité d'un système. Il est à ranger dans la première catégorie des modèles qui font confiance aux logiciels sans imposer de contrôle de sécurité fort.
+Le contrôle d'accès discrétionnaire correspond à un modèle laissant à l'utilisateur, et donc aux programmes, tout contrôle sur les droits accordés aux objets qu'il possède. Un utilisateur peut ainsi compromettre un système en accordant des droits importants à d'autres utilisateurs sur les fichiers qu'il possède. Ce modèle ne permet pas d'assurer la confidentialité, l'intégrité d'un système. Il est à ranger dans la première catégorie des modèles qui font confiance aux logiciels sans imposer de contrôle de sécurité fort.
 
 \subsubsection{Contrôle d'accès mandataire (MAC)}
 
-Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, éventuelement matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui foment une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune intéraction puis en rajoutant progressivement des intéractions autorisées. Le contrôle d'accès mandataire correspond aux catégories trois et quatre, oû l'on ne fait pas confiance aux applications pour se reposer sur l'application d'une politique de sécurité plus ou moins fiable.
+Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui forme une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune interaction puis en rajoutant progressivement des interactions autorisées. Le contrôle d'accès mandataire correspond aux catégories trois et quatre, oû l'on ne fait pas confiance aux applications pour se reposer sur l'application d'une politique de sécurité plus ou moins fiable.
 
 % \begin{figure}[h]
 % 	\centering
@@ -67,9 +67,9 @@ Le contrôle d'accès mandataire repose sur la séparation entre les application
 
 \subsubsection{Sécurité multiniveau, multi catégorie (MLS ou MCS)}
 
-Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés comme l'intégrité ou la confidentialité. Il repose sur la séparation des données en plusieurs domaines, imposant des règles limitant les intéractions de l'utilisateur.
+Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés comme l'intégrité ou la confidentialité. Il repose sur la séparation des données en plusieurs domaines, imposant des règles limitant les interactions de l'utilisateur.
 
-\textbf{Bell-LaPaluda :} Ce modèle préserve la confidentialité de l'information en n'autorisant un sujet à écrire uniquement dans un niveau de confidentialité supérieur ou égal, et à ne lire que dans un niveau de sécurité inférieur ou égal. Ce modèle présente plusieurs inconvénients majeurs parce qu'il ne permet pas d'imposer des contraintes d'intégrité et ne permet pas de faire de disctinctions précise entre deux personnes possédant le même niveau d'accréditation.
+\textbf{Bell-LaPaluda :} Ce modèle préserve la confidentialité de l'information en n'autorisant un sujet à écrire uniquement dans un niveau de confidentialité supérieur ou égal, et à ne lire que dans un niveau de sécurité inférieur ou égal. Ce modèle présente plusieurs inconvénients majeurs parce qu'il ne permet pas d'imposer des contraintes d'intégrité et ne permet pas de faire de distinctions précise entre deux personnes possédant le même niveau d'accréditation.
 
 \begin{figure}[h]
 	\centering
@@ -77,7 +77,7 @@ Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés
 	\caption{Le modèle Bell-LaPadula}
 \end{figure}
 
-\textbf{Biba :} A contrario du modèle précédent, c'est l'intégrité qui est préservée, car seules les modifications dans un niveau de sécurité inférieur sont autorisée, et la lecture ne peut se faire que sur un niveau d'intégrité supérieur.
+\textbf{Biba :} A contrario du modèle précédent, c'est l'intégrité qui est préservée, car seules les modifications dans un niveau de sécurité inférieur sont autorisées, et la lecture ne peut se faire que sur un niveau d'intégrité supérieur.
 
 \begin{figure}[h]
 	\centering
@@ -85,11 +85,11 @@ Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés
 	\caption{Le modèle Biba}
 \end{figure}
 
-Ces deux modèles ne permettent pas d'atteindre plus d'un ou deux objectifs à la fois, et posent le problème de la sur-classification des données (toutes les données devenues confidentielles). Ceci conduit à l'introduction d'une méthode de déclassification, compromettant l'ensemble du modèle.
+Ces deux modèles ne permettent pas d'atteindre plus d'un ou deux objectifs à la fois, et posent le problème de la sur-classification des données (toutes les données devenues confidentielles). Ceci conduit à l'introduction d'une méthode de dé-classification, compromettant l'ensemble du modèle.
 
 \subsubsection{Contrôle d'accès basé sur des rôles (RBAC)}
 
-Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permettant de simplifier le travail de l'administrateur d'un système utilisant un contrôle mandataire. Le principe du contrôle d'accès mandataire consiste à attribuer des rôles à chaque utilisateur de la machine. Ces rôles donnent ainsi accès à différents éléments du système. Par exemple, les rôles d'utilisateur, d'administrateur et de webmaster peuvent être définis et un utilisateur classique pourra se voir attribuer le rôle de webmaster lui autorisant de modifier les pages disponibles sur un serveur sans avoir besoin de donner un accès administrateur complet à cette personne.
+Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permettant de simplifier le travail de l'administrateur d'un système utilisant un contrôle mandataire. Le principe du contrôle d'accès mandataire consiste à attribuer des rôles à chaque utilisateur de la machine. Ces rôles donnent ainsi accès à différents éléments du système. Par exemple, les rôles d'utilisateur, d'administrateur et de webmestre peuvent être définis et un utilisateur classique pourra se voir attribuer le rôle de webmestre lui autorisant de modifier les pages disponibles sur un serveur sans avoir besoin de donner un accès administrateur complet à cette personne.
 
 \subsubsection{Application de règles de politiques securité par les types (Type Enforcement)}
 
@@ -97,24 +97,24 @@ Ce principe repose sur l'association d'un contexte de sécurité à chaque objet
 
 \subsection{Solutions disponibles}
 
-Nous allons détailler les implémentations de ces modèles de sécurité dans certains systèmes d'exploitations, notamment les systèmes ``libres'', pour lesquels nous pouvons avoir accès au code source : Linux et la famille des BSD.
+Nous allons détailler les implémentations de ces modèles de sécurité dans certains systèmes d'exploitation, notamment les systèmes ``libres'', pour lesquels nous pouvons avoir accès au code source : Linux et la famille des BSD.
 
 \subsubsection{SELinux}
 
-SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire basé sur le ``type enforcement'', de niveau de sécurité/confidentialité non prédéfinis, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler à chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décission est prise indépendamment des précédantes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
+SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire basé sur le ``type enforcement'', de niveaux de sécurité/confidentialité non prédéfinis, et d'un contrôle d'accès basé sur les rôles. SELinux a été développé par la National Security Agency (NSA) et a été intégrée au noyau Linux une fois que l'architecture des Linux Security Modules fut mise en place. SELinux permet de contrôler pour chaque appel système la validité de l'interaction par rapport aux définitions d'une politique. On associe à chaque objets et processus un context de sécurité. L'accès à un object par un processus doit correspondre à une règle de la politique SELinux pour être autorisé. Il faut noter que chaque décision est prise indépendamment des précédentes : SELinux n'as pas de mémoire des transitions effectuées sur un système. C'est cette limitation et la possibilité d'utiliser les flux d'informations indirects, donc non contrôlés par SELinux, qui ont poussé la création de PIGA.
 
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des intéractions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux. Seuls certains systèmes de fichiers supportent les attributs étendus nécessaires à la labelisation des fichiers présents sur les supports de stockage.
+ \item \textbf{Contrainte pour l'administrateur :} Il faut décrire la totalité des interactions possibles pour chaque programme présent sur un système. Il faut s'assurer du bon fonctionnement de ces politiques. Il n'existe pas d'outils pour valider les politiques SELinux. Seuls certains systèmes de fichiers supportent les attributs étendus nécessaires à la labelisation des fichiers présents sur les supports de stockage.
  \item \textbf{Avantages :} Séparation fine des privilèges et des rôles, intégrée dans le noyau. Des politiques ont déjà été écrites. Il existe une distribution facilitant le déploiement de ce type de protection : Fedora.
 \end{list}
 
 \subsubsection{PIGA}
 
-L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notement d'une surcouche à SELinux permettant de définir et imposer des propriétés de sécurité à l'echelle du système en plus des contrôles au niveau des intéractions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des intéractions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'information dans un système, qu'ils soient directs ou indirects.
+L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notamment d'une sur-couche à SELinux permettant de définir et imposer des propriétés de sécurité à l'échelle du système en plus des contrôles au niveau des interactions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des interactions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'information dans un système, qu'ils soient directs ou indirects.
 
 \begin{list}{}{}
- \item \textbf{Contrainte pour l'administrateur :} Connaissance du langage de définition de propriété PIGA, maîtrise préalable de SELinux, prérequis matériels pour la ``compilation'' des politiques.
- \item \textbf{Avantages :} Un contrôle très fin sur les intéractions dans un système, restriction (statique) des privilèges maximale.
+ \item \textbf{Contrainte pour l'administrateur :} Connaissance du langage de définition de propriété PIGA, maîtrise préalable de SELinux, pré-requis matériels pour la ``compilation'' des politiques.
+ \item \textbf{Avantages :} Un contrôle très fin sur les interactions dans un système, restriction (statique) des privilèges maximale.
 \end{list}
 
 Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a été vainqueur du concours Sec\&Si organisé par l'Agence Nationale pour la Recherche (ANR) \cite{PIGA}\cite{PIGA2}.
@@ -134,7 +134,7 @@ Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a �
 
 \subsubsection{iptables}
 
-iptables et un logiciel permettant de contrôler plus facilement netfilter, le parre-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles intéractions avec le réseau sont autorisées sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. iptables est un parre-feu à états, c'est à dire qu'il garde en mémoire les intéractions précédantes opur déterminer la légitimité des interactions suivantes.
+iptables et un logiciel permettant de contrôler plus facilement netfilter, le pare-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles interactions avec le réseau sont autorisés sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. Iptables est un pare-feu à états, c'est-à-dire qu'il garde en mémoire les interactions précédentes pour déterminer la légitimité des interactions suivantes.
 
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :}
@@ -143,7 +143,7 @@ iptables et un logiciel permettant de contrôler plus facilement netfilter, le p
 
 \subsubsection{PIGA-SYSTRANS ou contextd}
 
-contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
+Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
 
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :}
