@@ -392,11 +392,11 @@ Par exemple, voici le code de la fonction auditsec\_file\_permission:
 int auditsec_file_permission(struct file *file, int mask)
 {
 ...
-	if(prog_is_monitored()){ // On teste si le programme est surveillé
+	if(prog_is_monitored()){ // On teste si le programme est surveille
 ...
-		// On récupère le chemin complet du fichier auquel on accède
+		// On recupere le chemin complet du fichier auquel on accede
 		file_path(file, fullpath);
-		if(*daemon_launched()){  // On teste si contextd est lance.
+		if(*daemon_launched()){  // On teste si contextd est lance
 			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){...}
 			
 			// On remplit la structure
