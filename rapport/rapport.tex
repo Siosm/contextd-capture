@@ -116,7 +116,6 @@
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
 Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année. Ce projet s'inscrit dans le cadre des projets de recherche menés au Laboratoire d'informatique Fondamentale d'Orléans (LIFO) par l'équipe Sécurité et Distribution des Systèmes (SDS) sur la création d'un système d'exploitation sécurisé basé sur Linux.
-% FIXME Est-ce correct ?
 
 ~
 
@@ -174,7 +173,6 @@ De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins
 Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il n'était alors pas pertinent de récupérer le chemin complet du fichier, car cette recherche est inadaptée et inefficace : il est nécessaire de parcourir l'intégralité du système de fichiers.
 
 Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
-
 
 \section{Solution retenue et implémentée}
 
@@ -439,41 +437,11 @@ struct prog {
 };
 \end{lstlisting}
 
-Puis nous déclarons et implémentons la liste dynamique:
+Puis nous déclarons la liste des programmes en utilisant une des implémentation de liste générique du noyau :
 
 \textit{{kernel\_src}/security/auditsec/share.c} :
 \begin{lstlisting}[language=C]
 static LIST_HEAD(prog_list);
-
-char * prog_liste()
-{
-	char * result = NULL;
-	char * tmp = NULL;
-	int alloc = 20 * (TASK_COMM_LEN + 1);
-	int res_len = 0;
-	struct prog * p;
-	
-	result = kmalloc(sizeof(char) * alloc, GFP_NOFS);
-	if(result == NULL){
-		printk(KERN_INFO "AuditSec: Can't allocate mem for /proc/contextd/programs");
-		return NULL;
-	}
-
-	list_for_each_entry(p, &prog_list, list){
-		if((res_len + TASK_COMM_LEN + 1) < alloc){
-			res_len += sprintf(result + res_len, "%s\n", p->execname);
-		}else{
-			alloc += 20 * (TASK_COMM_LEN + 1);
-			tmp = kmalloc(sizeof(char) * alloc, GFP_NOFS);
-			strncpy(tmp, result, alloc);
-			kfree(result);
-			result = tmp;
-			res_len += sprintf(result + res_len, "%s\n", p->execname);
-		}
-	}
-
-	return result;
-}
 \end{lstlisting} 
 
 Maintenant, pour tester si une application appartient à cette liste, nous faisons appel à la fonction suivante :
@@ -545,31 +513,11 @@ int unregister_prog(char * prog_name)
 
 	return -1;
 }
-
-
-int clean_prog_list()
-{
-	struct prog * p, * next_p;
-
-	printk(KERN_INFO "AuditSec: Cleanning prog list");
-
-	list_for_each_entry_safe(p, next_p, &prog_list, list) {
-		list_del(&p->list);
-		kfree(p);
-	}
-
-	if(list_empty(&prog_list) == 0){
-		printk(KERN_INFO "AuditSec: Prog list NOT empty !");
-		return -1;
-	}
-
-	return 0;
-}
 \end{lstlisting} 
 
 \subsubsection{Structure transmise}
 
-Une fois les tests effectués, le "hook" remplie une structure. Nous avons opté pour une structure "dynamique" plutôt qu'une multitude de structure car en effet, les données sont différentes selon le "hook" surveillé.
+Une fois les tests effectués, le "hook" remplie une structure. Nous avons opté pour une structure "dynamique" plutôt qu'une multitude de structure car les données sont différentes selon le "hook" surveillé.
 
 La partie principale de cette structure est la suivante :
 
@@ -592,7 +540,7 @@ struct auditsec_info {
 };
 \end{lstlisting} 
 
-Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créé différentes autres structures pour chaque type de "hook".
+Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créé différentes structures pour chaque type de "hook".
 
 Concernant les fichiers :
 
@@ -794,7 +742,8 @@ Cet appel système a une triple fonction :
 \begin{itemize}
 	\item Enregistrer contextd auprès du noyau.
 	\item Ajouter les programmes surveillés.
-	\item Dé-enregistrer et nettoyer les éléments de la liste. 
+	\item Dé-enregistrer des programmes pour ne plus les surveiller.
+	\item Dé-enregistrer contextd.
 \end{itemize}
 
 Il s'assure aussi de l'identité de l'appelant, ne laissant qu'à contextd, une fois lancé, la possibilité de modifier la liste des programmes à surveiller. Voici le code source de cet appel système :
@@ -875,26 +824,14 @@ Cet appel système attend, grâce aux jeux des verrous que la structure de donn�
 \begin{lstlisting} [language=C]
 asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
 {
-	if(*daemon_launched() == false){
-		printk(KERN_INFO "AuditSec: The daemon is not launched");
-		return -EFAULT;
-	}
+	if(*daemon_launched() == false){...}
 
-	if(*contextd_pid() != task_tgid_nr(current)){
-		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
-		return -EFAULT;
-	}
+	if(*contextd_pid() != task_tgid_nr(current)){...}
 
-	if(down_interruptible(auditsec_question_lock()) != 0){
-		printk(KERN_INFO "AuditSec: Can't get the question lock or interrupted");
-		return -EFAULT;
-	}
+	if(down_interruptible(auditsec_question_lock()) != 0){...}
 
-	// FIXME faire des tests sur le pointeur donne par le process en userspace
 	if(likely(user_as_i != NULL)){
 		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
-// 			printk(KERN_INFO "AuditSec: pid: %d, execname: %s, file: %s (%d) COPIED",
-//				   user_as_i->pid, user_as_i->execname, user_as_i->auditsec_struct.file.fullpath, strlen(user_as_i->auditsec_struct.file.fullpath));
 			return 0;
 		}
 	}
@@ -907,7 +844,7 @@ asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
 }
 \end{lstlisting}
 
-Les verrous sont accessibles grâce aux fonctions définies dans :
+Pour partager les verrous entre les appels système et les ``hooks'', nous avons défini les fonctions :
 
 \textit{{kernel\_src}/security/auditsec/share.c} :
 \begin{lstlisting} [language=C]
@@ -917,19 +854,9 @@ struct semaphore * auditsec_hook_lock()
 	return &auditsec_hook_lock;
 }
 
+struct semaphore * auditsec_question_lock(){...}
 
-struct semaphore * auditsec_question_lock()
-{
-	static DECLARE_MUTEX(auditsec_question_lock);
-	return &auditsec_question_lock;
-}
-
-
-struct semaphore * auditsec_answer_lock()
-{
-	static DECLARE_MUTEX(auditsec_answer_lock);
-	return &auditsec_answer_lock;
-}
+struct semaphore * auditsec_answer_lock(){...}
 \end{lstlisting}
 
 \subsubsection{auditsec\_answer}
@@ -939,15 +866,9 @@ Cet appel système transmet la réponse de contextd au noyau. Voici son impléme
 \begin{lstlisting} [language=C]
 asmlinkage long sys_auditsec_answer(int __user answer)
 {
-	if(*daemon_launched() == false){
-		printk(KERN_INFO "AuditSec: The daemon is not launched");
-		return -EFAULT;
-	}
+	if(*daemon_launched() == false){...}
 
-	if(*contextd_pid() != task_tgid_nr(current)){
-		printk(KERN_INFO "AuditSec: You're not the daemon (%d <> %d)", *contextd_pid(), task_pid_nr(current));
-		return -EFAULT;
-	}
+	if(*contextd_pid() != task_tgid_nr(current)){...}
 
 	*auditsec_answer() = answer;
 	up(auditsec_answer_lock());
@@ -973,21 +894,6 @@ Ensuite, il faut attribuer aux appels système un numéro. Cela est fait en ajou
 	.long sys_auditsec_answer
 \end{lstlisting}
 
-%Puis ajouter les lignes suivantes en faisant attention à bien incrémenter "\_\_NR\_syscalls":
-%
-%\textit{{kernel\_src}/include/asm-generic/unistd.h }
-%\begin{lstlisting}[language=C]
-%#define __NR_sys_auditsec_reg 242
-%__SYSCALL(__NR_sys_auditsec_reg, sys_auditsec_reg)
-%#define __NR_sys_auditsec_question 243
-%__SYSCALL(__NR_sys_auditsec_question, sys_auditsec_question)
-%#define __NR_sys_auditsec_answer 244
-%__SYSCALL(__NR_sys_auditsec_answer, sys_auditsec_answer)
-%
-%#undef __NR_syscalls
-%#define __NR_syscalls 245
-%\end{lstlisting}
-
 et enfin :
 
 \textit{{kernel\_src}/arch/x86/include/asm/unistd\_64.h}
@@ -1000,18 +906,17 @@ __SYSCALL(__NR_auditsec_question, sys_auditsec_question)
 __SYSCALL(__NR_auditsec_answer, sys_auditsec_answer)
 \end{lstlisting}
 
-
 Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision sur l'accès ou non à la ressource demandée.
 
 \subsection{Modification de contextd}
 
-Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus. Nous avons donc implémenté une classe virtuelle ``AbstractContext''.
+Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus.
 
 \subsubsection{Ajout d'une classe ``AbstractContext''}
 
-Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons fait qu'une déclaration dans un .h et implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
+Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
 
-De plus, pour palier le problème liée à la liste de clients (alias les applications surveillées et enregistrées), nous avons déclaré cette liste ainsi que le verrou en tant qu'attribut de cette classe abstraite. Voici le code produit :
+De plus, pour partager la liste de clients (les applications surveillées et enregistrées), nous avons déclaré cette liste en tant qu'attribut de cette classe abstraite. Voici le code produit :
 
 \textit{abstractcontext.h} : 
 \begin{lstlisting}[language=C++]
@@ -1071,7 +976,7 @@ void AbstractContext::onEvent(ContextdPluginEvent* event)
 }
 \end{lstlisting}
 
-\subsubsection{Modification de dbus-context}
+\subsubsection{Modification de ``DBusContext''}
 
 Compte tenu que la précédente liste de client était indexée par le dbus\_id, et que les programmes dont l'enregistrement se fait via le noyau ne dispose pas d'un tel identifiant, il a fallut modifier les méthodes de cette case. La modification est très succincte : il a juste fallu ajouter ces quelques lignes dans les méthodes et de modifier dbus\_id en pid.
 
@@ -1086,256 +991,11 @@ Compte tenu que la précédente liste de client était indexée par le dbus\_id,
 	}
 \end{lstlisting}
 
-\subsubsection{Ajout de la classe ``kernel-context''}
+\subsubsection{Ajout de la classe ``KernelContext''}
 
-Enfin, nous avons implémenté la classe kernel-context qui hérite d'abstractcontext.
+Enfin, nous avons implémenté la classe KernelContext qui hérite d'AbstractContext. Elle utilise un QThread (KThread) pour gérer la boucle de communication avec le noyau.
 
-\textit{kernel-context.h} : 
-\begin{lstlisting}[language=C++]
-class KernelContext: public AbstractContext
-{
-Q_OBJECT
-private:
-	struct auditsec_info _usai;
-	char exec_path[PATH_MAX];
-
-	KThread * kernelT;
-
-public:
-	KernelContext();
-    ~KernelContext();
-
-	void stop();
-	struct auditsec_info * usai();
-
-	QMap< pid_t, ContextClient > * getClients();
-
-public slots:
-	void start();
-
-	QString register_application(const QString &app_name, uint app_pid);
-	QString register_application(const QString &app_name);
-
-	QString domain_changed(const QString &xml_context);
-	QString required_domain(const QString &xml_context);
-
-	QString current_domain();
-	QString is_registered();
-
-	QString register_for_domain_changes_updates();
-
-private slots:
-	void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext);
-
-signals:
-	void globalContextChanged(const QString &previous_context, const QString &new_context);
-};
-
-\end{lstlisting}
-
-\textit{kernel-context.cpp} : 
-\begin{lstlisting}[language=C++]
-KernelContext::KernelContext()
-{
-	qDebug("Trying to register with the kernel");
-	if(auditsec_register(1, NULL) != 1){
-		qFatal("FAILED to register with the kernel.");
-	}
-	qDebug("The daemon is registered with the kernel.");
-	
-	if(auditsec_register(1, "firefox") != 1){
-		qDebug() << "Can't register prog : firefox";
-	}
-	if(auditsec_register(1, "soffice.bin") != 1){
-		qDebug() << "Can't register prog : soffice.bin";
-	}
-	if(auditsec_register(1, "testprog") != 1){
-		qDebug() << "Can't register prog : testprog";
-	}
-
-	kernelT = new KThread(this);
-}
-
-
-void KernelContext::start()
-{
-	kernelT->start();
-}
-
-
-KernelContext::~KernelContext()
-{
-	qDebug("Stopping daemon and telling the kenel.");
-	if(auditsec_register(0, NULL) != 0){
-		qCritical("The kernel state may NOT be ok. You should reboot.");
-	}else{
-		qDebug("The kernel is ok.");
-	}
-}
-
-
-void KernelContext::stop()
-{
-	kernelT->_keep_going = false;
-
-	kernelT->wait();
-
-	qDebug("Stopping daemon and telling the kenel.");
-	if(auditsec_register(0, NULL) != 0){
-		qCritical("The kernel state may NOT be ok. You should reboot.");
-	}else{
-		qDebug("The kernel is ok.");
-	}
-}
-
-
-struct auditsec_info * KernelContext::usai()
-{
-	return &_usai;
-}
-
-
-QMap< pid_t, ContextClient > * KernelContext::getClients()
-{
-	return &clients;
-}
-
-
-QString KernelContext::register_application(const QString& app_name, uint app_pid)
-{
-	QWriteLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	qDebug() << "KernelContext: Trying to register " << app_name;
-
-	//You can't register two applications using the same pid !
-	if((pid != 0) && !clients.contains(pid))
-	{
-		//Get the exe full path
-		QString full_path=getFullPathFromPID(pid);
-
-		const Configuration& transRules=Configuration::instance();
-
-		//If the program is white listed
-		if(transRules.isProgramAllowed(app_name, full_path))
-		{
-			Program program=transRules.getProgramByName(app_name);
-			clients[pid]=ContextClient(0, program, pid);
-
-			EventDispatcher::instance().sendNotification("KernelContext: " + app_name + " has been successfuly registered.");
-
-			return KERNEL_SUCCESS;
-		}else{
-			EventDispatcher::instance().sendError("KernelContext: " + full_path + " cannot be identified as "+ app_name +".");
-
-			return KERNEL_ERROR;
-		}
-	}
-	else
-		return KERNEL_ERROR;
-}
-
-
-QString KernelContext::register_application(const QString& app_name)
-{
-	return register_application(app_name, 0);
-}
-
-
-QString KernelContext::is_registered()
-{
-	QReadLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	if(clients.contains(pid))
-		return KERNEL_SUCCESS;
-	else
-		return KERNEL_ERROR;
-}
-
-
-QString KernelContext::domain_changed(const QString &xml_context)
-{
-	QReadLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	//You have to be registered to use this function !
-	if(clients.contains(pid))
-	{
-		if(clients[pid].updateState(xml_context) == CONTEXT_ACCEPT){
-			qDebug() << "KernelContext: domain_changed: accepted";
-			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
-			auditsec_answer(true);
-			return CONTEXT_ACCEPT;
-		}else{
-			qDebug() << "KernelContext: domain_changed: refused";
-			qDebug() << "KernelContext: now in " << clients[pid].currentDomain().name();
-			auditsec_answer(false);
-			return KERNEL_ERROR;
-		}
-	} else {
-		qDebug() << "KernelContext: domain_changed: non registered";
-		auditsec_answer(true);
-		return KERNEL_ERROR;
-	}
-}
-
-
-QString KernelContext::required_domain(const QString &xml_context)
-{
-	QReadLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	qDebug("KernelContext: required_domain");
-
-	//You have to be registered to use this function !
-	if(clients.contains(pid))
-	{
-		return clients[pid].required_domain(xml_context);
-	} else {
-// 		auditsec_answer(false);
-		return KERNEL_ERROR;
-	}
-}
-
-
-QString KernelContext::current_domain()
-{
-	QReadLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	//You have to be registered to use this function !
-	if(clients.contains(pid))
-		return DomainHolder::instance().currentDomain().name();
-	else
-		return KERNEL_ERROR;
-}
-
-
-QString KernelContext::register_for_domain_changes_updates()
-{
-	QWriteLocker _lock(&lock);
-	pid_t pid = _usai.pid;
-
-	//You have to be registered to use this function !
-	if(clients.contains(pid))
-		return clients[pid].registerForContextChangesUpdates();
-	else
-		return KERNEL_ERROR;
-}
-
-
-void KernelContext::onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext)
-{
-	emit globalContextChanged(previousGlobalContext.name(), globalContext.name());
-}
-\end{lstlisting}
-
-\subsubsection{Thread pour les attentes}
-
-Dernière modification, il a fallu ajouter un thread afin de pouvoir surveiller en permanence les actions des programmes monitorés.
-
-\textit{auditsec\_lsm/kthread.h} : 
+\textit{auditsec\_lsm/kthread.h} :
 \begin{lstlisting}[language=C++]
 class KThread : public QThread
 {
@@ -1353,7 +1013,7 @@ private:
 };
 \end{lstlisting}
 
-\textit{auditsec\_lsm/kthread.h} : 
+\textit{auditsec\_lsm/kthread.cpp} :
 \begin{lstlisting}[language=C++]
 KThread::KThread(KernelContext * kc) : KC(kc)
 {
@@ -1367,11 +1027,7 @@ void KThread::run()
 	struct sockaddr_in addr_;
 	struct hostent * hote = NULL;
 
-	qDebug("KThread: Starting kernel loop");
-
 	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
-		qDebug() << "";
-		qDebug() << "KThread: " << KC->usai()->execname << " (" << KC->usai()->pid << ")";
 		if(KC->is_registered() == KERNEL_ERROR){
 			KC->register_application(KC->usai()->execname);
 		}
@@ -1383,97 +1039,23 @@ void KThread::run()
 					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
 					//"filename", KC->usai()->auditsec_struct.file.name,
 					NULL, NULL));
-
-				#ifdef DEBUG
-				read_execpath(KC->usai()->pid, exec_path);
-				qDebug() << "file access: " << KC->usai()->auditsec_struct.file.fullpath
-				<< "/" << KC->usai()->auditsec_struct.file.name << ", pid: " << KC->usai()->pid
-				<< ", execname: " << exec_path
-				/*<< ", mask: " << KC->usai()->auditsec_struct.file.mask*/;
-				#endif /* DEBUG */
 				break;
 
 			case AUDITSEC_DIR:
-				qDebug() << "KThread : Directory: " << KC->usai()->auditsec_struct.file.fullpath;
-				KC->domain_changed(xmlContext(
-					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
-					NULL, NULL));
-
-				#ifdef DEBUG
-				read_execpath(KC->usai()->pid, exec_path);
-				qDebug(); << "mkdir: " << KC->usai()->auditsec_struct.dir.fullpath
-				<< ", pid: " << KC->usai()->pid << ", execname: " << exec_path << KC->usai()->execname
-				/*<< ", mode: " << KC->usai()->auditsec_struct.dir.mode*/;
-				#endif /* DEBUG */
+				...
 				break;
 			
 			case AUDITSEC_SOCKET:
-				qDebug() << "KThread socket";
-				address = inet_ntoa(KC->usai()->auditsec_struct.socket.addr.addr4.sin_addr);
-				
-				addr_.sin_addr.s_addr = inet_addr(address.toStdString().c_str());
-				
-				hote = gethostbyaddr((char *) &addr_.sin_addr, 4, AF_INET);
-				
-				if (hote == NULL)
-					qDebug() << "KThread: IP: " << address;
-				else
-					qDebug() << "KThread: IP: " << address << " " << hote->h_name;
-				
-				auditsec_answer(true);
+				...
 				break;
 
 			default:
-				qCritical("KernelContext: can't determine struct type !");
-				auditsec_answer(0);
+				...
 				break;
 		}
 	}
-	qDebug("KernelContext: loop end.");
 }
-
-
-QString KThread::toXMLEntities(QString str)
-{
-	return str.replace("&","&amp;").replace("<", "$lt;").replace(">", "&gt;").replace("\"", "&quot;");
-}
-
-
-QString KThread::xmlContext(char * param_name, ...)
-{
-	const char* name;
-	const char* value;
-
-	QString xmlContext="<xmlContext>";
-
-	va_list vl;
-	va_start(vl, param_name);
-
-	name = param_name;
-	value = va_arg(vl, char*);
-
-	do {
-		if(name == NULL)
-			name = "";
-		if(value == NULL)
-			value = "";
-
-		QString sname = name;
-		QString svalue = toXMLEntities(value);
-
-		if(sname!="" && svalue!="")
-			xmlContext += QString("<parameter name=\"%1\" value=\"%2\"/>").arg(sname).arg(svalue);
-
-		name = va_arg(vl, char*);
-		value = va_arg(vl, char*);
-	} while (name != NULL);
-	va_end(vl);
-
-	xmlContext+="</xmlContext>";
-
-	return xmlContext;
-}
-$\end{lstlisting}
+\end{lstlisting}
 
 \section{Résultats finaux}
 
@@ -1505,9 +1087,7 @@ int main(int argc, char ** argv)
 
 Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
 
-% FIXME
 Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins internes contenant les fonctionnalités de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
-% FIXME
 
 \begin{figure}%[!ht]
 	\centering
@@ -1611,9 +1191,13 @@ Les éléments suivant restent à réaliser avant d'envisager l'intégration de 
 
 Le but de ce projet était de simplifier l'ajout d'application à PIGA-SYSTRANS et au système PIGA-OS. Cet objectif est atteint car nos travaux permettent, par exemple, de faire fonctionner OpenOffice.org/LibreOffice avec contextd, sans modifier ces applications.
 
-De plus, l'aspect totalement générique de notre solution nous assure un fort potentiel de réutilisation. En effet, les ajouts dans contextd permettant le chargement dynamique de programmes à contrôler nous permettent de se concentrer sur l'écriture de règles contextd, et non sur la modification des applications. Il ne reste alors plus qu'à modifier uniquement les applications possédant un comportment s'étendant sur plusieurs domaines et dont l'état interne nécessite des modifications lors d'un changement de domaine.
+De plus, l'aspect totalement générique de notre solution nous assure un fort potentiel de réutilisation. En effet, les ajouts dans contextd permettant le chargement dynamique de programmes à contrôler nous permettent de se concentrer sur l'écriture de règles contextd, et non sur la modification des applications.
 
-TODO Remarques sur SELinux / intégration avec PIGA-OS ...
+Il ne reste alors plus qu'à modifier uniquement les applications possédant un comportement s'étendant sur plusieurs domaines et dont l'état interne nécessite des modifications lors d'un changement de domaine. Pour l'instant, les applications concernées sont Mozilla Firefox et Claws-Mail. Il est difficilement envisageable de se ``débarrasser'' du plugin Claws-Mail à l'avenir. Mais l'arrivée de la séparation entre les onglets sous Firefox et du principe un onglet = un processus pourrait permettre de se séparer du plugin Firefox.
+
+Enfin, il faut noter que notre projet ne prendra tout son sens que lorsqu'il sera intégrable à PIGA-OS. Ce n'est pour l'instant pas le cas, mais les modifications restantes restent moindres par rapport aux objectifs atteints par ce projet. Un essai d'intégration à été réalisé, mais aucun test ni vérification de fonctionnalité n'as été effectué par manque de temps.
+
+Nous tenons à remercier Jérémy Briffaut et Martin Peres pour leur aide précieuse tout au long du déroulement de ce projet.
 
 % Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDTE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
 
