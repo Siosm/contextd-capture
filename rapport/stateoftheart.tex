@@ -1,6 +1,6 @@
 \section{\'Etat de l'art}
 
-Ce projet de deuxième année s'inscrit dans le contexte de la sécurité d'un système d'exploitation. La majeur partie des systèmes d'exploitation actuels ont intégré une forme de contrôle d'accès pour assurer un minimum de sécurité et de contrôle sur les activités des utilisateurs, dans le but de limiter les effets d'une attaque sur un système. Dans les faits, ce contrôle n'est pas suffisant et ne peut empêcher, par exemple, la compromition d'un système par l'intermédiaire d'un service possédant les droits d'administrateur \cite{TIOF}, ou l'échange d'information par flux indirects, comme des fichiers temporaires.
+Ce projet de deuxième année s'inscrit dans le contexte de la sécurité d'un système d'exploitation. La majeur partie des systèmes d'exploitation actuels ont intégré une forme de contrôle d'accès pour assurer un minimum de sécurité et de contrôle sur les activités des utilisateurs, dans le but de limiter les effets d'une attaque sur un système. Dans les faits, ce contrôle n'est pas suffisant et ne peut empêcher, par exemple, la compromission d'un système par l'intermédiaire d'un service possédant les droits d'administrateur \cite{TIOF}, ou l'échange d'informations par flux indirects, comme des fichiers temporaires.
 
 Plus généralement, c'est dans l'absence de mécanisme de sécurité global imposé à un système que réside les manques des modèles de sécurité classique. Plus que simplement le noyau et les applications, ce sont l'ensemble des intéractions entre tous ces éléments qui doivent être contrôlées. Nous allons détailler les différents objectifs à atteindre avant de poursuivre sur les modèles théoriques et leur implémentation dans les systèmes d'exploitation modernes.
 
@@ -30,7 +30,7 @@ L'origine et le contenu de certaines informations ne peut être mis en doute. Ce
 
 \subsection{Le principe de séparation des privilèges}
 
-Une des technique utilisées pour tenter d'atteindre ces objectifs consiste à appliquer le principe de séparation des privilèges ou principe de moindre privilège. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits strictement nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'a pas besoin d'avoir accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
+Une des techniques utilisées pour tenter d'atteindre ces objectifs consiste à appliquer le principe de séparation des privilèges ou principe de moindre privilège. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits strictement nécessaires à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'a pas besoin d'avoir accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
 
 L'application la plus courante de ce principe est la séparation entre les différents comptes sur un système. Une application lancée par un utilisateur ne bénéficie que des droits accordés à cet utilisateur.
 
@@ -41,7 +41,7 @@ Il est possible d'employer différentes approches pour s'assurer de la sécurit�
 \begin{itemize}
   \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité, tout en étant conscient que les logiciels ne sont pas de confiance.% Trust all the software to abide by a security policy but the software is not trustworthy (this is computer insecurity).
   \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité et s'assurer que le logiciel est validé et fiable (analyse complète et exhaustive de tous les cas d'utilisations, de toutes les branches du code).% Trust all the software to abide by a security policy and the software is validated as trustworthy (by tedious branch and path analysis for example).
-  \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité même si la fiabilité de cette politique et son moyen d'application n'est pas complétement fiable.% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
+  \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité même si la fiabilité de cette politique et son moyen d'application n'est pas complétement assuré.% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
   \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliquée par des méchanismes matériels de confiance.% trustworthy hardware mechanisms.
 \end{itemize}
 
@@ -49,7 +49,7 @@ Les modèles de sécurité standard se situent tous dans la première catégrie 
 
 \subsection{Les différentes méthodes de contrôle d'accès}
 
-Pour atteindre les objectifs détaillés précédemment et assurer la séparation des privilèges, nous allons détailler dans cette partie plusieurs méthodes de contrôle d'accès.
+Pour atteindre les objectifs détaillés précédemment et assurer la séparation des privilèges, nous allons présenter dans cette partie plusieurs méthodes de contrôle d'accès.
 
 \subsubsection{Contrôle d'accès discrétionnaire (DAC)}
 
@@ -115,7 +115,7 @@ L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jéré
  \item \textbf{Avantages :} Un contrôle très fin sur les interactions dans un système, restriction (statique) des privilèges maximale.
 \end{list}
 
-Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a été vainqueur du concours Sec\&Si organisé par l'Agence Nationale pour la Recherche (ANR) \cite{PIGA}\cite{PIGA2}.
+Le système d'exploitation PIGA-OS basé sur la recherche effectuée sur PIGA a été vainqueur du concours Sec\&Si organisé par l'Agence Nationale pour la Recherche (ANR) \cite{PIGA}\cite{PIGA2}.
 
 \subsubsection{grsecurity \& PaX}
 
@@ -127,7 +127,7 @@ Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a �
 
 \subsubsection{TrustedBSD}
 
-Le projet TrustedBSD consiste à intégrer à FreeBSD des fonctions de sécurité telles les attributs étendus pour le système de fichier UFS2, les listes de contrôle d'accès, des capacités d'audit lié à la sécurité, plusieurs contrôles d'accès mandataire.
+Le projet TrustedBSD consiste à intégrer à FreeBSD des fonctions de sécurité telles les attributs étendus pour le système de fichier UFS2, les listes de contrôle d'accès, des capacités d'audit liées à la sécurité, plusieurs méthodes de contrôles d'accès mandataire.
 
 \subsubsection{iptables}
 
@@ -139,7 +139,7 @@ iptables et un logiciel permettant de contrôler plus facilement netfilter, le p
 
 \subsubsection{PIGA-SYSTRANS ou contextd}
 
-Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port. Contextd introduit la notion de domaine (web, impôts, ...) liés à une activité particulière de l'utilisateur. Les programmes surveillé n'ont le droit de faire que ce qui leur est autorisé dans le domaine courant.
+Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribuée le droit définitif d'utiliser un port. Contextd introduit la notion de domaine (web, impôts, ...) lié à une activité particulière de l'utilisateur. Les programmes surveillés n'ont le droit de faire que ce qui leur est autorisé dans le domaine courant.
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Maîtrise de SELinux, PIGA. Rédaction et test des règles exhaustives pour faire fonctionner les programmes avec contextd. Certains programmes nécessitent des modifications, surtout lorsque ceux-ci ont un comportement inter-domaine.
  \item \textbf{Avantages :} Presque la plus fine implémentation du principe de moindre privilèges.

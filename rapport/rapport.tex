@@ -115,7 +115,7 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année. Ce projet s'inscrit dans le cadre des projets de recherche menés au Laboratoire d'informatique Fondamentale d'Orléans (LIFO) par l'équipe Sécurité et Distribution des Systèmes (SDS) sur la création d'un système d'exploitation sécurisé basé sur Linux.
+Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année. Ce projet s'inscrit dans le cadre des projets de recherche menés au Laboratoire d'Informatique Fondamentale d'Orléans (LIFO) par l'équipe Sécurité et Distribution des Systèmes (SDS) sur la création d'un système d'exploitation sécurisé basé sur Linux.
 
 ~
 
@@ -123,11 +123,11 @@ Ce projet a pour but la simplification et la généralisation du contrôle d'app
 
 ~
 
-Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprisent par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un plugin ou un patch propre à chaque application. Contextd recueillait alors les demandes de chacune de ces applications (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
+Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprises par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un plugin ou un patch propre à chaque application. Contextd recueillait alors les demandes (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
 
 ~
 
-L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd et la nature de ses sources d'information. Nous verons aussi qu'il n'est pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine.
+L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd pour changer la nature de ses sources d'information. Nous verrons aussi qu'il n'est pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine.
 
 ~
 
@@ -204,7 +204,7 @@ Pour les besoins du développement, nous avons dû désactiver SELinux, pour nou
 
 Nous avons donc décider de nous orienter vers l'implémentation d'un module LSM. Grâce aux "hooks", et notamment la fonction "file\_permission", nous pouvons contrôler les différents accès aux ressources systèmes telles que les fichiers (binaires ou textes).
 
-Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hooks" pouvoir surveiller les connexions réseaux.
+Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permettent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hooks" pouvoir surveiller les connexions réseaux.
 
 Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôles voulus à l'avenir.
 
@@ -220,9 +220,9 @@ Nous avons donc dû étudier également le fonctionnement du démon contextd. Il
 		\item le context de sécurité SELinux~\\
 	\end{itemize}
 	
-\textit{\textsl{\textbf{Nota bene :}}} Pour les activités réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Bien qu'il puissent utiliser des adresses IP, ce comportement n'est pas souhaitable pour des raisons évidentes liées au fonctionnement d'Internet. En revanche, le noyau n'a conscience que de l'adresse IP associée à une connexion. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après une tentative, grâce à la fonction \textit{getnamebyaddr}, nous n'avons pas pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, nous pouvions retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
+\textit{\textsl{\textbf{Nota bene :}}} Pour les activités réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Bien qu'il puisse utiliser des adresses IP, ce comportement n'est pas souhaitable pour des raisons évidentes liées au fonctionnement d'Internet. En revanche, le noyau n'a conscience que de l'adresse IP associée à une connexion. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après une tentative, grâce à la fonction \textit{getnamebyaddr}, nous n'avons pas pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, nous pouvions retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
 
-Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (User space) là où opère contextd. 
+Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (userspace) là où opère contextd.
 
 \subsection{Problématique de la communication entre contextd et le noyau}
 
@@ -278,16 +278,16 @@ Nous avons mis en place deux fichiers dans l'arborescence /proc :
 
 	\begin{itemize}
 		\item \textbf{/proc/contextd/programs} : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Des demandes seront envoyées à contextd pour ces programmes. Ce fichier n'est disponible qu'en lecture seule. En effet, nous considérons qu'une fois contextd lancé, lui seul peut décider de l'enregistrement ou de la désincription d'un programme.
-		\item \textbf{/proc/contextd/status} : Ce fichier est en revanche accessible en lecture et en écriture. En lecture, on y trouve le PID de contextd (plus précisément le tgid, pour ne pas prendre en compte les threads de contextd). En écriture, s'il reçoit un 0, le noyau désactive la surveillance par contextd et vide la liste des programmes enregistrés. Il est donc impératif que ce fichier ne soit pas accessible par défaut à un utilisateur non privilégié. On peut aussi envisager de désactiver ce comportement sur un système en production.
+		\item \textbf{/proc/contextd/status} : Ce fichier est en revanche accessible en lecture et en écriture. En lecture, on y trouve le pid de contextd (plus précisément le tgid, pour ne pas prendre en compte les threads de contextd). En écriture, s'il reçoit un 0, le noyau désactive la surveillance par contextd et vide la liste des programmes enregistrés. Il est donc impératif que ce fichier ne soit pas accessible par défaut à un utilisateur non privilégié. On peut aussi envisager de désactiver ce comportement sur un système en production.
 	\end{itemize}
 
 \subsubsection{Séparation des fonctions de communications dans contextd}
 
-Compte tenu de ce qui a été dit précédemment, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspiré de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
+Nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspiré de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
 
 Cette communication se faisait grâce à la classe "DBusContext". Cette classe traitait les sollicitations des clients (programmes), les enregistrait dans une table de hashage privée et s'occupait des transitions. Les programmes étaient indexés par le dbus\_id correspondant au canal de communication DBus.
 
-Nous avons donc reproduit ce comportement pour la réception des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
+Nous avons donc reproduit ce comportement pour la réception des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter le cas des processus non modifiés et ne disposant pas de plugin.
 
 Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc pallié ce problème en implémentant une classe abstraite "AbstractContext" afin de centraliser la liste des clients pour toutes les sources d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier. L'accès à la liste des clients est synchronisé pour éviter toute concurrence d'accès.
 
@@ -316,9 +316,9 @@ De plus, notre solution nécessitant maintenant l'enregistrement des programmes 
 
 \subsection{Ajout du module dans le menuconfig et la compilation du noyau}
 
-Premièrement, nous avons donc développé un module LSM qui "hook" les appels système. Pour ce faire, nous avons créé un dossier "auditsec" dans \textit{{kernel\_src}/security/}. C'est dans ce dossier que nous allons mettre toutes nos sources (appels système, hook, etc.) ainsi qu'un sous dossier \textit{{kernel\_src}/security/includes} pour nos .h.  
+Premièrement, nous avons donc développé un module LSM qui "hook" les appels système. Pour ce faire, nous avons créé un dossier "auditsec" dans \textit{{kernel\_src}/security/}. C'est dans ce dossier que nous avons mis toutes nos sources (appels système, hook, etc.) ainsi qu'un sous dossier \textit{{kernel\_src}/security/includes} pour nos headers.
 
-Ensuite,  pour avoir la possibilité d'activer ou non ce module lors de la compilation du noyau (suivant les conventions de nommage des options de configuration) il a fallu ajouter la ligne suivante dans \textit{{kernel\_src}/security/Kconfig} afin d'indiquer d'aller voir dans le nouveau dossier.
+Ensuite,  pour avoir la possibilité d'activer ou non ce module lors de la compilation du noyau (suivant les conventions de nommage des options de configuration) il a fallu ajouter la ligne suivante dans \textit{{kernel\_src}/security/Kconfig} :
 
 
 \begin{lstlisting}[language=make]
@@ -342,7 +342,7 @@ La description des différentes lignes ci-dessus :
 	\item Nom de la variable. On pourra l'utiliser avec des "\#ifdef" dans le code C. La variable sera alors "CONFIG\_SECURITY\_AUDITSEC".
 	\item Type de variable pour menuconfig (ici booléen)
 	\item De quel autre partie de configuration notre module a besoin.
-	\item
+	\item Active d'autres options
 	\item Par défaut, le module est désactivé.
 	\item La description
 \end{itemize}
@@ -730,15 +730,13 @@ int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned l
 }
 \end{lstlisting}
 
-Voici donc le module LSM complet et fonctionnel. Nous avons vu comment étaient implémentées les différentes composantes dont il a besoin pour fonctionner.
+Voici donc le module LSM complet et fonctionnel. Nous avons vu comment étaient implémentées les différentes composantes dont il a besoin pour fonctionner. Au tour des appels système.
 
 \subsection{Les appels système}
 
-Maintenant, voyons comment sont implémentés les appels système.
-
 \subsubsection{ausitsec\_reg}
 
-Cet appel système a une triple fonction :
+Cet appel système a une quadruple fonction :
 \begin{itemize}
 	\item Enregistrer contextd auprès du noyau.
 	\item Ajouter les programmes surveillés.
@@ -879,7 +877,7 @@ asmlinkage long sys_auditsec_answer(int __user answer)
 
 \subsubsection{Déclaration des appels système}
 
-Une dernière étapes est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouter les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
+Une dernière étape est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouté les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
 \begin{lstlisting} [language=C]
 asmlinkage long sys_auditsec_reg(int __user state, char __user *);
 asmlinkage long sys_auditsec_question(struct auditsec_info __user *);
@@ -910,11 +908,11 @@ Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels sys
 
 \subsection{Modification de contextd}
 
-Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus.
+Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via DBus.
 
 \subsubsection{Ajout d'une classe ``AbstractContext''}
 
-Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
+Nous nous sommes inspiré de la classe ``DBusContext'' pour créer la classe abstraire. Nous n'avons implémenté qu'une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
 
 De plus, pour partager la liste de clients (les applications surveillées et enregistrées), nous avons déclaré cette liste en tant qu'attribut de cette classe abstraite. Voici le code produit :
 
