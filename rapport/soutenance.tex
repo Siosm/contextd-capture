@@ -45,9 +45,9 @@
 }
 
 \newcommand{\includesvg}[2]{%
- %\executeiffilenewer{#1.svg}{#1.pdf}%
- %{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
- %\input{#1.eps_tex}%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+% \input{#1.eps_tex}%
  \includegraphics[scale=#2]{#1.pdf}
 }
 
@@ -272,7 +272,8 @@
 \begin{frame}
 	\frametitle{Démonstration}
 	\pause
-	\includesvg{attachements/fonctionnement_apres}{1}
+	\centering
+	\includesvg{attachements/schema_general}{.7}
 \end{frame}
 
 \end{document}
