@@ -20,7 +20,7 @@ Les informations ne doivent être accessibles qu'aux utilisateurs qui en ont bes
 Le système reste dans un état cohérent. Les informations importantes comme les mots de passe, les binaires installés, les fichiers de configuration ne peuvent être modifiés par des utilisateurs non privilégiés.
 
 \textbf{Disponibilité :}
-Le système doit être réactif, stable et utilisable. Les programes doivent pouvoir fonctionner correctement. Les contrôles de sécurité supplémentaires instaurés ne doivent pas limiter les capacités légitimes du système et des applications.
+Le système doit être réactif, stable et utilisable. Les programmes doivent pouvoir fonctionner correctement. Les contrôles de sécurité supplémentaires instaurés ne doivent pas limiter les capacités légitimes du système et des applications.
 
 \textbf{Authenticité :}
 Il est possible de savoir qui a effectué quelle action critique sur un système.
@@ -30,7 +30,7 @@ L'origine et le contenu de certaines informations ne peut être mis en doute. Ce
 
 \subsection{Le principe de séparation des privilèges}
 
-Une des technique utilisée pour tenter d'atteindre ces objectifs consiste à appliquer le principe de séparation des privilèges ou principe de moindre privilège. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits strictement nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'a pas besoin d'avoir accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
+Une des technique utilisées pour tenter d'atteindre ces objectifs consiste à appliquer le principe de séparation des privilèges ou principe de moindre privilège. Il stipule qu'un programme (contrôlé ou non par l'utilisateur) ne doit disposer que des droits strictement nécessaire à son bon fonctionnement. Par exemple, il semble évident qu'un logiciel de traitement de texte n'a pas besoin d'avoir accès aux informations sensibles du système comme la liste des utilisateurs ou la liste des mots de passe.
 
 L'application la plus courante de ce principe est la séparation entre les différents comptes sur un système. Une application lancée par un utilisateur ne bénéficie que des droits accordés à cet utilisateur.
 
@@ -128,7 +128,7 @@ Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a �
  \item \textbf{Avantages :} Protection avancée de l'utilisation de la mémoire avec PaX (pile non exécutable, ...)
 \end{list}
 
-\subsection{TrustedBSD}
+\subsubsection{TrustedBSD}
 
 % TODO
 
@@ -143,7 +143,7 @@ iptables et un logiciel permettant de contrôler plus facilement netfilter, le p
 
 \subsubsection{PIGA-SYSTRANS ou contextd}
 
-contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribués les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
+contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites préédement, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port.
 
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :}

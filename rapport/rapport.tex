@@ -81,7 +81,6 @@
 \newcommand{\clearemptydoublepage}{
 	\newpage{\pagestyle{empty}\cleardoublepage}}
 
-
 \makeindex
 
 \begin{document}
@@ -125,11 +124,11 @@ Ce projet a pour but la simplification et la généralisation du contrôle d'app
 
 ~
 
-Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprisent par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les demandes de chacunes de ces applications (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
+Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprisent par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un plugin ou un patch propre à chaque application. Contextd recueillait alors les demandes de chacunes de ces applications (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
 
 ~
 
-L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd et la nature de ses sources d'information.
+L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd et la nature de ses sources d'information. Nous verons aussi qu'il n'est pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine.
 
 ~
 
@@ -209,7 +208,7 @@ Nous avons donc décider de nous orienter vers l'implémentation d'un module LSM
 
 Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hook" pouvoir surveiller les connexions réseau.
 
-Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôls voulus à l'avenir.
+Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôles voulus à l'avenir.
 
 En effet, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheuresement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivit l'intégration des ``connexions'' dans notre solution.
 
@@ -223,7 +222,7 @@ Nous avons donc dû étudier également le fonctionnement du démon contextd. Il
 		\item le context de sécurité SELinux~\\
 	\end{itemize}
 	
-\textit{\textsl{\textbf{Nota bene :}}} Pour les activitées réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Or, au niveau du noyau n'est accessible que l'adresse IP. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après uen tentative, grâce à la fonction \textit{getnamebyaddr}, nous avons pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, on pouvait retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
+\textit{\textsl{\textbf{Nota bene :}}} Pour les activitées réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Bien qu'il puissent utiliser des adresses IP, ce comportement n'est pas souhaitable pour des raisons évidentes liées au fonctionnement d'internet. En revanche, le noyau n'a conscience que de l'adresse IP associée à une connexion. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après une tentative, grâce à la fonction \textit{getnamebyaddr}, nous n'avons pas pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, nous pouvions retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
 
 Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (User space) là où opère contextd. 
 
@@ -255,7 +254,7 @@ Pour mettre en place la communication entre l'espace noyau et le démon en espac
 	\caption{Diagramme de séquence entre le noyau, contextd, et une application}
 \end{figure}
 
-Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et de s'assurer le traitement de chacun des appels système.
+Nous utilisons des mutex pour s'assurer du traitement par contextd de chacun des appels système.
 
 \begin{figure}[!ht]
 	\centering
@@ -292,11 +291,9 @@ Cette communication se faisait grâce à la classe "DBusContext". Cette classe t
 
 Nous avons donc reproduit ce comportement pour la réceptions des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
 
-Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc palié ce problème en implémentant une classe abstraite "AbstractContext" de telle sorte à centraliser la liste des clients pour toutes les source d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier.
+Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc palié ce problème en implémentant une classe abstraite "AbstractContext" de telle sorte à centraliser la liste des clients pour toutes les source d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier. L'accès à la liste des clients est synchronisée pour éviter toute concurrence d'accès.
 
 Dans le cas où un troisième mode de communication serait envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà : il suffira d'hériter de la classe AbstractContext.
-
-De même, pour lire cette liste, ajouter ou supprimer un élément, on utilise un vérrou (lock) afin d'éviter les accès concurrents. Ce vérrou est également déclaré en protected static, pour les mêmes raison évoquées supra concernant l'héritage et l'instanciation.
 
 \begin{figure}[!ht]
 	\centering
@@ -640,7 +637,7 @@ struct auditsec_msg {
 };
 \end{lstlisting} 
 
-\subsection{Création du module}
+\subsubsection{Création du module}
 
 Maintenant que tous les éléments nécessaires sont définis, il faut maintenant implémenter la fonction d'initialisation du module. Lors de cette initialisation, doivent être créés les "proc files" ainsi que les fonctions nécessaires pour les lire et/ou écrire dedans.
 
@@ -1509,7 +1506,9 @@ int main(int argc, char ** argv)
 
 Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
 
+% FIXME
 Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va ... (terminal en haut à gauche). Puis nous lançons context-notify qui ... (terminal en haut à droite). Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg ...(terminal en bas à droite).
+% FIXME
 
 \begin{figure}[!ht]
 	\centering
@@ -1544,6 +1543,7 @@ Les éléments suivant restent à réaliser avant d'envisager l'intégration de 
 	\begin{itemize}
 		\item Les règles à fournir à contextd pour définir les accès autorisés pour un programme deviennent rapidement compliquées car elles doivent être exhaustives (il faut notament autoriser le chargement de toutes les librairies pour les programmes non compilés en statique, ...). L'usage des expressions régulières réduit cet impact mais ne résout pas le prblème.
 		\item Nous avons pris pour base un module LSM vide. Il faut en revanche intégrer nos modifications au module SELinux pour pouvoir faire fonctionner notre solution avec PIGA-OS. Il faudrait aussi envisager la solution des empilements de modules LSM et s'assurer de l'usage de notre module.
+		\item Enfin, il faut noter qu'il n'est pour l'instant pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine (claws-mail, firefox). Notre solution permet juste de réduire le travail de ``portage'' d'une application vers PIGA-SYSTRANS.
 	\end{itemize}
 
 \newpage
@@ -1591,9 +1591,9 @@ TODO Remarques sur SELinux / intégration avec PIGA-OS ...
 
 \bibitem{ITXT} Intel Trusted Execution Technology (TXT), \url{http://www.intel.com/technology/malwarereduction/index.htm}
 
-\bibitem{PIGA}, Jérémy Briffaut, Martin Peres, Jonathan Rouzaud-Cornabas, Jigar Solanki, Christian Toinard, Benjamin Venelle, \textit{PIGA-OS : Retour sur le système d'exploitation vainqueur du défi sécurité}
+\bibitem{PIGA} Jérémy Briffaut, Martin Peres, Jonathan Rouzaud-Cornabas, Jigar Solanki, Christian Toinard, Benjamin Venelle, \textit{PIGA-OS : Retour sur le système d'exploitation vainqueur du défi sécurité}
 
-\bibitem{PIGA2}, Jérémy Briffaut, Jean-François Lalande, Christian Toinard, \textit{Formalization os security properties : enforcement for mac operating systems and verification of dynamic mac policies}, International journal on advances in security, 2:325-343, 2009
+\bibitem{PIGA2} Jérémy Briffaut, Jean-François Lalande, Christian Toinard, \textit{Formalization os security properties : enforcement for mac operating systems and verification of dynamic mac policies}, International journal on advances in security, 2:325-343, 2009
 
 \end{thebibliography}
 
