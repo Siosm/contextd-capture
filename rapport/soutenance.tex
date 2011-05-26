@@ -68,7 +68,7 @@
 \subtitle{Capture d'activité système pour PIGA-SYSTRANS}
 \author{Dimitri~Gressin \and Timothée~Ravier}
 \institute{ENSI de Bourges}
-\date{20 janvier 2011}
+\date{27 mai 2011}
 
 %%% POUR AVOIR UN PLAN QUI S'AFFICHE QUAND ON CHANGE DE SOUS-SECTION
 \AtBeginSection[ ]
@@ -163,7 +163,7 @@
 			\item socket\_sendmsg
 			\item socket\_recvmsg
 		\end{itemize}
-		\item Mise en place de verrou
+% 		\item Mise en place de verrou
 	\end{itemize}	
 	\item Ajout dans le mode de configuration standard du noyau
 		\begin{itemize}
@@ -207,17 +207,17 @@
 	\begin{itemize}
 		\item Ajout d'une classe abstraire
 		\begin{itemize}
-			\item Gestion des clients ()
+			\item Gestion des clients
 		\end{itemize}
 		\item Modification de dbus-context
 		\begin{itemize}
 			\item Suppression de dbus\_id
 			\item Indexation par pid
-			\item Héritage avec abstractcontext
+			\item Héritage avec AbstractContext
 		\end{itemize}
-		\item Ajout d'une classe kernel-context
+		\item Ajout d'une classe KernelContext
 		\begin{itemize}
-			\item Hérite avec abstractcontext
+			\item Hérite avec AbstractContext
 			\item Thread d'écoute
 		\end{itemize}
 		\item Recharge des programmes surveillés dynamique (SIGUSR2)
@@ -267,10 +267,11 @@
 \end{itemize}
 \end{frame}
 
-\section{Démonstration}
+\section*{Démonstration}
 
 \begin{frame}
 	\frametitle{Démonstration}
+	\pause
 	\includesvg{attachements/fonctionnement_apres}{1}
 \end{frame}
 
