@@ -42,7 +42,7 @@ Il est possible d'employer différentes approches pour s'assurer de la sécurit�
   \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité, tout en étant conscient que les logiciels ne sont pas de confiance.% Trust all the software to abide by a security policy but the software is not trustworthy (this is computer insecurity).
   \item Faire confiance à tous les logiciels à propos du respect de la politique de sécurité et s'assurer que le logiciel est validé et fiable (analyse complète et exhaustive de tous les cas d'utilisations, de toutes les branches du code).% Trust all the software to abide by a security policy and the software is validated as trustworthy (by tedious branch and path analysis for example).
   \item Ne faire confiance à aucun programme, mais imposer une politique de sécurité même si la fiabilité de cette politique et son moyen d'application n'est pas complétement fiable.% enforce a security policy with mechanisms that are not trustworthy (again this is computer insecurity).
-  \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliquée par des méchanismes matériels de confiance.% trustworthy hardware mechanisms.
+  \item Ne faire confiance à aucun programme, mais s'assurer qu'une politique de sécurité est appliquée par des mécanismes matériels de confiance.% trustworthy hardware mechanisms.
 \end{itemize}
 
 Les modèles de sécurité standard se situent tous dans la première catégrie alors que les méthodes que nous allons présenter par la suite peuvent être placées dans les catégories trois et quatre. Le test complet de tous les logiciels présents sur un système d'exploitation est une tâche difficilement réalisable si l'on considère la diversité des matériels disponibles et la complexité d'une application telle que le noyau d'un système d'exploitation. Il existe des systèmes d'exploitation et plus particulièrement des noyaux certifiés critères communs, tel QNX\cite{QNX}, qui peuvent être classés dans la catégorie 2. En revanche, le code source de ces différents systèmes n'étant pas disponible librement, nous ne les détaillerons pas dans ce document.
@@ -57,7 +57,7 @@ Le contrôle d'accès discrétionnaire correspond à un modèle laissant à l'ut
 
 \subsubsection{Contrôle d'accès mandataire (MAC)}
 
-Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui forme une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindre privilèges en partant d'une base n'autorisant aucune interaction puis en rajoutant progressivement des interactions autorisées. Le contrôle d'accès mandataire correspond aux catégories trois et quatre, oû l'on ne fait pas confiance aux applications pour se reposer sur l'application d'une politique de sécurité plus ou moins fiable.
+Le contrôle d'accès mandataire repose sur la séparation entre les applications et l'entité prenant la décision d'autoriser ou d'interdire une action. Cette entité peut être implémentée au sein du noyau ou à l'aide de mécanismes externes au système, matériels \cite{ITXT}. Ce modèle permet d'assurer la conformité du système à un ensemble de règles qui forme une politique de sécurité. Il est ainsi possible d'appliquer le principe de moindres privilèges en partant d'une base n'autorisant aucune interaction puis en rajoutant progressivement des interactions autorisées. Le contrôle d'accès mandataire correspond aux catégories trois et quatre, où l'on ne fait pas confiance aux applications pour se reposer sur l'application d'une politique de sécurité plus ou moins fiable.
 
 % \begin{figure}[h]
 % 	\centering
@@ -69,7 +69,7 @@ Le contrôle d'accès mandataire repose sur la séparation entre les application
 
 Le modèle de sécurité multiniveau permet d'atteindre certains des buts fixés comme l'intégrité ou la confidentialité. Il repose sur la séparation des données en plusieurs domaines, imposant des règles limitant les interactions de l'utilisateur.
 
-\textbf{Bell-LaPaluda :} Ce modèle préserve la confidentialité de l'information en n'autorisant un sujet à écrire uniquement dans un niveau de confidentialité supérieur ou égal, et à ne lire que dans un niveau de sécurité inférieur ou égal. Ce modèle présente plusieurs inconvénients majeurs parce qu'il ne permet pas d'imposer des contraintes d'intégrité et ne permet pas de faire de distinctions précise entre deux personnes possédant le même niveau d'accréditation.
+\textbf{Bell-LaPaluda :} Ce modèle préserve la confidentialité de l'information en n'autorisant un sujet à écrire uniquement dans un niveau de confidentialité supérieur ou égal, et à ne lire que dans un niveau de sécurité inférieur ou égal. Ce modèle présente plusieurs inconvénients majeurs parce qu'il ne permet pas d'imposer des contraintes d'intégrité et ne permet pas de faire de distinctions précises entre deux personnes possédant le même niveau d'accréditation.
 
 \begin{figure}[h]
 	\centering
@@ -93,7 +93,7 @@ Plus qu'un modèle réel de contrôle, c'est un modèle d'administration permett
 
 \subsubsection{Application de règles de politiques securité par les types (Type Enforcement)}
 
-Ce principe repose sur l'association d'un contexte de sécurité à chaque objets et processus. L'accès à un object par un processus doit correspondre à une règle de la politique de sécurité pour être autorisé. Ce modèle nécessite l'attribution d'un contexte de sécurité à tous les objets du système, y compris les fichiers présents sur les supports de stockage.
+Ce principe repose sur l'association d'un contexte de sécurité à chaque objet et processus. L'accès à un object par un processus doit correspondre à une règle de la politique de sécurité pour être autorisé. Ce modèle nécessite l'attribution d'un contexte de sécurité à tous les objets du système, y compris les fichiers présents sur les supports de stockage.
 
 \subsection{Solutions disponibles}
 
@@ -109,7 +109,7 @@ SELinux est une implémentation d'un mécanisme de contrôle d'accès mandataire
 
 \subsubsection{PIGA}
 
-L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notamment d'une sur-couche à SELinux permettant de définir et imposer des propriétés de sécurité à l'échelle du système en plus des contrôles au niveau des interactions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des interactions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'information dans un système, qu'ils soient directs ou indirects.
+L'ensemble désigné sous le nom de PIGA est le résultat de la thèse de Jérémy Briffaut ainsi que des contributions de l'équipe SDS du LIFO, et des étudiants de l'ENSIB. Il est constitué notamment d'une sur-couche à SELinux permettant de définir et imposer des propriétés de sécurité à l'échelle du système en plus des contrôles au niveau des interactions effectués par SELinux. Il apporte une ``mémoire'' à SELinux. Un tel résultat est obtenu après génération du graphe complet des interactions possibles et autorisées par une politique SELinux, recherche de chemins interdits, et consignation de ces chemins. Cette solution permet un contrôle plus avancé sur les flux d'informations dans un système, qu'ils soient directs ou indirects.
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Connaissance du langage de définition de propriété PIGA, maîtrise préalable de SELinux, pré-requis matériels pour la ``compilation'' des politiques.
  \item \textbf{Avantages :} Un contrôle très fin sur les interactions dans un système, restriction (statique) des privilèges maximale.
@@ -127,11 +127,11 @@ Le système d'exploitation PIGA-OS basé sur la recherche effectué sur PIGA a �
 
 \subsubsection{TrustedBSD}
 
-Le projet TrustedBSD consiste à intégrer à FreeBSD des fonctions de sécurité telles les attributs étendus pour le système de fichier UFS2, les listes de contrôle d'accès, des capacités d'audit lié à la sécurité, plusieurs contrôles d'accès mandataire.
+Le projet TrustedBSD consiste à intégrer à FreeBSD des fonctions de sécurité telles que les attributs étendus pour le système de fichier UFS2, les listes de contrôle d'accès, des capacités d'audit lié à la sécurité, plusieurs contrôles d'accès mandataire.
 
 \subsubsection{iptables}
 
-iptables et un logiciel permettant de contrôler plus facilement netfilter, le pare-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles interactions avec le réseau sont autorisés sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. Iptables est un pare-feu à états, c'est-à-dire qu'il garde en mémoire les interactions précédentes pour déterminer la légitimité des interactions suivantes.
+Iptables et un logiciel permettant de contrôler plus facilement netfilter, le pare-feu intégré au noyau Linux. Il permet entre autre de définir précisément quels ports et quelles interactions avec le réseau sont autorisés sur une machine. Les règles iptables peuvent être modifiées dynamiquement pour autoriser ponctuellement une application à communiquer avec l'extérieur mais le comportement d'iptables est statique par défaut. Iptables est un pare-feu à états, c'est-à-dire qu'il garde en mémoire les interactions précédentes pour déterminer la légitimité des interactions suivantes.
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Il faut préciser de manière exhaustive les ports utilisés sur une machine.
  \item \textbf{Avantages :} Contrôle fin des connexions réseaux possibles. Audit des connexions facilité.
@@ -139,7 +139,7 @@ iptables et un logiciel permettant de contrôler plus facilement netfilter, le p
 
 \subsubsection{PIGA-SYSTRANS ou contextd}
 
-Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin pour toujours. Une application utilisant ponctuellement le réseau se voyait attribué le droit définitif d'utiliser un port. Contextd introduit la notion de domaine (web, impôts, ...) liés à une activité particulière de l'utilisateur. Les programmes surveillé n'ont le droit de faire que ce qui leur est autorisé dans le domaine courant.
+Contextd est un démon chargé de coordonner différents mécanismes de sécurité sur un système Linux. En effet, dans toutes les solutions décrites précédemment, les programmes se voyaient attribuer les droits dont ils avaient besoin, pour toujours. Une application utilisant ponctuellement le réseau se voyait attribuée le droit définitif d'utiliser un port. Contextd introduit la notion de domaine (web, impôts, ...) liés à une activité particulière de l'utilisateur. Les programmes surveillés n'ont le droit de faire que ce qui leur est autorisé dans le domaine courant.
 \begin{list}{}{}
  \item \textbf{Contrainte pour l'administrateur :} Maîtrise de SELinux, PIGA. Rédaction et test des règles exhaustives pour faire fonctionner les programmes avec contextd. Certains programmes nécessitent des modifications, surtout lorsque ceux-ci ont un comportement inter-domaine.
  \item \textbf{Avantages :} Presque la plus fine implémentation du principe de moindre privilèges.
