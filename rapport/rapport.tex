@@ -166,7 +166,7 @@ Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau g
 
 \subsubsection{Résultats obtenus}
 
-Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels système avant de les effectuer.
+Après s'être familiarisés avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels système avant de les effectuer.
 
 De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins.
 
@@ -226,7 +226,7 @@ Maintenant que ces informations sont localisées, il faut pouvoir les extraire d
 
 \subsection{Problématique de la communication entre contextd et le noyau}
 
-Compte tenu du fonctionnement de contextd, il a fallut développer un système de communication entre le noyau et contextd.
+Compte tenu du fonctionnement de contextd, il a fallu développer un système de communication entre le noyau et contextd.
 
 \begin{figure}[!ht]
 	\centering
@@ -877,7 +877,8 @@ asmlinkage long sys_auditsec_answer(int __user answer)
 
 \subsubsection{Déclaration des appels système}
 
-Une dernière étape est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouté les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
+Une dernière étape est cependant nécessaire pour que ces appels système soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouté les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
+
 \begin{lstlisting} [language=C]
 asmlinkage long sys_auditsec_reg(int __user state, char __user *);
 asmlinkage long sys_auditsec_question(struct auditsec_info __user *);
@@ -1087,7 +1088,7 @@ Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui prés
 
 Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins internes contenant les fonctionnalités de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
 
-\begin{figure}%[!ht]
+\begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.5]{attachements/capture_ini.png}
 	\caption{Après lancement de contextd}
@@ -1103,14 +1104,14 @@ La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test t
 	\label{DEMANDE}
 \end{figure}
 
-La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans /etc/context.d/program.d/mon\_programme.xml et le fichier décrivant les transitions autorisées /etc/context.d/transitions.xml). Ainsi, une fois dans le domaine ``impôts'', testprog peut afficher les données du dossier impôts mais pas celles du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
-
-\begin{figure}%[!ht]
+\begin{figure}
 	\centering
 	\includegraphics[scale=0.5]{attachements/capture_fin.png}
 	\caption{Après confirmation du changement de domaine}
 	\label{FIN}
 \end{figure}
+
+La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans /etc/context.d/program.d/mon\_programme.xml et le fichier décrivant les transitions autorisées /etc/context.d/transitions.xml). Ainsi, une fois dans le domaine ``impôts'', testprog peut afficher les données du dossier impôts mais pas celles du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
 
 D'autres tests effectués avec Libreoffice, montrent que le résultat fonctionne parfaitement avec des programmes classiques et courants sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a refusé l'accès). Ce problème est lié au choix de LSM : les applications ne peuvent pas faire la différence entre un refus lié aux permissions classiques et un refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
 
