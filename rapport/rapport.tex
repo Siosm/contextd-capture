@@ -1507,10 +1507,10 @@ int main(int argc, char ** argv)
 Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
 
 % FIXME
-Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va ... (terminal en haut à gauche). Puis nous lançons context-notify qui ... (terminal en haut à droite). Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg ...(terminal en bas à droite).
+Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins interne contenants les fonctionnalitées de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
 % FIXME
 
-\begin{figure}[!ht]
+\begin{figure}%[!ht]
 	\centering
 	\includegraphics[scale=0.5]{attachements/capture_ini.png}
 	\caption{Après lancement de contextd}
@@ -1519,23 +1519,77 @@ Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va ... (termin
 
 La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel (ici default). Si la transaction est autorisée par les règles établies pour testprog et qu'il est précisé que l'utilisateur doit confirmer cette action, une demande est envoyée à context-notify qui attend la réponse pour la renvoyer à contextd. Si l'utilisateur mets trop de temps à répondre (30 secondes actuellement), la demande est rejetée et il ne se produit aucun changement de domaine.
 
-\begin{figure}[!ht]
+\begin{figure}%[!ht]
 	\centering
 	\includegraphics[scale=0.5]{attachements/capture_notify.png}
 	\caption{Après lancement de progtest}
 	\label{DEMANDE}
 \end{figure}
 
-La Figure~\ref{FIN} présente le résultat final.
+La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans \/etc\/context.d\/program.d\/mon\_programme.xml et le fichier décrivant les transitions autorisées \/etc\/context.d\/transitions.xml). Ainsi, une fois dans le domaine impôts, testprog peut afficher les données du dossier impôts mais pas celle du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
 
-\begin{figure}[!ht]
+\begin{figure}%[!ht]
 	\centering
 	\includegraphics[scale=0.5]{attachements/capture_fin.png}
 	\caption{Après confirmation du changement de domaine}
 	\label{FIN}
 \end{figure}
 
-D'autres tests effectués avec Libreoffice, montre que le résultat fonctionne parfaitement avec des programmes classiques et courant sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a tout simplement refusé l'accès). Ce problème est lié au choix de LSM, les applications ne pouvant faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
+D'autres tests effectués avec Libreoffice, montrent que le résultat fonctionne parfaitement avec des programmes classiques et courants sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a refusé l'accès). Ce problème est lié au choix de LSM : les applications ne pouvent pas faire la différence entre un refus lié aux permissions classiques par rapport au refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
+
+Pour finir, voici un extrait du fichier de configuration pour testprog :
+
+\begin{lstlisting}[language=XML]
+		<!-- Loop -->
+		<loop app_name="testprog" notify="false" prompt="false" display_name="Loop">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|de|s|/etc/resolv.conf|/etc/nsswitch.conf|/etc/host.conf|/etc/hosts)</fullpath>
+				</mrule>
+			</matching>
+			<domains>
+				<loop_domain name="default" />
+				<loop_domain name="mail" />
+				<loop_domain name="web" />
+				<loop_domain name="web-flash" />
+				<loop_domain name="ecommerce" />
+				<loop_domain name="impots" />
+			</domains>
+		</loop>
+
+		<!--Impots-->
+		<rule app_name="testprog" to_domain="impots" notify="false" prompt="true" display_name="domaine impots">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/impots/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="false" prompt="false"/>
+					<!--<transit from_domain="ecommerce" to_domain="impots" notify="false" prompt="true"/>-->
+					<transit from_domain="default" />
+				</allow>
+			</transitions>
+		</rule>
+
+		<!--Ecommerce-->
+		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/ecommerce/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="false" prompt="false"/>
+					<!--<transit from_domain="mail" to_domain="ecommerce" prompt="true" />-->
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+					<!--<transit from_domain="impots" to_domain="ecommerce" prompt="true" />-->
+				</allow>
+			</transitions>
+		</rule>
+\end{lstlisting}
 
 \subsection{Poursuite du projet}
 
