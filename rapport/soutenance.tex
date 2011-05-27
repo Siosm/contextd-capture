@@ -45,9 +45,9 @@
 }
 
 \newcommand{\includesvg}[2]{%
- %\executeiffilenewer{#1.svg}{#1.pdf}%
- %{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
- %\input{#1.eps_tex}%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+% \input{#1.eps_tex}%
  \includegraphics[scale=#2]{#1.pdf}
 }
 
@@ -68,7 +68,7 @@
 \subtitle{Capture d'activité système pour PIGA-SYSTRANS}
 \author{Dimitri~Gressin \and Timothée~Ravier}
 \institute{ENSI de Bourges}
-\date{20 janvier 2011}
+\date{27 mai 2011}
 
 %%% POUR AVOIR UN PLAN QUI S'AFFICHE QUAND ON CHANGE DE SOUS-SECTION
 \AtBeginSection[ ]
@@ -93,18 +93,18 @@
 }
 
 \section{Introduction}
-\begin{frame}{Le context}
-	\begin{enumerate}
+\begin{frame}{context\{e|d\}}
+	\begin{itemize}
 		\item Contrôler les différents éléments accédés par les applications.
 		\item Autoriser les actions en suivant une politique bien déterminée.
-	\end{enumerate}
+	\end{itemize}
 	~\\
 	Jusqu'à présent : ~\\
 	~\\
-	\begin{enumerate}
+	\begin{itemize}
 		\item Plugin développé pour chaque application.
 		\item Contextd.
-	\end{enumerate}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}{Schéma de fonctionnement initial}
@@ -163,7 +163,7 @@
 			\item socket\_sendmsg
 			\item socket\_recvmsg
 		\end{itemize}
-		\item Mise en place de verrou
+% 		\item Mise en place de verrou
 	\end{itemize}	
 	\item Ajout dans le mode de configuration standard du noyau
 		\begin{itemize}
@@ -207,17 +207,17 @@
 	\begin{itemize}
 		\item Ajout d'une classe abstraire
 		\begin{itemize}
-			\item Gestion des clients ()
+			\item Gestion des clients
 		\end{itemize}
 		\item Modification de dbus-context
 		\begin{itemize}
 			\item Suppression de dbus\_id
 			\item Indexation par pid
-			\item Héritage avec abstractcontext
+			\item Héritage avec AbstractContext
 		\end{itemize}
-		\item Ajout d'une classe kernel-context
+		\item Ajout d'une classe KernelContext
 		\begin{itemize}
-			\item Hérite avec abstractcontext
+			\item Hérite avec AbstractContext
 			\item Thread d'écoute
 		\end{itemize}
 		\item Recharge des programmes surveillés dynamique (SIGUSR2)
@@ -225,11 +225,11 @@
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Diagramme de classes}
-	\begin{center}
-		\includedot{attachements/class}{.55}
-	\end{center}
-\end{frame}
+% \begin{frame}{Diagramme de classes}
+% 	\begin{center}
+% 		\includedot{attachements/class}{.55}
+% 	\end{center}
+% \end{frame}
 
 \section{Résultats finaux}
 
@@ -242,7 +242,7 @@
 \section{Remaques \& Amélioration}
 \begin{frame}{Remarques \& Améliorations}
 	\begin{itemize}
-		\item Seuls les "hook" file\_permission et mkdir fonctionnent
+		\item Seuls les "hooks" file\_permission et mkdir fonctionnent
 		\item Acheminement des données pour les "hooks" réseau.
 	\end{itemize}
 
@@ -267,11 +267,13 @@
 \end{itemize}
 \end{frame}
 
-\section{Démonstration}
+\section*{Démonstration}
 
 \begin{frame}
 	\frametitle{Démonstration}
-	\includesvg{attachements/fonctionnement_apres}{1}
+	\pause
+	\centering
+	\includesvg{attachements/schema_general}{.7}
 \end{frame}
 
 \end{document}
