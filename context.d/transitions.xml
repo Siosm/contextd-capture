@@ -445,4 +445,50 @@
 			</transitions>
 		</rule>
 	
+
+		<loop app_name="cat" notify="false" prompt="false" display_name="Loop">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|/usr/share/.*|de|s|)</fullpath>
+				</mrule>
+			</matching>
+			<domains>
+				<loop_domain name="default" />
+				<loop_domain name="mail" />
+				<loop_domain name="web" />
+				<loop_domain name="web-flash" />
+				<loop_domain name="ecommerce" />
+				<loop_domain name="impots" />
+			</domains>
+		</loop>
+
+		<rule app_name="cat" to_domain="impots" notify="false" prompt="true" display_name="domaine impots"> 
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/impots/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="false" prompt="false"/>
+					<transit from_domain="default" />
+				</allow>
+			</transitions>
+		</rule>
+
+		<rule app_name="cat" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/ecommerce/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="false" prompt="false"/>
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+				</allow>
+			</transitions>
+		</rule>
+
+
 </PIGA_Transitions>
