@@ -9,6 +9,7 @@
 \usepackage{relsize}
 \usepackage{amssymb}
 \usepackage{framed}
+% \usepackage{makeidx}
 
 
 %%% THÈME TORINO AVEC MINIFRAMES MODIFIÉES - NÉCESSITE FICHIERS SPÉCIAUX
@@ -37,14 +38,30 @@
 % \0
 \newcommand{\slz}{$\backslash0$}
 
-% commande pour un message réseau
-\newcommand{\netmessage}[5]{\small \begin{framed}
-\texttt{Message} \emph{#1} \texttt{- #2 - #3 $\rightarrow$ #4}\\\noindent
-\rule{\linewidth}{0.4pt}
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {\immediate\write18{#3}}\fi%
+}
 
-\footnotesize\noindent\texttt{#5}
+\newcommand{\includesvg}[2]{%
+ %\executeiffilenewer{#1.svg}{#1.pdf}%
+ %{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
 
-\end{framed}}
+\newcommand{\includedot}[2]{%
+ \executeiffilenewer{#1.dot}{#1.pdf}%
+ {dot -T pdf -o #1.pdf #1.dot}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includepic}[2]{%
+ \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
 
 %%% TITRE DE PAGE
 \title{Contextd Capture}
@@ -76,51 +93,43 @@
 }
 
 \section{Introduction}
-\begin{frame}
-\frametitle{Context\{e|d\}}
-\begin{itemize}
-	\item Commande différents systèmes de sécurité pour autoriser une application à effectuer certaines actions
-	\item Pour fonctionner, il doit avoir connaissance :
-		\begin{itemize}
-			\item des accès aux fichiers
-			\item des noms de domaine des sites visités
-		\end{itemize}
-\end{itemize}
+\begin{frame}{Le context}
+	\begin{enumerate}
+		\item Contrôler les différents éléments accédés par les applications.
+		\item Autoriser les actions en suivant une politique bien déterminée.
+	\end{enumerate}
+	~\\
+	Jusqu'à présent : ~\\
+	~\\
+	\begin{enumerate}
+		\item Plugin développé pour chaque application.
+		\item Contextd.
+	\end{enumerate}
 \end{frame}
 
-\begin{frame}
-\frametitle{Présentation du sujet}
-\begin{itemize}
-	\item Intercepter les appels système
-	\item Récupérer des informations telles que PID, fichiers ouverts, socket créée, etc.
-	\item Envoyer ces informations dans l'espace utilisateur au démon contextd
-	\item Retourner la réponse de contextd au noyau pour débloquer l'appel système
-\end{itemize}
+\begin{frame}{Schéma de fonctionnement initial}
+	\begin{center}
+			%\includesvg{attachements/contextd_dbus}{1}
+			\includesvg{attachements/contextd_dbus}{.45}
+	\end{center}
 \end{frame}
 
-\section{Systemtap}
-\begin{frame}
-\frametitle{Systemtap}
-\begin{center}
-	\includegraphics[scale=0.25]{kretprob.png}
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Systemtap}
-\begin{itemize}
-	\item Les scripts sont exécutés après les appels système
-	\item Impossibilité de suspendre un appel système
-	\item Les données accessibles sont inexploitables
-\end{itemize}
-~\\
-\textbf{Systemtap ne répondait absolument pas à nos besoins}
-
+\begin{frame}{Présentation du sujet}
+	\begin{block}{But :}
+		\textbf{Remplacer l'utilisation de plugin pour la plupart des applications.}
+	\end{block}
+	~\\
+	Organisation du projet en quatre étapes : 
+	\begin{itemize}
+		\item[-] Intercepter les appels système
+		\item[-] Récupérer des informations au niveau du noyau
+		\item[-] Envoyer ces informations dans l'espace utilisateur à contextd
+		\item[-] Retourner la réponse de contextd au noyau pour débloquer l'appel système
+	\end{itemize}
 \end{frame}
 
 \section{Linux Security Modules}
-\begin{frame}
-\frametitle{}
+\begin{frame}{Modules LSM}
 	\begin{itemize}
 		\item Ce sont des modules noyau
 		\item Ils permettent de "hooker" les appels système
@@ -133,55 +142,136 @@
 \begin{frame}
 \frametitle{Schéma}
 \begin{center}
-	\includegraphics[scale=0.30]{lsm1.png}
+	\includegraphics[scale=0.30]{attachements/lsm1.png}
 \end{center}
 \end{frame}
 
-\begin{frame}
-\frametitle{Notre travail}
-\begin{itemize}
-	\item Création du module LSM\\
-	\item Ajout dans le mode de configuration standard du noyau\\
-	\item Manipulation de deux "hooks"\\
-	\begin{itemize}
-		\item file permission : appelé à chaque fois qu'un fichier est ouvert
-		\item socket bind : appelé à chaque création de socket (à venir)
-	\end{itemize}
-\end{itemize}
-\textbf{Hooks principaux en ce qui concerne contextd}\\
-% \textbf{Évite de passer par ULOG pour la partie "réseau"}\\
-\end{frame}
 
-\section{Objectifs suivants}
-\begin{frame}
-\frametitle{Prochaines étapes}
+\section{Déroulement du projet}
+
+\begin{frame}{Travail produit}
 \begin{enumerate}
-	\item Communication entre les espaces noyau et utilisateur :
+	\item Création du module LSM \\
 	\begin{itemize}
-		\item[-] Via des sockets unix ?
-		\item[-] Via un proc filesystem ?
-		\item[-] Via un chardev ?
-		\item[-] Via des appels système !
-	\end{itemize}
-	\item Démon qui fera le lien entre l'espace noyau et contextd
-	\item Eventuellement remplacé à terme par un plugin contextd
+		\item Création du module
+		\item Création et implémentation des différents hooks \\
+		\begin{itemize}
+			\item file\_permission
+			\item mkdir
+			\item socket\_bind
+			\item socket\_connect
+			\item socket\_sendmsg
+			\item socket\_recvmsg
+		\end{itemize}
+		\item Mise en place de verrou
+	\end{itemize}	
+	\item Ajout dans le mode de configuration standard du noyau
+		\begin{itemize}
+			\item Makefiles
+			\item Kconfig
+		\end{itemize}
 \end{enumerate}
 \end{frame}
 
-\begin{frame}
-\frametitle{Appels système}
-\begin{center}
-	\includegraphics[scale=0.75]{global.pdf}
-\end{center}
+\begin{frame}{Travail produit}
+\begin{enumerate}
+\setcounter{enumi}{2}
+	\item Création de proc filesysstem \\
+	\begin{itemize}
+		\item Un dossier "contextd" (/proc/contextd/)
+		\item Deux fichiers\
+		\begin{itemize}
+			\item /proc/contextd/status
+			\item /proc/contextd/program
+		\end{itemize}
+	\end{itemize}
+	\item Création de 3 appels systèmes \\
+	\begin{itemize}
+		\item auditsec\_register (int, char *);
+		\item auditsec\_question (struct auditsec\_info *);
+		\item auditsec\_answer (int);
+	\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Diagramme de séquence}
+	\begin{center}
+		\includepic{attachements/sequence_diagram}{.6}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Travail produit}
+\begin{enumerate}
+\setcounter{enumi}{4}
+	\item Modification de contextd \\
+	\begin{itemize}
+		\item Ajout d'une classe abstraire
+		\begin{itemize}
+			\item Gestion des clients ()
+		\end{itemize}
+		\item Modification de dbus-context
+		\begin{itemize}
+			\item Suppression de dbus\_id
+			\item Indexation par pid
+			\item Héritage avec abstractcontext
+		\end{itemize}
+		\item Ajout d'une classe kernel-context
+		\begin{itemize}
+			\item Hérite avec abstractcontext
+			\item Thread d'écoute
+		\end{itemize}
+		\item Recharge des programmes surveillés dynamique (SIGUSR2)
+	\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Diagramme de classes}
+	\begin{center}
+		\includedot{attachements/class}{.55}
+	\end{center}
+\end{frame}
+
+\section{Résultats finaux}
+
+\begin{frame}{Schéma global}
+	\begin{center}
+		\includesvg{attachements/fonctionnement_apres}{1}
+	\end{center}
+\end{frame}
+
+\section{Remaques \& Amélioration}
+\begin{frame}{Remarques \& Améliorations}
+	\begin{itemize}
+		\item Seuls les "hook" file\_permission et mkdir fonctionnent
+		\item Acheminement des données pour les "hooks" réseau.
+	\end{itemize}
+
+	\begin{itemize}
+		\item Gestion des "hooks" réseaux
+		\item Cohabitation avec SELinux (en partie réalisée)
+		\item Intégration à PIGA-OS
+	\end{itemize}
 \end{frame}
 
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
 \begin{itemize}
-	\item Certains objectifs sont atteints
-	\item Seule une petite partie du projet est visible pour l'instant
+	\item[+] Objectifs globalement atteints
+	\item[+] Partie système pleinement opérationnelle
+\end{itemize} 
+~\\
+\begin{itemize}
+	\item[-] L'intégration à SELinux
+	\item[-] Partie réseau.
 \end{itemize}
+\end{frame}
+
+\section{Démonstration}
+
+\begin{frame}
+	\frametitle{Démonstration}
+	\includesvg{attachements/fonctionnement_apres}{1}
 \end{frame}
 
 \end{document}

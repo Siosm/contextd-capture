@@ -1,9 +1,17 @@
-\documentclass[pdftex,a4paper,titlepage,11pt,openright]{article}
+\documentclass[pdftex,a4paper,titlepage,11pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english,francais]{babel}
 \usepackage{listings}
 \usepackage{setspace}
+\usepackage{color} 
+
+\definecolor{darkgreen}{rgb}{0.3,0.7,0.3} 
+\definecolor{blue}{rgb}{0,0,1} 
+\definecolor{red}{rgb}{0.9,0.2,0.4} 
+\definecolor{gris}{rgb}{0.95,0.95,0.95} 
+
+\lstset{keywordstyle=\color{blue},commentstyle=\color{darkgreen},stringstyle=\color{red},captionpos=b,tabsize=3,frame=single,numbers=left,numbersep=5pt,breaklines=true,showstringspaces=false,basicstyle=\footnotesize,emph={label}}
 
 \usepackage[top=2.5cm, bottom=2.5cm, left=3.0cm, right=3.0cm, a4paper]{geometry}
 
@@ -12,7 +20,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE,RO]{\itshape\thepage}
+\fancyhead[RO]{\itshape\thepage}
 % \fancyhead[LO]{\itshape\rightmark}
 % \fancyhead[RE]{\itshape\leftmark}
 \renewcommand{\headrulewidth}{0.5pt}
@@ -32,6 +40,34 @@
 % \addtolength{\textwidth}{1cm}
 % \setlength{\textheight}{24cm} 	% Hauteur de la zone de texte
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {\immediate\write18{#3}}\fi%
+}
+
+\newcommand{\includesvg}[2]{%
+ \executeiffilenewer{#1.svg}{#1.pdf}%
+ {inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includedot}[2]{%
+ \executeiffilenewer{#1.dot}{#1.pdf}%
+ {dot -T pdf -o #1.pdf #1.dot}%
+ %\input{#1.eps_tex}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+\newcommand{\includepic}[2]{%
+ \immediate\write18{pic2plot -Tsvg --bg-color none #1.pic > #1.svg && inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-width=1000}%
+ \includegraphics[scale=#2]{#1.pdf}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % nouvelle commande pour un joli nom
 \newcommand{\nom}[1]{\textsc{#1}}
@@ -44,7 +80,6 @@
 % nettoyer une page blanche avant une page de chapitre en mode openright
 \newcommand{\clearemptydoublepage}{
 	\newpage{\pagestyle{empty}\cleardoublepage}}
-
 
 \makeindex
 
@@ -62,7 +97,7 @@
 \ligne{\Large}
 }
 \author{\nom{Dimitri Gressin} \& \nom{Timothée Ravier}\\\\\nom{Pilote : Jérémy Briffaut}}
-\date{20 \textsc{janvier} 2011} %TODO
+\date{27 \textsc{mai} 2011}
 
 % titre
 \maketitle
@@ -71,7 +106,7 @@
 \clearemptydoublepage
 
 % table des matières
-\setcounter{secnumdepth}{2}
+\setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{2}
 \addtocontents{toc}{\protect\thispagestyle{empty}}
 \tableofcontents
@@ -80,48 +115,56 @@
 \newpage
 
 \section*{Introduction} \addcontentsline{toc}{section}{Introduction}
-Ce rapport présente le travail et les résultats obtenus à la fin du premier semestre, dans le cadre de notre projet d'application de deuxième année.
-%TODO
+Ce rapport présente le travail et les résultats obtenus dans le cadre de notre projet d'application de deuxième année. Ce projet s'inscrit dans le cadre des projets de recherche menés au Laboratoire d'informatique Fondamentale d'Orléans (LIFO) par l'équipe Sécurité et Distribution des Systèmes (SDS) sur la création d'un système d'exploitation sécurisé basé sur Linux.
 
 ~
 
-Le but de ce projet est de généraliser la communication entre les différentes applications et le démon contextd. Contextd permet de commander différents systèmes de sécurité pour autoriser une applications à effectuer certaines actions.
-Pour fonctionner, il doit avoir connaissance, entre autres, des accès aux fichiers et des noms de domaine des sites visités.
+Ce projet a pour but la simplification et la généralisation du contrôle d'application par le démon contextd. Contextd est un démon résident en espace utilisateur qui commande et coordonne différents systèmes de sécurité (SELinux, PIGA-MAC, iptables...). Il permet de changer dynamiquement la configuration de ces outils de sécurité pour assurer la sécurité et la cohérence globale d'un système. Il constitue une mise en œuvre avancée du principe de séparation des privilèges, limitant les droits des applications contrôlées au strict minimum, à chaque instant donné.
 
 ~
 
-Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un pluging ou un patch propre à chaque application. Contextd recueillait alors les différentes opérations qu'elles effectuaient (lecture/écriture de fichiers, création de socket, etc.) pour en déduire un contexte. En effet, il est pour l'instant nécessaire de modifier chaque application pour lui permettre de valider ses actions avec contextd. L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions entreprises par les programmes.
-%TODO
+Mais pour fonctionner, Contextd doit avoir connaissance des actions entreprisent par chacune des applications que l'on veut surveiller. Jusqu'à présent, la communication entre les applications et contextd s'effectuait via un plugin ou un patch propre à chaque application. Contextd recueillait alors les demandes de chacune de ces applications (lecture/écriture de fichiers, création de socket...) pour en déduire un domaine (web, ecommerce, mail...). Contextd était donc limité aux informations fournies par ces applications.
 
 ~
 
-\section*{Objectifs} \addcontentsline{toc}{section}{Objectifs}
+L'idée retenue consiste à déplacer la contrainte de communication au niveau du noyau, qui par l'intermédiaire des appels système a connaissance des actions effectuées par les programmes. Il s'agit donc de modifier le fonctionnement du noyau Linux ainsi que le comportement de contextd et la nature de ses sources d'information. Nous verons aussi qu'il n'est pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine.
 
-Pour pouvoir se séparer des plugins/modifications par applications, il est nécessaire de communiquer à contextd certaines informations sur le comportement des programmes. Il faut notamment obtenir :
-\begin{itemize}
-	\item la liste des fichiers créés, ouverts, modifiés par l'ensemble des processus, et les contextes SELinux associés, si le module SELinux est activé.
-	\item la liste des connexions ouvertes par le systeme, et plus particulièrement les adresses IP de destination, et donc finalement le nom de domaine de destination.\\
-\end{itemize}
-
-De plus, il faut que le programme puisse attendre la réponse de contextd avant de poursuivre son exécution.
+~
 
 \newpage
 
-\section{Systemtap}
+\include{stateoftheart}
 
-\subsection{Principe de fonctionnement}
+\newpage
 
-Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé sur le schéma ci-dessous.
+\section{Déroulement du projet}
 
-\begin{figure}[hb]
+\subsection{Base utilisée pour le développement}
+
+% \subsection{PIGA-OS, PIGA-SYSTRANS}
+
+\subsubsection{SELinux, PIGA, contextd}
+
+La solution retenue par Jérémy Briffaut et l'équipe SDS pour construire un système d'exploitation sécurisé est constituée de SELinux, PIGA, et de contextd. Ces trois éléments forment une suite de couche qui offrent progressivement un contrôle plus fin sur les interactions sur un système Linux, et permettent de garantir des propriétés fines et précises, mais en même temps générales.
+
+\subsubsection{Gentoo Hardened}
+
+Notre project ayant pour but potentiel, à terme, d'être intégré dans le système PIGA-OS, nous avons basé l'intégralité du développement sur la distribution Gentoo Hardened, qui propose une version du noyau modifiée. C'est donc à partir des noyaux Linux 2.6.32-r9 et r22 version hardened que nous avons travaillé.
+
+\subsection{Systemtap}
+
+\subsubsection{Principe de fonctionnement}
+
+Nous avons ainsi commencé par utiliser Systemtap, un outil d'analyse du noyau grâce à des scripts qui ne nécessitent pas de modifier le code du noyau. Systemtap utilise les KProbes, et les Kretprobes\cite{IBMRBST} pour intervenir à différents endroits dans le déroulement des fonctions du noyau pour permettre à l'utilisateur de lire certaines variables ou de logger certains appels système. Le principe de fonctionnement de Systemtap est résumé par la Figure~\ref{IBMST}.
+
+\begin{figure}[!ht]
 	\centering
-	\includegraphics[scale=0.4]{kretprob.png}
+	\includegraphics[scale=0.4]{attachements/kretprob.png}
 	\caption{Fonctionnement tel que décrit dans la référence IBM sur Systemtap \cite{IBMRBST}}
+	\label{IBMST}
 \end{figure}
 
-\newpage
-
-\subsection{Résultats obtenus}
+\subsubsection{Résultats obtenus}
 
 Après s'être familiarisé avec le fonctionnement de Systemtap, nous nous sommes aperçu que les scripts utilisés pour récupérer les informations issues des appels système sont exécutés une fois l'appel système effectué. Il n'est pas possible, d'après nos recherches, de faire en sorte que les scripts puissent bloquer les appels système avant de les effectuer.
 
@@ -129,131 +172,1068 @@ De ce fait, l'utilisation de Systemtap ne permet pas de répondre à nos besoins
 
 Il faut ajouter à cela que les informations recueillies à partir de Systemtap ne sont pas exploitables pour certaines d'entre-elles. Par exemple, lorsqu'un fichier est accédé (lu ou écrit), seul le numéro d'inode nous était retourné. Il n'était alors pas pertinent de récupérer le chemin complet du fichier, car cette recherche est inadaptée et inefficace : il est nécessaire de parcourir l'intégralité du système de fichiers.
 
-Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, Jérémy Briffaut, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
+Il fallait donc changer de stratégie. C'est pourquoi, nous avons, avec l'accord du responsable du projet, décidé de nous orienter vers l'utilisation des ``Linux Security Modules'' (LSM).
 
-\newpage
+\section{Solution retenue et implémentée}
 
-\section{Linux Security Modules}
+La solution retenue est axée sur les modules LSM.
 
-\subsection{Principe de fonctionnement}
+\subsection{Linux Security Modules}
 
 Les modules LSM sont au noyau ce que netfilter est au réseau.
 
-Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
+Le principe de fonctionnement est simple : un module LSM est chargé dans le noyau Linux au démarrage. Il se substitue ou complète alors la procédure de contrôle d'accès. \`A chaque appel système est associé un point d'ancrage ou hook que l'on peut considérer comme une fonction. Il est placé dans l'appel système entre les vérifications élémentaires (existence des fichiers, droits unix) et sa réalisation. Dès qu'un appel système est demandé, le hook est exécuté. Par défaut, il autorise l'exécution de l'appel système.
 
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
-	\includegraphics[scale=0.45]{lsm1.png}
+	\includegraphics[scale=0.45]{attachements/lsm1.png}
 	\caption{Architecture des hooks LSM \cite{LSMINTRO}}
 \end{figure}
 
-L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de charger dans le noyau qu'un seul et unique module LSM. Or, PIGA utilise déjà un module LSM modifié, celui de SELinux.
+L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment de ne charger dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
 
-Pour simplifier le développement, nous avons désactivé SELinux. \`A terme, il se pourrait que SELinux soit définitivement désactivé.
-
-\begin{figure}%[hb]
+\begin{figure}[!ht]
 	\centering
-	\includegraphics[scale=0.45]{lsm2.png}
+	\includegraphics[scale=0.45]{attachements/lsm2.png}
 	\caption{Hook LSM permissif. Ce hook autorise la politique de sécurité à passer outre les restrictions DAC \cite{LSMINTRO}}
 \end{figure}
 
-L'avantage de ces hooks est qu'ils offrent une très grande liberté. Cependant, il n'est possible pour le moment que de chargé dans le noyau qu'un seul et unique module LSM. Or, PIGA-OS utilise déjà un module LSM : SELinux.
+Pour les besoins du développement, nous avons dû désactiver SELinux, pour nous concentrer sur notre propre module, et non sur l'intégration avec le module LSM de SELinux.
 
-Pour les besoins du développement, nous avons dû donc désactiver SELinux.
+\subsection{Détail de la solution}
 
-\newpage
+Nous avons donc décider de nous orienter vers l'implémentation d'un module LSM. Grâce aux "hooks", et notamment la fonction "file\_permission", nous pouvons contrôler les différents accès aux ressources systèmes telles que les fichiers (binaires ou textes).
 
-\subsection{Ce qui a été réalisé}
+Nous avons également remarqué que les hooks ``socket\_bind'' et ``socket\_connect'' permetent de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Ils permettent ainsi d'obtenir l'adresse IP et le port qui correspondent à une connexion. Il existe également deux autres "hooks" ``socket\_recvmsg'' et ``socket\_sendmsg'' qui permettent, eux, de pouvoir exercer un contrôle en fonction du contenu du paquet. On peut donc imaginer grâce à ces quatre "hooks" pouvoir surveiller les connexions réseaux.
 
-Nous avons donc développé un module LSM qui "hook" les appels système. Par défaut, ces hooks sont "transparents" à l'exception du hook "file permission" sur lequel nous travaillons. Il est appelé à chaque ouverture (lecture, écriture, exécution) de descripteur de fichier.
+Par manque de temps, nous avons décidé de ne pas surveiller ces "hooks". Cependant, nous avons tout mis en œuvre afin que les informations disponibles dans ces "hook" arrivent à contextd, afin, de pouvoir travailler sur l'exploitation des données et effectuer les contrôles voulus à l'avenir.
 
-Par la suite, il faudra convenir des appels systèmes sur lesquels il est intéressant d'intervenir.
+En effet, contextd ne permet pas de prendre de décisions sur les adresses IP mais seulement sur les URLs. Une requête DNS inverse ne permet malheureusement pas d'obtenir d'adresse utilisable par contextd. Nous n'avons donc pas poursuivi l'intégration des ``connexions'' dans notre solution.
 
-Nous avons ajouté la possibilité d'activer ou non ce module lors de la compilation du noyau en suivant les conventions de nommage des options de configuration.
+La principale difficulté de cette étape fut de localiser dans quels fichiers ces informations sont définies parmi l'ensemble du code source du noyau Linux. S'agissant de structures pour la plupart, il nous fallait savoir quels en étaient les membres pour pouvoir en tirer les informations essentielles au fonctionnement de contextd.
 
-Ensuite, nous avons commencé à chercher les différentes informations nécessaires à contextd pour son fonctionnement, et plus particulièrement ce qui concerne le hook "file permission" :
+Nous avons donc dû étudier également le fonctionnement du démon contextd. Il s'avère qu'il n'a besoin que de peu de données et se contente de :
 	\begin{itemize}
 		\item le PID
 		\item l'execname
 		\item le chemin complet du fichier
-		\item ...
+		\item le context de sécurité SELinux~\\
 	\end{itemize}
+	
+\textit{\textsl{\textbf{Nota bene :}}} Pour les activités réseaux, contextd à besoin de non seulement du FQDN mais aussi de la page et/ou des sous-domaines associés. Bien qu'il puissent utiliser des adresses IP, ce comportement n'est pas souhaitable pour des raisons évidentes liées au fonctionnement d'Internet. En revanche, le noyau n'a conscience que de l'adresse IP associée à une connexion. Il faut donc pouvoir retrouver à partir de l'IP le FQDN. Après une tentative, grâce à la fonction \textit{getnamebyaddr}, nous n'avons pas pu retrouver un FQDN exploitable. En effet, nous avons tenté une connexion vers www.google.fr afin de voir, si à partir de l'adresse IP résolue, nous pouvions retrouver google. Force est de constater que le résultat, wy-in-f104.1e100.net, bien qu'il redirige vers google, n'est pas exploitable par contextd.
 
-Nous avons également remarqué que le hook "socket bind" permet de récupérer des informations, notamment l'adresse IP et le port de destination d'une socket, avant qu'elle ne soit créée. Son fonctionnement doit être confirmé, car il pourrait nous affranchir d'utiliser une alternative telle que ULOG et iptables.
-% 	\begin{itemize}
-% 		\item[-] le PID
-% 		\item[-] l'execname
-% 		\item[-] la structure de la socket
-% 		\item[-] L'adresse de connexion
-% 		\item[-] ...
-% 	\end{itemize}
+Maintenant que ces informations sont localisées, il faut pouvoir les extraire de l'espace noyau (kernel space) pour les acheminer dans l'espace utilisateur (User space) là où opère contextd. 
 
-La principale difficulté de cette étape était de localiser dans quels fichiers ses informations sont localisées dans l'ensemble du code source du noyau Linux.
+\subsection{Problématique de la communication entre contextd et le noyau}
 
-L'étape suivante consiste à envoyer les informations récupérées dans l'espace noyau à l'espace utilisateur. Nous avons envisagé plusieurs pistes, pour l'instant restées infructueuses.
+Compte tenu du fonctionnement de contextd, il a fallut développer un système de communication entre le noyau et contextd.
 
-\newpage
-
-\subsection{Idées abandonnées}
-
-\subsubsection{Socket Unix}
-
-Tout d'abord, nous avons essayé de créer une socket Unix pour communiquer avec l'espace utilisateur. Cependant, les sockets NETLINK ne garantissent pas que les informations soient correctement envoyées. Il devient alors difficile de maîtriser le comportement du hook : il n'y a donc aucune garantie quant à la poursuite ou non de l'appel système.
-
-\subsubsection{Proc fs}
-
-Cette solution consiste à créer un ou plusieurs devices dans /proc. Le noyau écrirait dans l'un et lirait les réponses dans l'autre. Or cette solution ne permet pas de s'assurer facilement que seul un processus écrit et lit et donc d'authentifier les échanges entre le noyau et le démon. De plus il est nécessaire de parser les informations transmises par un device.
-
-\subsection{Développement en cours : appels système}
-
-Nous avons envisagé de créer trois nouveaux appels systèmes pour répondre au besoins de communications entre le noyau et contextd. Un appel système nous permet de renseigner et de transmettre une structure avec toutes les informations nécessaires à contextd. Cela nous évite ansi de parser du texte et facilite le processus d'authentification du démon qui correspond alors à un simple appel système lui aussi. La procédure d'authentification est une procédure séparée.
-
-\begin{figure}[hb]
+\begin{figure}[!ht]
 	\centering
-	\includegraphics{global.pdf}
-	\caption{Communication entre le noyau, le démon et contextd}
+	\includesvg{attachements/contextd_dbus}{0.45}
+	\caption{Communication entre contextd et les applications}
+	\label{contextd_dbus}
 \end{figure}
 
-Il faut donc s'assurer que le démon se désauthentifie si le processus est terminé. \`A terme, ce comportement ne sera pas accepté.
+En effet, comme le montre la Figure~\ref{contextd_dbus}, l'implémentation choisie au départ pour acheminer les informations nécessaires à contextd était centrée sur DBus, un système de communication inter-processus simple.
 
-Nous utilisons des mutex pour contrôler les échanges d'informations entre le noyau et le démon et assurer le traitement de chacun des appels système.
+\subsubsection{Les appels systèmes}
 
-\begin{figure}[hb]
+Pour mettre en place la communication entre l'espace noyau et le démon en espace utilisateur contextd, nous avons implémenté trois nouveaux appels système. En effet, la solution des appels système nous permet de contrôler les interactions avec le noyau en créant :
+\begin{itemize}
+ \item \textbf{auditsec\_reg} : démarre/termine la communication et enregistre/désinscrit les programmes à surveiller.
+ \item \textbf{auditsec\_question} : bloquant, qui attend une demande d'autorisation de la part du noyau.
+ \item \textbf{auditsec\_answer} : qui permet de donner une réponse au noyau.\\
+\end{itemize}
+
+\begin{figure}[!ht]
 	\centering
-	\includegraphics{syscall_sync.pdf}
+	\includepic{attachements/sequence_diagram}{1}
+	\caption{Diagramme de séquence entre le noyau, contextd, et une application}
+\end{figure}
+
+Nous utilisons des mutex pour s'assurer du traitement par contextd de chacun des appels système.
+
+\begin{figure}[!ht]
+	\centering
+	\includesvg{attachements/syscall_sync}{0.6}
 	\caption{Communication entre les hooks LSM et les appels système}
 \end{figure}
 
-Cette idée n'est pas encore complétement implémentée et ne fonctionne donc pas encore.
+Une fois que contextd est enregistré, toute nouvelle tentative d'enregistrement échouera. Il sera nécessaire de quitter contextd avant d'effectuer un nouvel enregistrement. Cela permet de limiter la communication par l'intermédiaire de cet appel, pour l'enregistrement et la désinscription des programmes à surveiller.
+
+Les appels système présentent deux avantages majeurs par rapport à d'autres solutions :
+\begin{itemize}
+  \item l'appel auditsec\_question est bloquant, laissant le processus en attente d'une réponse du noyau. Cela évite d'avoir à vérifier périodiquement l'état d'un fichier contenant temporairement des informations.
+  \item il n'est pas nécessaire de parser les informations reçues : nous utilisons un pointeur sur une structure remplie par le noyau.\\
+\end{itemize}
+
+En revanche, il est peu probable qu'une telle solution soit acceptée par les développeurs du noyau. Il faudrait donc envisager de convertir ces appels systèmes en appels à ioctl, un appel système utilisé pour communiquer avec les périphériques par exemple.
+
+\subsubsection{L'interface présentée à l'administrateur}
+
+Pour simplifier la tâche de l'administrateur et rendre compte de l'état du noyau, nous avons créé les ``proc files''. Ce système de fichiers virtuel, contenu dans la mémoire vive du système, permet non seulement de récupérer des informations depuis le noyau mais aussi de lui en envoyer.
+
+Nous avons mis en place deux fichiers dans l'arborescence /proc :
+
+	\begin{itemize}
+		\item \textbf{/proc/contextd/programs} : Ce fichier liste les programmes qui ont été enregistrés auprès du noyau et qui sont donc surveillés. Des demandes seront envoyées à contextd pour ces programmes. Ce fichier n'est disponible qu'en lecture seule. En effet, nous considérons qu'une fois contextd lancé, lui seul peut décider de l'enregistrement ou de la désincription d'un programme.
+		\item \textbf{/proc/contextd/status} : Ce fichier est en revanche accessible en lecture et en écriture. En lecture, on y trouve le PID de contextd (plus précisément le tgid, pour ne pas prendre en compte les threads de contextd). En écriture, s'il reçoit un 0, le noyau désactive la surveillance par contextd et vide la liste des programmes enregistrés. Il est donc impératif que ce fichier ne soit pas accessible par défaut à un utilisateur non privilégié. On peut aussi envisager de désactiver ce comportement sur un système en production.
+	\end{itemize}
+
+\subsubsection{Séparation des fonctions de communications dans contextd}
+
+Compte tenu de ce qui a été dit précédemment, nous avons dû modifier contextd afin de lui ajouter la possibilité de communiquer avec le noyau grâce aux appels système que nous avions définis. Pour ce faire, nous nous sommes inspiré de ce qui était déjà implémenté, à savoir la communication par l'intermédiaire de DBus.
+
+Cette communication se faisait grâce à la classe "DBusContext". Cette classe traitait les sollicitations des clients (programmes), les enregistrait dans une table de hashage privée et s'occupait des transitions. Les programmes étaient indexés par le dbus\_id correspondant au canal de communication DBus.
+
+Nous avons donc reproduit ce comportement pour la réception des informations depuis le noyau. Nous avons créé une classe "KernelContext" qui permet de traiter les processus non modifiés et ne disposant pas de plugin.
+
+Pour éviter une potentielle surveillance double, nous avons décidé d'abstraire le comportement de ces deux classes recevant de l'information à transmettre à contextd. Nous avons donc pallié ce problème en implémentant une classe abstraite "AbstractContext" afin de centraliser la liste des clients pour toutes les sources d'information. Les classes DBusContext et KernelContext héritent alors de la classe AbstractContext qui possède la liste des clients en attribut static protégé : ces propriétés permettent à toutes les classes qui héritent d'AbstractContext d'avoir accès à l'instanciation de cette liste sans que celle-ci ne dépende d'une instance en particulier. L'accès à la liste des clients est synchronisé pour éviter toute concurrence d'accès.
+
+Dans le cas où un troisième mode de communication serait envisagé, il sera alors aisé de faire les modifications pour que celui-ci s'intègre parfaitement à ce qui existe déjà : il suffira d'hériter de la classe AbstractContext.
+
+\begin{figure}[!ht]
+	\centering
+	\includedot{attachements/class}{.8}
+	\caption{Diagramme de classes}
+\end{figure}
+
+\subsubsection{Surveillance et enregistrement dynamique}
+
+Pour rendre contextd conscient de nos modifications nous avons implémenté plusieurs éléments :
+
+\begin{itemize}
+	\item L'enregistrement et la désinscription/mise à jour de la liste des programmes surveillés par contextd lors de la réception du signal SIGUSR2.
+	\item La vérification de la cohérence de la liste des clients stockée par contextd : cette liste est maintenant nettoyée à intervalles réguliers.
+\end{itemize}
+
+De plus, notre solution nécessitant maintenant l'enregistrement des programmes auprès du noyau, il est désormais possible de charger dynamique cette liste de programmes à partir de /etc/context.d/program.d. Il est par contre nécessaire de préciser à contextd, à la compilation, les programmes à exclure de cette liste (pour l'instant firefox, claws-mail et context-notify).
+
+\textit{\textsl{\textbf{Nota bene :}}} Nous partons du principe que notre travail est/sera utilisé avec SELinux, même si ce n'est pas possible actuellement. Nous n'effectuons aucune vérification d'intégrité sur les programmes surveillés par contextd. Cette intégrité est en principe assurée par les politiques SELinux et/ou les règles PIGA.
+
+\section{Implémentation}
+
+\subsection{Ajout du module dans le menuconfig et la compilation du noyau}
+
+Premièrement, nous avons donc développé un module LSM qui "hook" les appels système. Pour ce faire, nous avons créé un dossier "auditsec" dans \textit{{kernel\_src}/security/}. C'est dans ce dossier que nous allons mettre toutes nos sources (appels système, hook, etc.) ainsi qu'un sous dossier \textit{{kernel\_src}/security/includes} pour nos .h.  
+
+Ensuite,  pour avoir la possibilité d'activer ou non ce module lors de la compilation du noyau (suivant les conventions de nommage des options de configuration) il a fallu ajouter la ligne suivante dans \textit{{kernel\_src}/security/Kconfig} afin d'indiquer d'aller voir dans le nouveau dossier.
+
+
+\begin{lstlisting}[language=make]
+source security/auditsec/Kconfig
+\end{lstlisting}
+
+Il faut ajouter également un fichier Kconfig dans le dossier \textit{{kernel\_src}/security/auditsec} pour définir la description, le type de variable et le texte du menuconfig. Dans ce fichier, on insère les lignes suivantes :
+
+\begin{lstlisting}[language=make]
+config SECURITY_AUDITSEC
+bool "Userspace contextd capture LSM hook"
+depends on AUDIT && NET && INET
+select NETWORK_SECMARK
+default n
+help
+ Module pour communiquer avec contextd pour la gestion d'applications en userspace.
+\end{lstlisting}
+
+La description des différentes lignes ci-dessus :
+\begin{itemize}
+	\item Nom de la variable. On pourra l'utiliser avec des "\#ifdef" dans le code C. La variable sera alors "CONFIG\_SECURITY\_AUDITSEC".
+	\item Type de variable pour menuconfig (ici booléen)
+	\item De quel autre partie de configuration notre module a besoin.
+	\item
+	\item Par défaut, le module est désactivé.
+	\item La description
+\end{itemize}
+
+ Pour que ce dossier soit pris en compte lors de la compilation, il faut rajouter les lignes suivantes dans \textit{{kernel\_src}/security/Makefile} :
+
+\begin{lstlisting}[language=make]
+subdir-$(CONFIG_SECURITY_AUDITSEC)  += auditsec	
+obj-$(CONFIG_SECURITY_AUDITSEC)     += auditsec/built-in.o
+\end{lstlisting}
+
+Puis, il faut ajouter un Makefile dans notre dossier \textit{{kernel\_src}/security/auditsec/Makefile} :
+
+\begin{lstlisting}[language=make]
+obj-$(CONFIG_SECURITY_AUDITSEC) := audit_security.o
+ 
+audit_security-y := hooks.o share.o syscall.o
+
+EXTRA_CFLAGS += -Isecurity/auditsec/include
+$\end{lstlisting}
+
+Ceci fait, tout est désormais prêt pour la compilation. Maintenant, passons à la création d'un module LSM. L'implémentation de ce module a été faite dans le fichier \textit{{kernel\_src}/security/auditsec/hook.c}. 
+
+\subsection{Création des éléments nécessaires au module}
+
+La particularité d'un module LSM est l'utilisation d'une structure spéciale qui liste les différentes fonctions appelées lorsqu'un appel système est demandé. Voici donc la structure de notre module.
+
+\begin{lstlisting}[language=C]
+static struct security_operations audit_ops = {
+	.name =             "audit_ops", // nom 
+	.inode_mkdir =                  auditsec_inode_mkdir,
+	.file_permission =              auditsec_file_permission,
+	.socket_bind =                  auditsec_socket_bind,
+	.socket_connect =               auditsec_socket_connect,
+	.socket_sendmsg =               auditsec_socket_sendmsg,
+ 	.socket_recvmsg =               auditsec_socket_recvmsg
+ };
+\end{lstlisting}
+
+Il faut donc ajouter le code de ces six hooks. Pour connaître la signature de ces fonctions, il faut aller voir dans \textit{{kernel\_src}/security/security.c}. 
+
+Par exemple, voici le code de la fonction auditsec\_file\_permission:
+
+\begin{lstlisting}[language=C]
+int auditsec_file_permission(struct file *file, int mask)
+{
+...
+	if(prog_is_monitored()){ // On teste si le programme est surveille
+...
+		// On recupere le chemin complet du fichier auquel on accede
+		file_path(file, fullpath);
+		if(*daemon_launched()){  // On teste si contextd est lance
+			if(down_timeout(auditsec_hook_lock(), 30 * HZ) != 0){...}
+			
+			// On remplit la structure
+			get_task_comm(k_auditsec_info()->execname, current);
+			k_auditsec_info()->pid = current_pid;
+			k_auditsec_info()->type = AUDITSEC_FILE;
+			strncpy(k_auditsec_info()->auditsec_struct.file.fullpath, fullpath, PATH_MAX + 1);
+			strncpy(k_auditsec_info()->auditsec_struct.file.name, file->f_path.dentry->d_name.name, NAME_MAX + 1);
+			k_auditsec_info()->auditsec_struct.file.mask = mask;
+			
+			// La structure est prete, on leve le verrou pour que contextd puisse la recuperer
+			up(auditsec_question_lock());
+			
+			// On attend la reponse
+			if(down_timeout(auditsec_answer_lock(), 30 * HZ) != 0){...}
+			
+			// On a eu la reponse			
+			answer = (*auditsec_answer() == 0);
+			up(auditsec_hook_lock());
+
+			// On autorise ou non suivant la reponse (0 oui - -EACCES non)
+			return answer == 0 ? 0 : -EACCES;
+		}else{...}
+	}else{...}
+	return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Liste des programmes surveillés}
+
+Comme on peut le voir, le code de ce "hook" fait appel à plusieurs éléments. Tout d'abord, on teste si le programme qui a déclenché ce "hook" est surveillé par contextd. Pour ce faire, on a crée une liste au niveau du noyau contenant l'ensemble des programmes surveillés par contextd. On traitera plus tard de la manière dont cette liste est mise à jour.
+
+Nous définissons une structure pour stocker un programme :
+
+\textit{{kernel\_src}/security/auditsec/include/share.h} :
+\begin{lstlisting}{language=C}
+struct prog {
+	char execname[TASK_COMM_LEN];
+	struct list_head list;
+};
+\end{lstlisting}
+
+Puis nous déclarons la liste des programmes en utilisant une des implémentation de liste générique du noyau :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting}[language=C]
+static LIST_HEAD(prog_list);
+\end{lstlisting} 
+
+Maintenant, pour tester si une application appartient à cette liste, nous faisons appel à la fonction suivante :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting} [language=C]
+int prog_is_monitored()
+{
+	char current_task_comm[TASK_COMM_LEN];
+	struct prog * p;
+
+	get_task_comm(current_task_comm, current);
+	list_for_each_entry(p, &prog_list, list){
+		if(strncmp(p->execname, current_task_comm, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s is monitored", current_task_comm);
+			return 1;
+		}
+	}
+	return 0;
+}
+\end{lstlisting} 
+
+Enfin, il faut pouvoir ajouter ou supprimer des éléments de cette liste. Nous avons implémenté pour cela les fonctions suivantes :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting} [language=C]
+int register_prog(char * prog_name)
+{
+	struct prog * p;
+
+	printk(KERN_INFO "AuditSec: Registering prog %s", prog_name);
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			printk(KERN_INFO "AuditSec: Prog %s already registered", prog_name);
+			return -1;
+		}
+	}
+
+	p = kmalloc(sizeof(*p), GFP_NOFS);
+	if(p == NULL){
+		return -ENOMEM;
+	}
+	strncpy(p->execname, prog_name, TASK_COMM_LEN);
+	INIT_LIST_HEAD(&p->list);
+
+	list_add(&p->list, &prog_list);
+	printk(KERN_INFO "AuditSec: Prog %s registered", prog_name);
+	return 0;
+}
+
+
+int unregister_prog(char * prog_name)
+{
+	struct prog * p;
+
+	if(list_empty(&prog_list) != 0){
+		printk(KERN_INFO "AuditSec: Prog list empty !");
+		return -1;
+	}
+
+	list_for_each_entry(p, &prog_list, list) {
+		if(strncmp(p->execname, prog_name, TASK_COMM_LEN) == 0){
+			list_del(&p->list);
+			kfree(p);
+			printk(KERN_INFO "AuditSec: Unregistering prog %s", prog_name);
+			return 0;
+		}
+	}
+
+	return -1;
+}
+\end{lstlisting} 
+
+\subsubsection{Structure transmise}
+
+Une fois les tests effectués, le "hook" remplie une structure. Nous avons opté pour une structure "dynamique" plutôt qu'une multitude de structure car les données sont différentes selon le "hook" surveillé.
+
+La partie principale de cette structure est la suivante :
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+enum auditsec_type {AUDITSEC_FILE, AUDITSEC_SOCKET, AUDITSEC_DIR, AUDITSEC_MSG};
+
+struct auditsec_info {
+    pid_t       pid;
+    char        execname[TASK_COMM_LEN];
+    //FIXME Add SELinux context to this struct
+    enum        auditsec_type type;
+    union
+    {  
+        struct auditsec_file file;
+        struct auditsec_socket socket;
+        struct auditsec_dir dir;
+        struct auditsec_msg msg;
+    } auditsec_struct;
+};
+\end{lstlisting} 
+
+Ainsi seule "auditsec\_struct" variera suivant les "hooks" qui la rempliront. Nous avons donc créé différentes structures pour chaque type de "hook".
+
+Concernant les fichiers :
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+struct auditsec_file {
+    char        name[NAME_MAX + 1];
+    char        fullpath[PATH_MAX + 1];
+    int         mask;
+};
+\end{lstlisting} 
+
+Concernant les dossiers : 
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+struct auditsec_dir {
+    char        name[NAME_MAX + 1];
+    char        fullpath[PATH_MAX + 1];
+    int         mode;
+};
+\end{lstlisting} 
+
+Concernant les sockets : 
+
+\textit{{kernel\_src}/security/auditsec/struct.c} :
+\begin{lstlisting} [language=C]
+enum socket_type {AUDITSEC_IPV4, AUDITSEC_IPV6};
+
+struct auditsec_socket {
+    enum        socket_type type;
+    union
+    {
+        struct sockaddr_in  addr4; // Adresse ip V4
+        struct sockaddr_in6  addr6; // Adresse ip V6
+    } addr;
+};
+
+struct auditsec_msg {
+    struct msghdr msg;
+    int size;
+};
+\end{lstlisting} 
+
+\subsubsection{Création du module}
+
+Maintenant que tous les éléments nécessaires sont définis, il faut maintenant implémenter la fonction d'initialisation du module. Lors de cette initialisation, doivent être créés les "proc files" ainsi que les fonctions nécessaires pour les lire et/ou écrire dedans.
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+static __init int auditsec_init(void)
+{
+	struct proc_dir_entry * auditsec_proc_programs, *auditsec_proc_status, *auditsec_dir;
+
+	if (!security_module_enable(&audit_ops)) {
+		printk(KERN_INFO "AuditSec: Abort initialization.\n");
+		return 0;
+	}
+
+	printk(KERN_INFO "AuditSec: Initializing.\n");
+
+	if (register_security(&audit_ops))
+		panic("AuditSec: Unable to register with kernel.\n");
+
+	init_MUTEX(auditsec_hook_lock());
+	init_MUTEX(auditsec_question_lock());
+	init_MUTEX(auditsec_answer_lock());
+
+	down(auditsec_question_lock());
+	down(auditsec_answer_lock());
+
+	// Create dir in /proc
+	auditsec_dir = proc_mkdir(PROC_AUDITSEC_DIR, NULL);
+
+	if (auditsec_dir == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/ directory", PROC_AUDITSEC_DIR);
+		return -ENOMEM;
+	}
+
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which lists registered programs
+	auditsec_proc_programs = create_proc_entry(PROC_AUDITSEC_PROGRAM, 0400, auditsec_dir);
+
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_PROGRAM);
+		remove_proc_entry(PROC_AUDITSEC_PROGRAM, auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_programs->read_proc    = auditsec_proc_programs_read;
+	auditsec_proc_programs->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_programs->uid          = 0;
+	auditsec_proc_programs->gid          = 0;
+	auditsec_proc_programs->size         = 0;
+
+	// Create file in /proc/PROC_AUDITSEC_DIR/ which gives the current status and
+	// the opportunity to change it
+	auditsec_proc_status = create_proc_entry(PROC_AUDITSEC_STATUS, 0600, auditsec_dir);
+
+	if (auditsec_proc_programs == NULL) {
+		printk(KERN_INFO "AuditSec: failed to creat /proc/%s/%s file", PROC_AUDITSEC_DIR, PROC_AUDITSEC_STATUS);
+		remove_proc_entry(PROC_AUDITSEC_STATUS, auditsec_dir);
+		return -ENOMEM;
+	}
+
+	auditsec_proc_status->read_proc    = auditsec_proc_status_read;
+	auditsec_proc_status->write_proc   = auditsec_proc_status_write;
+	auditsec_proc_status->mode         = S_IFREG | S_IRUGO;
+	auditsec_proc_status->uid          = 0;
+	auditsec_proc_status->gid          = 0;
+	auditsec_proc_status->size         = 0;
+
+	printk(KERN_INFO "AuditSec: Waiting for daemon.\n");
+
+	return 0;
+}
+
+security_initcall(auditsec_init);
+\end{lstlisting}
+
+\subsubsection{Fonctions de lecture pour \textit{/proc/contextd/programs}}
+
+L'initialisation du module et la création des proc files nécessitent l'implémentation également des fonctions qui permettront la lecture et l'écriture dans ces fichiers. Pour pouvoir lire le fichier \textit{/proc/contextd/programs}, nous avons implémenté la fonction suivante :
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+int auditsec_proc_programs_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result = 0;
+	char * tmp = NULL;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		tmp = prog_liste();
+		result = sprintf(buffer, "%s", tmp);
+		kfree(tmp);
+	}
+
+	return result;
+}
+\end{lstlisting}
+
+\subsubsection{Fonctions de lecture/écriture pour \textit{/proc/contextd/status}}
+
+Concernant ce proc file, il faut deux fonctions car il est accessible en lecture et écriture. En lecture il fournit le pid qu'il considère comme être celui de contextd ; en écriture, il permet, si on envoie "0" de désactiver la surveillance et de vider la liste des programmes surveillés.
+
+\textit{{kernel\_src}/security/auditsec/hooks.c} :
+\begin{lstlisting} [language=C]
+int auditsec_proc_status_read(char *buffer, char **buffer_location,  off_t offset, int buffer_length, int *eof, void *data)
+{
+	int result;
+	
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		result  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		result = sprintf(buffer, "%d\n", *contextd_pid());
+	}
+
+	return result;
+}
+
+int auditsec_proc_status_write(struct file *file, const char *buffer, unsigned long count, void *data)
+{
+	long lecture;
+	char tmp[count + 1];
+	char ** tmp2 = NULL;
+
+	if(copy_from_user(tmp, buffer, count)){ 
+		return -EFAULT;
+	}
+
+	tmp[count] = '\0';
+
+	lecture = simple_strtol(tmp, tmp2, 10);
+
+	if (lecture == 0){
+		*daemon_launched() = false;
+		*contextd_pid() = -1;
+		clean_prog_list();
+	}
+
+	return 0;
+}
+\end{lstlisting}
+
+Voici donc le module LSM complet et fonctionnel. Nous avons vu comment étaient implémentées les différentes composantes dont il a besoin pour fonctionner.
+
+\subsection{Les appels système}
+
+Maintenant, voyons comment sont implémentés les appels système.
+
+\subsubsection{ausitsec\_reg}
+
+Cet appel système a une triple fonction :
+\begin{itemize}
+	\item Enregistrer contextd auprès du noyau.
+	\item Ajouter les programmes surveillés.
+	\item Dé-enregistrer des programmes pour ne plus les surveiller.
+	\item Dé-enregistrer contextd.
+\end{itemize}
+
+Il s'assure aussi de l'identité de l'appelant, ne laissant qu'à contextd, une fois lancé, la possibilité de modifier la liste des programmes à surveiller. Voici le code source de cet appel système :
+
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_reg(int __user state, char __user * process_name)
+{
+	// Contextd isn't registered yet
+	if(*contextd_pid() == -1){
+		if(state == 1){
+			if(process_name == NULL){
+				*contextd_pid() = task_tgid_nr(current);
+				*daemon_launched() = true;
+				printk(KERN_INFO "AuditSec: The daemon is now considered launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: The daemon is not launched: can't register a program !");
+				return 0;
+			}
+		}else if(state == 0){
+			printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already stopped");
+			return 0;
+		}else{
+			printk(KERN_INFO "AuditSec: Invalid state provided !");
+			return 0;
+		}
+
+	// Contextd is already registered
+	}else if(*contextd_pid() == task_tgid_nr(current)){
+		if(state == 1){
+			if(process_name == NULL){
+				printk(KERN_INFO "AuditSec: According to the kernel, the daemon is already launched");
+				return 1;
+			}else{
+				printk(KERN_INFO "AuditSec: Registering program: %s", process_name);
+				if(register_prog(process_name) == 0){
+					printk(KERN_INFO "AuditSec: Program registered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Program NOT registered: %s", process_name);
+					return -1;
+				}
+			}
+		}else if(state == 0){
+			if(process_name == NULL){
+				*contextd_pid() = -1;
+				*daemon_launched() = false;
+				clean_prog_list();
+				printk(KERN_INFO "AuditSec: The daemon is now considered stopped. Program list emptied");
+				return 0;
+			}else{
+				printk(KERN_INFO "AuditSec: Unregistering program: %s", process_name);
+				if(unregister_prog(process_name) == 0){
+					printk(KERN_INFO "AuditSec: Program unregistered: %s", process_name);
+					return 1;
+				}else{
+					printk(KERN_INFO "AuditSec: Error: Program: %s", process_name);
+					return -1;
+				}
+			}
+		}
+
+	// Contextd is registered but access is denied to other process
+	}else{
+		printk(KERN_INFO "AuditSec: You're not contextd");
+	}
+	printk(KERN_INFO "AuditSec: No action performed");
+	return -EFAULT;
+}
+\end{lstlisting}
+
+\subsubsection{ausitsec\_question}
+
+Cet appel système attend, grâce aux jeux des verrous que la structure de données soit remplie par le "hook".
+
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_question(struct auditsec_info __user * user_as_i)
+{
+	if(*daemon_launched() == false){...}
+
+	if(*contextd_pid() != task_tgid_nr(current)){...}
+
+	if(down_interruptible(auditsec_question_lock()) != 0){...}
+
+	if(likely(user_as_i != NULL)){
+		if(likely(copy_to_user(user_as_i, k_auditsec_info(), sizeof(struct auditsec_info)) == 0)){
+			return 0;
+		}
+	}
+	// If an error occured during the copy, the transaction is rejected
+	*auditsec_answer() = false;
+	up(auditsec_answer_lock());
+	printk(KERN_INFO "AuditSec: Process %d, error in data transfer to userspace.", task_pid_nr(current));
+
+	return -EFAULT;
+}
+\end{lstlisting}
+
+Pour partager les verrous entre les appels système et les ``hooks'', nous avons défini les fonctions :
+
+\textit{{kernel\_src}/security/auditsec/share.c} :
+\begin{lstlisting} [language=C]
+struct semaphore * auditsec_hook_lock()
+{
+	static DECLARE_MUTEX(auditsec_hook_lock);
+	return &auditsec_hook_lock;
+}
+
+struct semaphore * auditsec_question_lock(){...}
+
+struct semaphore * auditsec_answer_lock(){...}
+\end{lstlisting}
+
+\subsubsection{auditsec\_answer}
+
+Cet appel système transmet la réponse de contextd au noyau. Voici son implémentation :
+\textit{{kernel\_src}/security/auditsec/syscall.c} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_answer(int __user answer)
+{
+	if(*daemon_launched() == false){...}
+
+	if(*contextd_pid() != task_tgid_nr(current)){...}
+
+	*auditsec_answer() = answer;
+	up(auditsec_answer_lock());
+
+	return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Déclaration des appels système}
+
+Une dernière étapes est cependant nécessaire pour que ces appels systèmes soient pleinement opérationnels. Il faut les déclarer. Pour cela, nous avons ajouter les lignes suivantes dans le fichier \textit{{kernel\_src}/include/linux/syscalls.h} :
+\begin{lstlisting} [language=C]
+asmlinkage long sys_auditsec_reg(int __user state, char __user *);
+asmlinkage long sys_auditsec_question(struct auditsec_info __user *);
+asmlinkage long sys_auditsec_answer(int __user);
+\end{lstlisting}
+
+Ensuite, il faut attribuer aux appels système un numéro. Cela est fait en ajoutant les lignes suivantes dans le fichier \textit{{kernel\_src}/arch/x86/kernel/syscall\_table\_32.S} : %en notant les numéros !
+
+\begin{lstlisting}[language=C]
+	.long sys_auditsec_reg
+	.long sys_auditsec_question
+	.long sys_auditsec_answer
+\end{lstlisting}
+
+et enfin :
+
+\textit{{kernel\_src}/arch/x86/include/asm/unistd\_64.h}
+\begin{lstlisting}[language=C]
+#define __NR_auditsec_reg			299
+__SYSCALL(__NR_auditsec_reg, sys_auditsec_reg)
+#define __NR_auditsec_question			300
+__SYSCALL(__NR_auditsec_question, sys_auditsec_question)
+#define __NR_auditsec_answer			301
+__SYSCALL(__NR_auditsec_answer, sys_auditsec_answer)
+\end{lstlisting}
+
+Grâce à tout ce qui précède, nous sommes en mesure de stopper les appels systèmes des applications surveillées, de communiquer avec le noyau et de récupérer les informations essentielles pour pouvoir prendre une décision sur l'accès ou non à la ressource demandée.
+
+\subsection{Modification de contextd}
+
+Maintenant, voyons les modifications apportées à contextd. Comme cela a été dit précédemment, la principale modification apportée à contextd concerne le mode de communication avec les applications. Initialement, une seule classe existait pour gérer la communication qui ne se faisait que via dbus.
+
+\subsubsection{Ajout d'une classe ``AbstractContext''}
+
+Nous nous sommes inspiré de la classe ``dbus-context'' pour créer la classe abstraire. Nous n'avons implémenté une seule et unique méthode \textit{getFullPathFromPID} qui sera, quoi qu'il advienne, toujours la même y compris pour les classes dérivées.
+
+De plus, pour partager la liste de clients (les applications surveillées et enregistrées), nous avons déclaré cette liste en tant qu'attribut de cette classe abstraite. Voici le code produit :
+
+\textit{abstractcontext.h} : 
+\begin{lstlisting}[language=C++]
+class AbstractContext : public QObject
+{
+Q_OBJECT
+protected:
+	//There is some concurrency here. Use the lock!
+	static QMap<pid_t, ContextClient> clients;
+	static QReadWriteLock lock;
+
+	QString getFullPathFromPID(pid_t pid);
+
+public slots:
+	virtual QString register_application(const QString &app_name, uint app_pid) = 0;
+
+	virtual QString domain_changed(const QString &xml_context) = 0;
+	virtual QString required_domain(const QString &xml_context) = 0;
+
+	virtual QString current_domain() = 0;
+	virtual QString is_registered() = 0;
+
+	virtual QString register_for_domain_changes_updates() = 0;
+
+protected slots:
+	virtual void onGlobalContextChanged(Domain previousGlobalContext, Domain globalContext) = 0;
+
+	void onEvent(ContextdPluginEvent* event);
+
+signals:
+	void globalContextChanged(const QString &previous_context, const QString &new_context);
+};
+\end{lstlisting}
+
+\textit{abstractcontext.cpp} : 
+\begin{lstlisting}[language=C++]
+QMap< pid_t, ContextClient > AbstractContext::clients;
+
+QReadWriteLock AbstractContext::lock;
+
+
+QString AbstractContext::getFullPathFromPID(pid_t pid)
+{
+	QString proc_path="/proc/%1/exe";
+	proc_path=proc_path.arg(pid);
+
+	return QFile::readLink(proc_path);
+}
+
+
+void AbstractContext::onEvent(ContextdPluginEvent* event)
+{
+	if(event->type()==ContextdPluginRestartEvent().type())
+	{
+		DomainHolder::instance().resetToDefaultDomain();
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Modification de ``DBusContext''}
+
+Compte tenu que la précédente liste de client était indexée par le dbus\_id, et que les programmes dont l'enregistrement se fait via le noyau ne dispose pas d'un tel identifiant, il a fallut modifier les méthodes de cette case. La modification est très succincte : il a juste fallu ajouter ces quelques lignes dans les méthodes et de modifier dbus\_id en pid.
+
+\textit{dbus-context.cpp} : 
+\begin{lstlisting}[language=C++]
+	//Get the pid
+	QDBusReply<uint> res = QDBusConnection::systemBus().interface()->servicePid(dbus_id);
+	if(res.isValid()){
+		pid = res.value();
+	}else{
+		return DBUS_ERROR;
+	}
+\end{lstlisting}
+
+\subsubsection{Ajout de la classe ``KernelContext''}
+
+Enfin, nous avons implémenté la classe KernelContext qui hérite d'AbstractContext. Elle utilise un QThread (KThread) pour gérer la boucle de communication avec le noyau.
+
+\textit{auditsec\_lsm/kthread.h} :
+\begin{lstlisting}[language=C++]
+class KThread : public QThread
+{
+Q_OBJECT
+public:
+	KThread(KernelContext *);
+	void run();
+
+	bool _keep_going;
+
+private:
+	KernelContext * KC;
+	QString xmlContext(char *, ...);
+	QString toXMLEntities(QString str);
+};
+\end{lstlisting}
+
+\textit{auditsec\_lsm/kthread.cpp} :
+\begin{lstlisting}[language=C++]
+KThread::KThread(KernelContext * kc) : KC(kc)
+{
+	_keep_going = true;
+}
+
+
+void KThread::run()
+{
+	QString address;
+	struct sockaddr_in addr_;
+	struct hostent * hote = NULL;
+
+	while(_keep_going && (auditsec_question(KC->usai()) == 0)){
+		if(KC->is_registered() == KERNEL_ERROR){
+			KC->register_application(KC->usai()->execname);
+		}
+
+		switch (KC->usai()->type){
+			case AUDITSEC_FILE:
+				qDebug() << "KThread: File: " << KC->usai()->auditsec_struct.file.fullpath;
+				KC->domain_changed(xmlContext(
+					"fullpath", KC->usai()->auditsec_struct.file.fullpath,
+					//"filename", KC->usai()->auditsec_struct.file.name,
+					NULL, NULL));
+				break;
+
+			case AUDITSEC_DIR:
+				...
+				break;
+			
+			case AUDITSEC_SOCKET:
+				...
+				break;
+
+			default:
+				...
+				break;
+		}
+	}
+}
+\end{lstlisting}
+
+\section{Résultats finaux}
+
+La Figure~\ref{SCHEMAFIN} résume le fonctionnement de contextd avec toutes les modifications que nous avons apportées.
+
+\begin{figure}[!ht]
+	\centering
+	\includesvg{attachements/fonctionnement_apres}{1.3}
+	\caption{Schéma de fonctionnement}
+	\label{SCHEMAFIN}
+\end{figure}
+
+\subsection{Avec un programme de test}
+
+Les tests que nous avons conduit nous amènent à penser que notre travail correspond globalement à ce qui était attendu. En effet, le programme de test "testprog" montre que le comportement du système est cohérent avec les règles contextd écrites. Le programme testprog se contente d'afficher le contenu de fichiers placés dans des répertoires aux noms explicites :
+
+\begin{lstlisting}[language=C++]
+int openfile(std::string filename){...}
+
+int main(int argc, char ** argv)
+{
+	for (int i=0; i < 2; i++) {
+		openfile("/home/user/impots/test");
+		openfile("/home/user/ecommerce/test");
+	}
+	return 0;
+}
+\end{lstlisting}
+
+Les Figures~\ref{INI}, \ref{DEMANDE} et \ref{FIN} détaillent ce test, qui présente un cas d'utilisation de contextd.
+
+Tout d'abord, sur la Figure~\ref{INI}, nous lançons contextd qui va essayer de s'enregistrer auprès du noyau, puis va charger les plugins internes contenant les fonctionnalités de contextd. Il se place alors en attente d'événements. Le premier qu'il a à traiter correspond à l'enregistrement de context-notify à travers DBus (terminal en haut à gauche). Le lancement de context-notify est affiché dans le terminal en haut à droite. Enfin, nous affichons les messages envoyés par le noyau avec la commande dmesg : seuls les quatre derniers correspondent à cette instance de contextd et indiquent l'enregistrement de firefox, soffice.bin et testprog (terminal en bas à droite). Les messages précédents correspondent à ceux envoyés lors de l'extinction de contextd.
+
+\begin{figure}%[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_ini.png}
+	\caption{Après lancement de contextd}
+	\label{INI}
+\end{figure}
+
+La Figure~\ref{DEMANDE} correspond à l'affichage lorsque ce programme de test tente d'ouvrir un fichier qui appartient à un autre domaine que le domaine actuel (ici default). Si la transaction est autorisée par les règles établies pour testprog et qu'il est précisé que l'utilisateur doit confirmer cette action, une demande est envoyée à context-notify qui attend la réponse pour la renvoyer à contextd. Si l'utilisateur met trop de temps à répondre (30 secondes actuellement), la demande est rejetée et il ne se produit aucun changement de domaine.
+
+\begin{figure}%[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_notify.png}
+	\caption{Après lancement de progtest}
+	\label{DEMANDE}
+\end{figure}
+
+La Figure~\ref{FIN} présente le résultat final. Dans ce cas de figure, il n'y a eu qu'une seule demande de changement de domaine car nous avons configuré contextd de telle sorte que les domaines soient des puits (cf les fichiers de configurations associés aux programmes dans /etc/context.d/program.d/mon\_programme.xml et le fichier décrivant les transitions autorisées /etc/context.d/transitions.xml). Ainsi, une fois dans le domaine ``impôts'', testprog peut afficher les données du dossier impôts mais pas celles du dossier ecommerce. L'affichage dans le terminal en haut à gauche détaille les demandes de transitions et les réponses de contextd.
+
+\begin{figure}%[!ht]
+	\centering
+	\includegraphics[scale=0.5]{attachements/capture_fin.png}
+	\caption{Après confirmation du changement de domaine}
+	\label{FIN}
+\end{figure}
+
+D'autres tests effectués avec Libreoffice, montrent que le résultat fonctionne parfaitement avec des programmes classiques et courants sans aucune modification. Cependant, les erreurs affichées par ces applications ne sont pas forcément très explicites (Libreoffice considère parfois que le document est endommagé alors que le noyau lui a refusé l'accès). Ce problème est lié au choix de LSM : les applications ne peuvent pas faire la différence entre un refus lié aux permissions classiques et un refus lié au module de sécurité. Ces mêmes cas de figure se produisent sur un système utilisant SELinux, lors des refus de transitions de contexte.
+
+Pour finir, voici un extrait du fichier de configuration pour testprog :
+
+\begin{lstlisting}[language=XML]
+		<!-- Loop -->
+		<loop app_name="testprog" notify="false" prompt="false" display_name="Loop">
+			<matching>
+				<mrule>
+					<fullpath>(/usr/lib/.*|/lib/.*|de|s|/etc/resolv.conf|/etc/nsswitch.conf|/etc/host.conf|/etc/hosts)</fullpath>
+				</mrule>
+			</matching>
+			<domains>
+				<loop_domain name="default" />
+				<loop_domain name="mail" />
+				<loop_domain name="web" />
+				<loop_domain name="web-flash" />
+				<loop_domain name="ecommerce" />
+				<loop_domain name="impots" />
+			</domains>
+		</loop>
+
+		<!--Impots-->
+		<rule app_name="testprog" to_domain="impots" notify="false" prompt="true" display_name="domaine impots">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/impots/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="impots" notify="false" prompt="false"/>
+					<!--<transit from_domain="ecommerce" to_domain="impots" notify="false" prompt="true"/>-->
+					<transit from_domain="default" />
+				</allow>
+			</transitions>
+		</rule>
+
+		<!--Ecommerce-->
+		<rule app_name="testprog" to_domain="ecommerce" notify="false" prompt="true" display_name="domaine ecommerce">
+			<matching>
+				<mrule>
+					<fullpath>(/home/user/ecommerce/.*)</fullpath>
+				</mrule>
+			</matching>
+			<transitions>
+				<allow>
+					<transit from_domain="ecommerce" notify="false" prompt="false"/>
+					<!--<transit from_domain="mail" to_domain="ecommerce" prompt="true" />-->
+					<transit from_domain="default" to_domain="ecommerce" prompt="true" />
+					<!--<transit from_domain="impots" to_domain="ecommerce" prompt="true" />-->
+				</allow>
+			</transitions>
+		</rule>
+\end{lstlisting}
+
+\subsection{Poursuite du projet}
+
+Les éléments suivant restent à réaliser avant d'envisager l'intégration de notre travail dans PIGA-OS :
+	\begin{itemize}
+		\item Les règles à fournir à contextd pour définir les accès autorisés pour un programme deviennent rapidement compliquées car elles doivent être exhaustives (il faut notamment autoriser le chargement de toutes les librairies pour les programmes non compilés en statique, ...). L'usage des expressions régulières réduit cet impact mais ne résout pas le prblème.
+		\item Nous avons pris pour base un module LSM vide. Il faut en revanche intégrer nos modifications au module SELinux pour pouvoir faire fonctionner notre solution avec PIGA-OS. Il faudrait aussi envisager la solution des empilements de modules LSM et s'assurer de l'usage de notre module.
+		\item Enfin, il faut noter qu'il n'est pour l'instant pas possible de se séparer complètement des plugins, en particulier pour les applications devant modifier leur comportement interne lors d'un changement de domaine (claws-mail, firefox). Notre solution permet juste de réduire le travail de ``portage'' d'une application vers PIGA-SYSTRANS.
+	\end{itemize}
 
 \newpage
 
-\clearemptydoublepage
+% \section{Résultats et benchmarks}
+% 
+% Benchmark : Sans le module LSM, Avec le module mais pas lancé, Avec le module et lancé
+% 
+% \newpage
 
 \section*{Conclusion} \addcontentsline{toc}{section}{Conclusion}
 
-Nous avons donc bien atteint les premiers objectifs consistants à récupérer des informations essentielles à contextd.
+Le but de ce projet était de simplifier l'ajout d'application à PIGA-SYSTRANS et au système PIGA-OS. Cet objectif est atteint car nos travaux permettent, par exemple, de faire fonctionner OpenOffice.org/LibreOffice avec contextd, sans modifier ces applications.
 
-Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDSE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
+De plus, l'aspect totalement générique de notre solution nous assure un fort potentiel de réutilisation. En effet, les ajouts dans contextd permettant le chargement dynamique de programmes à contrôler nous permettent de se concentrer sur l'écriture de règles contextd, et non sur la modification des applications.
 
-Malheureusement, seule une petite partie du projet est visible, du fait du retard pris au départ, avec systemtap, et dû au temps de compilation du noyau. Mais l'évolution actuelle du projet nous permettra d'atteindre les objectifs à la fin de l'année.
+Il ne reste alors plus qu'à modifier uniquement les applications possédant un comportement s'étendant sur plusieurs domaines et dont l'état interne nécessite des modifications lors d'un changement de domaine. Pour l'instant, les applications concernées sont Mozilla Firefox et Claws-Mail. Il est difficilement envisageable de se ``débarrasser'' du plugin Claws-Mail à l'avenir. Mais l'arrivée de la séparation entre les onglets sous Firefox et du principe un onglet = un processus pourrait permettre de se séparer du plugin Firefox.
+
+Enfin, il faut noter que notre projet ne prendra tout son sens que lorsqu'il sera intégrable à PIGA-OS. Ce n'est pour l'instant pas le cas, mais les modifications restantes restent moindres par rapport aux objectifs atteints par ce projet. Un essai d'intégration à été réalisé, mais aucun test ni vérification de fonctionnalité n'as été effectué par manque de temps.
+
+Nous tenons à remercier Jérémy Briffaut et Martin Peres pour leur aide précieuse tout au long du déroulement de ce projet.
+
+% Le retard, sur la partie implémentation noyau, par rapport à notre planification est principalement dû à notre découverte très progressive des capacités offertes aux développeurs. Le livre Linux Kernel Development \cite{LKDTE} nous a permis de faire un bon en avant dans la compréhension du fonctionnement du noyau et notamment l'implémentation des appels système.
 
 \newpage
-\addcontentsline{toc}{section}{Annexes}
-\addcontentsline{toc}{subsection}{Liens et références}
+% \addcontentsline{toc}{section}{Annexes}
+\addcontentsline{toc}{section}{Références}
 
-\subsection*{Liens et références}
+% \subsection*{Liens et références}
 \begin{thebibliography}{40}
-\bibitem{IBMRBST} \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
 
-\bibitem{LSMINTRO} \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
+\bibitem{IBMRBST} Bart Jacob, Paul Larson, Breno Henrique Leitao, Saulo Augusto M Martins da Silva, \textit{IBM Redbooks : SystemTap: Instrumenting the Linux Kernel for Analyzing Performance and Functional Problems}, \url{http://www.redbooks.ibm.com/abstracts/redp4469.html}
 
-\bibitem{SOURCE} Code source (kernel 2.6.32 hardened r9 et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle pour l'instant ``Projet LSM''), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+\bibitem{LSMINTRO} Chris Wright, Crispin Cowan, Stephen Smalley, James Morris, Greg Kroah-Hartman, \textit{Linux Security Modules : General Security Support for the Linux Kernel}, \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.6867&rep=rep1&type=pdf}
 
-\bibitem{LKDSE} \textit{Linux Kernel Development, Second Edition}, Robert Love, Novell Press
+\bibitem{LKDSE} Robert Love, \textit{Linux Kernel Development, Second Edition}, Novell Press
+\bibitem{LKDTE} Robert Love, \textit{Linux Kernel Development, Third Edition}, Pearson Education, Inc.
+
+\bibitem{SELEX} Frank Mayer, Karl MacMillan, David Caplan, \textit{SELinux By Example}, Prentice Hall, Première édition, 6 août 2006
+\bibitem{MRHEL5} Daniel J Walsh, Karl MacMillan, \textit{Managing Red Hat Enterprise Linux 5}, \url{http://people.redhat.com/dwalsh/SELinux/Presentations/ManageRHEL5.pdf}
+
+\bibitem{WCS} \textit{Wikipedia : Computer Security}, \url{http://en.wikipedia.org/wiki/Computer_security}
+
+\bibitem{SOURCE} Code source (kernel 2.6.32 hardened r22, piga-systrans, et scripts systemtap) disponible sur le serveur de projet STI (le projet s'appelle Contextd Capture), \url{http://projetsti.ensi-bourges.fr/projects/promo2012-systemtap}.
+
+\bibitem{TIOF} Peter A. Loscocco, Stephen D. Smalley, Patrick A. Muckelbauer, Ruth C. Taylor, S. Jeff Turner, and John F. Farrell. The Inevitability of Failure : The Flawed Assumption of Security in Modern Computing Environments. In Proceedings of the 21st National Information Systems Security Conference, pages 303–314, Arlington, Virginia, USA, October 1998
+
+\bibitem{QNX} QNX Realtime Operating System, \url{http://www.qnx.com}
+
+\bibitem{ITXT} Intel Trusted Execution Technology (TXT), \url{http://www.intel.com/technology/malwarereduction/index.htm}
+
+\bibitem{PIGA} Jérémy Briffaut, Martin Peres, Jonathan Rouzaud-Cornabas, Jigar Solanki, Christian Toinard, Benjamin Venelle, \textit{PIGA-OS : Retour sur le système d'exploitation vainqueur du défi sécurité}
+
+\bibitem{PIGA2} Jérémy Briffaut, Jean-François Lalande, Christian Toinard, \textit{Formalization os security properties : enforcement for mac operating systems and verification of dynamic mac policies}, International journal on advances in security, 2:325-343, 2009
+
 \end{thebibliography}
 
 %\printindex
 
 \end{document}
-s

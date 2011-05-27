@@ -1,0 +1,34 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname  ="Bitstream Vera Sans"
+		fontsize = 8
+		shape = "record"
+	]
+
+	edge [
+		fontname  ="Bitstream Vera Sans"
+		fontsize = 8
+		arrowhead = "empty"
+	]
+
+	abstractcontext [
+		label = "{AbstractContext|protected static clients : QMap\lprotected static lock : QReadWriteLock\l|protected getFullPathFromPid(pid_t) : QString\l+ virtual register_application(const QString, uint) : QString\l+ virtual domain_changed(const QString) : QString\l+ virtual required_domain(const QString) : QString\l+ virtual current_domain() : QString\l+ virtual is_registered() : QString\l+ virtual register_for_domain_changes_updates() : QString\lprotected virtual onGlobalContextChanged(Domain,Domain) : void\lprotected onEvent(ContextPluginEvent*): void\l}"
+		//label = "{abstractcontext|protected static clients : QMap\lprotected static lock : QReadWriteLock\l|protected getFullPathFromPid(pid_t) : QString\l...}"
+	]
+
+	dbuscontext [
+		label = "{Dbus-Context|...|...}"
+	]
+
+	kernelcontext [
+		label = "{Kernel-Context|...|+ register_application(const QString, uint) : QString\l+ domain_changed(const QString) : QString\l+ required_domain(const QString) : QString\l+ current_domain() : QString\l+ is_registered() : QString\l+ register_for_domain_changes_updates() : QString\l...}"
+	]
+
+	dbuscontext->abstractcontext;
+	kernelcontext->abstractcontext;
+
+}
+// dot -T pdf -o class.pdf class.dot

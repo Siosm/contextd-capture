@@ -1,14 +1,11 @@
 C_RAPPORT = rapport.tex
 C_SOUTENANCE = soutenance.tex
 
-all : clean rapport soutenance
-
-clean :
-	rm *~ *.dvi
+all : rapport soutenance
 
 rapport :
-	pdflatex $(C_RAPPORT) && pdflatex $(C_RAPPORT) && pdflatex $(C_RAPPORT)
+	pdflatex -shell-escape $(C_RAPPORT) && pdflatex $(C_RAPPORT) && pdflatex $(C_RAPPORT)
 
 soutenance :
-	pdflatex $(C_SOUTENANCE) && pdflatex $(C_SOUTENANCE) && pdflatex $(C_SOUTENANCE)
+	pdflatex -shell-escape $(C_SOUTENANCE) && pdflatex $(C_SOUTENANCE) && pdflatex $(C_SOUTENANCE)
 
